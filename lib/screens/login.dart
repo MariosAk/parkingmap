@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:parkingmap/main.dart';
 import 'package:parkingmap/screens/forgotPassword.dart';
+import 'package:parkingmap/screens/introductionScreen.dart';
 import 'package:parkingmap/screens/register.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -401,9 +402,11 @@ class _LoginPageState extends State<LoginPage> {
                                           .loginUserWithEmailAndPassword(
                                               textControllerEmail.text,
                                               textControllerPassword.text)
-                                          .then((User? user) async {
-                                        if (user != null &&
-                                            !user.emailVerified) {
+                                          .then((UserCredential?
+                                              userCredential) async {
+                                        if (userCredential!.user != null &&
+                                            !userCredential
+                                                .user!.emailVerified) {
                                           loginResponseMessage =
                                               "Please verify your email first.";
                                           setState(() {
@@ -411,11 +414,23 @@ class _LoginPageState extends State<LoginPage> {
                                           });
                                           return;
                                         }
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        var firstTime =
+                                            prefs.getBool("firstLogIn");
+                                        if (firstTime == null || firstTime) {
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          IntroScreen()),
+                                                  (Route route) => false);
+                                          prefs.setBool("firstLogin", false);
+                                          return;
+                                        }
                                         setState(() {
                                           _isLoading = false;
                                         });
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
                                         await prefs.setBool("isLoggedIn", true);
                                         await prefs.setString(
                                             "email", textControllerEmail.text);

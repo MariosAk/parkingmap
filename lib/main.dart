@@ -7,6 +7,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:parkingmap/screens/claim.dart';
 import 'package:parkingmap/screens/declare.dart';
 import 'package:parkingmap/screens/enableLocation.dart';
+import 'package:parkingmap/screens/introductionScreen.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/MarkerEventBus.dart';
@@ -108,6 +109,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   bool? _isUserLogged;
 
+  late PageController _pageViewController;
+  ValueNotifier<int> _notifier = ValueNotifier(0);
+
   Future<List<Marker>> updateBounds(LatLngBounds bounds) async {
     postNewVisibleBounds(bounds.southWest.latitude, bounds.southWest.longitude,
         bounds.northEast.latitude, bounds.northEast.longitude, email);
@@ -155,11 +159,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             width: 80.0,
             height: 80.0,
             point: LatLng(data['latitude'], data['longitude']),
-            child: const Icon(
-              Icons.location_pin,
-              color: Colors.red,
-              size: 40.0,
-            ),
+            child: Image.asset('Assets/Images/parking-location.png', scale: 15),
           );
         }).toList();
 
@@ -210,13 +210,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future notificationsCount() async {
     count = await SqliteService().getNotificationCount();
-    screens.add(HomePage(address, token, _currentPosition!.latitude,
-        _currentPosition!.longitude, count, markers, updateBounds));
-    screens.add(DeclareSpotScreen(
-        latitude: _currentPosition!.latitude,
-        longitude: _currentPosition!.longitude,
-        token: token.toString()));
-    screens.add(SettingsScreen());
+    if (screens.isEmpty) {
+      screens.add(HomePage(address, token, _currentPosition!.latitude,
+          _currentPosition!.longitude, count, markers, updateBounds));
+      screens.add(DeclareSpotScreen(
+          latitude: _currentPosition!.latitude,
+          longitude: _currentPosition!.longitude,
+          token: token.toString()));
+      screens.add(SettingsScreen());
+    }
   }
 
   postInsertTime() async {
@@ -234,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   getUserID() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      email = prefs.getString("email");
+      email = AuthService().email;
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/get-userid"),
           body: cnv.jsonEncode({"email": email.toString()}),
@@ -325,12 +327,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     registerNotification();
     overlayState = Overlay.of(context);
     _toggleServiceStatusStream();
+    _pageViewController = PageController(initialPage: selectedIndex);
   }
 
   @override
   void dispose() {
     // Remove the observer
     WidgetsBinding.instance.removeObserver(this);
+    _pageViewController.dispose();
     super.dispose();
   }
 
@@ -474,31 +478,48 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             if (snapshot.connectionState == ConnectionState.done &&
                 !snapshot.hasError) {
               return Scaffold(
-                body: screens[selectedIndex],
-                bottomNavigationBar: BottomNavigationBar(
-                  selectedItemColor: Colors.blue,
-                  backgroundColor: Colors.white,
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.map),
-                      label: 'Map',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.add_location_alt),
-                      label: 'Declare',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.settings),
-                      label: 'Settings',
-                    ),
-                  ],
-                  currentIndex: selectedIndex,
-                  onTap: (index) {
-                    setState(() {
-                      selectedIndex = index;
-                    });
+                body: PageView(
+                  controller: _pageViewController,
+                  physics: const ClampingScrollPhysics(),
+                  children: screens,
+                  onPageChanged: (changedIndex) {
+                    _notifier.value = changedIndex;
                   },
                 ),
+                bottomNavigationBar: ValueListenableBuilder(
+                    valueListenable: _notifier,
+                    builder: (BuildContext context, int value, Widget? child) {
+                      return BottomNavigationBar(
+                        unselectedItemColor: Colors.blue[900],
+                        backgroundColor: Colors.white,
+                        items: const [
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.map),
+                            label: 'Map',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.add_location_alt),
+                            label: 'Declare',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.settings),
+                            label: 'Settings',
+                          ),
+                        ],
+                        currentIndex: _notifier.value,
+                        onTap: (index) {
+                          _notifier.value = index;
+                          _pageViewController.animateToPage(_notifier.value,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                        },
+                        selectedIconTheme: const IconThemeData(
+                          color: Color.fromARGB(255, 0, 140,
+                              255), // change color of the selected icon
+                          size: 35, // change size of the selected icon
+                        ),
+                      );
+                    }),
               );
             }
             // Future with some errors

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:parkingmap/main.dart';
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
@@ -26,16 +27,17 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   Widget build(BuildContext context) {
     PageDecoration pageDecoration = const PageDecoration(
+      pageColor: Colors.white,
       titleTextStyle: TextStyle(
-          fontSize: 28.0, fontWeight: FontWeight.w700, color: Colors.grey),
+        fontSize: 28.0,
+        fontWeight: FontWeight.w700,
+        color: Colors.grey,
+      ),
     );
     return Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-        ),
+        color: Colors.white,
         child: SafeArea(
             child: Scaffold(
-          backgroundColor: Colors.white,
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.white,
@@ -44,13 +46,14 @@ class _IntroScreenState extends State<IntroScreen> {
           ),
           body: Center(
             child: IntroductionScreen(
+              globalBackgroundColor: Colors.white,
               pages: [
                 PageViewModel(
                   title: "Discover empty parking spots with ease!",
                   body:
                       "Searching endless hours for a parking spot is no more. Pasthelwparking does it for you.",
                   image: _buildImage(
-                      'introCar.jpg', MediaQuery.of(context).size.width),
+                      'carParkbutton.png', MediaQuery.of(context).size.width),
                   decoration: pageDecoration,
                 ),
                 PageViewModel(
@@ -64,7 +67,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   title: "Always take care!",
                   body:
                       "This is not an excuse to be on the phone..Keep your eyes on the road.",
-                  image: _buildImage('crash.jpg'),
+                  image: _buildImage('crash.png'),
                   decoration: pageDecoration,
                 ),
 
@@ -72,9 +75,15 @@ class _IntroScreenState extends State<IntroScreen> {
               ],
               onDone: () {
                 // When done button is press
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                    (Route route) => false);
               },
               onSkip: () {
                 // You can also override onSkip callback
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                    (Route route) => false);
               },
               showBackButton: false,
               showSkipButton: true,
@@ -89,7 +98,8 @@ class _IntroScreenState extends State<IntroScreen> {
                   color: Colors.black26,
                   spacing: const EdgeInsets.symmetric(horizontal: 3.0),
                   activeShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0))),
+                      borderRadius: BorderRadius.circular(25.0)),
+                  activeColor: Colors.blue),
             ),
           ),
         )));

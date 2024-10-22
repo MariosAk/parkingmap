@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         width: 80.0,
         height: 80.0,
         point: markerPosition,
-        child: Icon(Icons.location_on, color: Colors.red, size: 40.0),
+        child: Image.asset('Assets/Images/parking-location.png', scale: 15),
       );
       List<Marker> markers = [mrk];
       addMarker(markers);
@@ -240,6 +240,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    var spots = _markersNotifier.value
+        .where((element) => LatLngBounds(_mapctl.camera.visibleBounds.southWest,
+                _mapctl.camera.visibleBounds.northEast)
+            .contains(element.point))
+        .length;
     return Container(
         color: Colors.white,
         child: SafeArea(
@@ -442,84 +447,94 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Available spots: ${_markersNotifier.value.where((element) => LatLngBounds(_mapctl.camera.visibleBounds.southWest, _mapctl.camera.visibleBounds.northEast).contains(element.point)).length}",
+                    "Available spots: $spots",
                     style: GoogleFonts.robotoSlab(
                         textStyle: TextStyle(color: Colors.blue[900]),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w900,
                         fontSize: 20),
                     textAlign: TextAlign.left,
                   ),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      itemCount: _markersNotifier.value.length,
-                      itemBuilder: (context, index) {
-                        try {
-                          var latlong = _markersNotifier.value[index].point;
-                          if (LatLngBounds(
-                                  _mapctl.camera.visibleBounds.southWest,
-                                  _mapctl.camera.visibleBounds.northEast)
-                              .contains(latlong)) {
-                            var cachedAddress = _addressCache[latlong];
-                            var decodedData = cnv.jsonDecode(cachedAddress!);
-                            var address = decodedData["addresses"][0]["address"]
-                                ["streetNameAndNumber"];
+                      child: spots > 0
+                          ? ListView.builder(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              itemCount: _markersNotifier.value.length,
+                              itemBuilder: (context, index) {
+                                try {
+                                  var latlong =
+                                      _markersNotifier.value[index].point;
+                                  if (LatLngBounds(
+                                          _mapctl
+                                              .camera.visibleBounds.southWest,
+                                          _mapctl
+                                              .camera.visibleBounds.northEast)
+                                      .contains(latlong)) {
+                                    var cachedAddress = _addressCache[latlong];
+                                    var decodedData =
+                                        cnv.jsonDecode(cachedAddress!);
+                                    var address = decodedData["addresses"][0]
+                                        ["address"]["streetNameAndNumber"];
 
-                            return Card(
-                              color: Colors.blue[50],
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 15.0,
-                                  vertical: 5.0), // Margin around the card
-                              elevation: 4, // Elevation for shadow effect
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    15.0), // Rounded corners
-                              ),
-                              child: InkWell(
-                                onTap: () {
-                                  var selectedMarker =
-                                      _markersNotifier.value[index];
-                                  _mapctl.move(selectedMarker.point, 18.0);
-                                },
-                                borderRadius: BorderRadius.circular(
-                                    15.0), // Ensure the tap area matches the card shape
-                                child: Padding(
-                                  padding: const EdgeInsets.all(
-                                      15.0), // Padding inside the card
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.location_on,
-                                          color: Colors.red,
-                                          size: 30), // Adjusted size
-                                      const SizedBox(
-                                          width:
-                                              15), // Space between icon and text
-                                      Expanded(
-                                        child: Text(
-                                          '$address',
-                                          style: TextStyle(
-                                            fontSize: 16, // Larger font size
-                                            fontWeight:
-                                                FontWeight.bold, // Bold text
-                                            color: Colors.black, // Text color
+                                    return Card(
+                                      color: Colors.blue[50],
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 15.0,
+                                          vertical:
+                                              5.0), // Margin around the card
+                                      elevation:
+                                          4, // Elevation for shadow effect
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Rounded corners
+                                      ),
+                                      child: InkWell(
+                                        onTap: () {
+                                          var selectedMarker =
+                                              _markersNotifier.value[index];
+                                          _mapctl.move(
+                                              selectedMarker.point, 18.0);
+                                        },
+                                        borderRadius: BorderRadius.circular(
+                                            15.0), // Ensure the tap area matches the card shape
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(
+                                              8.0), // Padding inside the card
+                                          child: Row(
+                                            children: [
+                                              Image.asset(
+                                                  'Assets/Images/parking-location.png',
+                                                  scale: 15),
+                                              const SizedBox(
+                                                  width:
+                                                      15), // Space between icon and text
+                                              Expanded(
+                                                child: Text(
+                                                  '$address',
+                                                  style: const TextStyle(
+                                                    fontSize:
+                                                        16, // Larger font size
+                                                    fontWeight: FontWeight
+                                                        .bold, // Bold text
+                                                    color: Colors
+                                                        .black, // Text color
+                                                  ),
+                                                  overflow: TextOverflow
+                                                      .ellipsis, // Handle long text
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          overflow: TextOverflow
-                                              .ellipsis, // Handle long text
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          return Container(); // Return an empty container on error
-                        }
-                        return Container(); // Return an empty container if bounds are not matched
-                      },
-                    ),
-                  )
+                                    );
+                                  }
+                                } catch (e) {
+                                  return Container(); // Return an empty container on error
+                                }
+                                return Container(); // Return an empty container if bounds are not matched
+                              },
+                            )
+                          : Image.asset('Assets/Images/pin.gif', scale: 5))
                 ],
               ),
             ),
@@ -552,8 +567,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           Container(
-            width: 20,
-            height: 20,
+            width: _mapctl.camera.zoom,
+            height: _mapctl.camera.zoom,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue,
