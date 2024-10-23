@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:parkingmap/main.dart';
 import 'dart:convert' as cnv;
-
+import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:parkingmap/tools/app_config.dart';
 
 class Car {
@@ -27,7 +27,10 @@ class _CarPickState extends State<CarPick> {
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/register-car"),
           body: cnv.jsonEncode({"carType": carType, "email": email}),
-          headers: {"Content-Type": "application/json"});
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
       print(response.body);
     } catch (e) {
       print(e);

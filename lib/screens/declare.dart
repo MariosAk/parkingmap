@@ -4,6 +4,8 @@ import 'package:parkingmap/tools/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
+import 'package:parkingmap/services/auth_service.dart';
+import 'package:parkingmap/services/globals.dart' as globals;
 
 class DeclareSpotScreen extends StatelessWidget {
   double latitude, longitude;
@@ -16,16 +18,20 @@ class DeclareSpotScreen extends StatelessWidget {
     try {
       final prefs = await SharedPreferences.getInstance();
       var userId = prefs.getString('userid');
-      var response =
-          await http.post(Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
-              body: cnv.jsonEncode({
-                "user_id": userId.toString(),
-                "lat": latitude.toString(),
-                "long": longitude.toString(),
-                "uid": token,
-                "newParking": "false",
-              }),
-              headers: {"Content-Type": "application/json"});
+      userId = await AuthService().getCurrentUserUID();
+      var response = await http.post(
+          Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
+          body: cnv.jsonEncode({
+            "user_id": userId.toString(),
+            "lat": latitude.toString(),
+            "long": longitude.toString(),
+            "uid": token,
+            "newParking": "false",
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
       return response.body;
     } catch (e) {
       return e.toString();

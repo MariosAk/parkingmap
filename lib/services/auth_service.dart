@@ -92,4 +92,13 @@ class AuthService {
       return null;
     }
   }
+
+  Future<String?> getCurrentUserUID() async {
+    var user = _auth.currentUser;
+    if (user != null) {
+      return user.uid;
+    } else {
+      return null;
+    }
+  }
 }

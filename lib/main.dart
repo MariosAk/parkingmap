@@ -13,6 +13,7 @@ import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/MarkerEventBus.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/push_notification_service.dart';
+import 'package:vibration/vibration.dart';
 import 'screens/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -111,12 +112,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   late PageController _pageViewController;
   ValueNotifier<int> _notifier = ValueNotifier(0);
+  ValueNotifier<double> notifierImageScale = ValueNotifier(15);
 
-  Future<List<Marker>> updateBounds(LatLngBounds bounds) async {
+  Future<List<Marker>> updateBounds(
+      LatLngBounds bounds, double currentZoom) async {
     postNewVisibleBounds(bounds.southWest.latitude, bounds.southWest.longitude,
         bounds.northEast.latitude, bounds.northEast.longitude, email);
     // Fetch markers asynchronously
-    var updatedMarkers = await getMarkersInBounds(bounds);
+    var updatedMarkers = await getMarkersInBounds(bounds, currentZoom);
     return updatedMarkers;
   }
 
@@ -142,7 +145,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future<List<Marker>> getMarkersInBounds(LatLngBounds bounds) async {
+  Future<List<Marker>> getMarkersInBounds(
+      LatLngBounds bounds, double currentZoom) async {
     try {
       final url =
           '${AppConfig.instance.apiUrl}/markers?swLat=${bounds.southWest.latitude}&swLng=${bounds.southWest.longitude}&neLat=${bounds.northEast.latitude}&neLng=${bounds.northEast.longitude}';
@@ -152,14 +156,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
       if (response.statusCode == 200) {
         List<dynamic> markersData = json.decode(response.body);
-
         // Manually create Marker objects from the response
         List<Marker> markers = markersData.map((data) {
           return Marker(
             width: 80.0,
             height: 80.0,
             point: LatLng(data['latitude'], data['longitude']),
-            child: Image.asset('Assets/Images/parking-location.png', scale: 15),
+            child: Image.asset('Assets/Images/parking-location.png', scale: 18),
           );
         }).toList();
 
@@ -177,6 +180,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await Firebase.initializeApp();
     // 2. Instantiate Firebase Messaging
     _messaging = FirebaseMessaging.instance;
+    bool? vibrationEnabled = await Vibration.hasVibrator();
 
     // 3. On iOS, this helps to take the user permissions
     NotificationSettings settings = await _messaging.requestPermission(
@@ -200,7 +204,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           latitude = double.parse(message.data['lat']);
           longitude = double.parse(message.data['long']);
           MarkerEventBus().addMarker(LatLng(latitude, longitude));
-          HapticFeedback.mediumImpact();
+          if (vibrationEnabled!) {
+            Vibration.vibrate();
+          }
         }
       });
     } else {
@@ -345,15 +351,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       case AppLifecycleState.resumed:
         // widget is resumed
         print("???resumed");
-        // if (serviceStatusValue == 'enabled') {
-        //   Navigator.of(context).pushAndRemoveUntil(
-        //       MaterialPageRoute(builder: (context) => const MyHomePage()),
-        //       (Route route) => false);
-        // } else {
-        //   Navigator.of(context).pushAndRemoveUntil(
-        //       MaterialPageRoute(builder: (context) => const EnableLocation()),
-        //       (Route route) => false);
-        // }
+        if (serviceStatusValue != 'enabled') {
+          //   Navigator.of(context).pushAndRemoveUntil(
+          //       MaterialPageRoute(builder: (context) => const MyHomePage()),
+          //       (Route route) => false);
+          // } else {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const EnableLocation()),
+              (Route route) => false);
+        }
         break;
       case AppLifecycleState.inactive:
         // widget is inactive

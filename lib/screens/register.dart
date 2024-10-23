@@ -9,6 +9,7 @@ import 'package:parkingmap/tools/app_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
+import 'package:parkingmap/services/globals.dart' as globals;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -41,7 +42,10 @@ class _RegisterPageState extends State<RegisterPage> {
             "password": password,
             "fcm_token": fcm_token
           }),
-          headers: {"Content-Type": "application/json"});
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
       //print("LATLON " + response.body);
       registrationStatus = response.body;
       if (registrationStatus.contains("successful")) {
@@ -88,14 +92,23 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          "Register",
-                          style: GoogleFonts.lato(
-                            color: Colors.black,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
+                        Row(children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.black),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                           ),
-                        ),
+                          Text(
+                            "Register",
+                            style: GoogleFonts.lato(
+                              color: Colors.black,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ]),
                         const SizedBox(height: 10),
                         Text(
                           "Start your parking assisted journey with us!",

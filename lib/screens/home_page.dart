@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
   double longitude;
   int notificationCount;
   List<Marker> markers;
-  Function(LatLngBounds) updateBounds;
+  Function(LatLngBounds, double) updateBounds;
   HomePage(this.address, this.token, this.latitude, this.longitude,
       this.notificationCount, this.markers, this.updateBounds,
       {super.key});
@@ -90,6 +90,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   LocationData? _currentLocation;
   bool _shouldCenterOnLocation = false;
 
+  double _zoom = 20;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -106,15 +108,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     startLocationTracking();
     // Wait until the widget tree is fully built before listening to map events
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      List<Marker> initialMarkers =
-          await widget.updateBounds(_mapctl.camera.visibleBounds);
+      List<Marker> initialMarkers = await widget.updateBounds(
+          _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
       //for (int i = 0; i < initialMarkers.length; i++) {}
       addMarker(initialMarkers);
       subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) async {
         if (mapEvent is MapEventMoveEnd) {
           // Perform actions when the map movement ends
-          var newPositionMarkers =
-              await widget.updateBounds(_mapctl.camera.visibleBounds);
+          var newPositionMarkers = await widget.updateBounds(
+              _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
           addMarker(newPositionMarkers);
         }
       });
@@ -149,40 +151,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<String?> convertPointToAddress(LatLng marker) async {
     try {
-      if (!convertedToAddress) {
-        convertedToAddress = true;
-        var response = await http.get(Uri.parse(
-            'https://api.tomtom.com/maps/orbis/places/reverseGeocode/${marker.latitude},${marker.longitude}.json?key=$TomTomApiKey&apiVersion=1'));
-        if (response.statusCode == 200) {
-          convertedToAddress = false;
-          var decodedResponse = cnv.utf8.decode(response.bodyBytes);
-          _addressCache[marker] = decodedResponse;
-          return response.body;
-        } else {
-          return null;
-        }
+      //if (!convertedToAddress) {
+      convertedToAddress = true;
+      var response = await http.get(Uri.parse(
+          'https://api.tomtom.com/maps/orbis/places/reverseGeocode/${marker.latitude},${marker.longitude}.json?key=$TomTomApiKey&apiVersion=1'));
+      if (response.statusCode == 200) {
+        convertedToAddress = false;
+        var decodedResponse = cnv.utf8.decode(response.bodyBytes);
+        _addressCache[marker] = decodedResponse;
+        return response.body;
       } else {
         return null;
       }
+      //} else {
+      //  return null;
+      //}
     } catch (e) {
       return null;
     }
   }
 
-  void addMarker(List<Marker> newMarker) {
+  void addMarker(List<Marker> newMarkers) {
     bool exists = _markersNotifier.value.any((existingMarker) {
-      return newMarker
-          .any((newMarker) => newMarker.point == existingMarker.point);
+      return newMarkers.any((marker) => marker.point == existingMarker.point);
     });
     if (!exists) {
       _markersNotifier.value = List.from(_markersNotifier.value)
-        ..addAll(newMarker);
+        ..addAll(newMarkers);
     }
-    newMarker.forEach((marker) {
+    for (Marker marker in newMarkers) {
       if (!_addressCache.keys.any((element) => marker.point == element)) {
         convertPointToAddress(marker.point);
       }
-    });
+    }
   }
 
   // Method to initialize and start location tracking
@@ -309,7 +310,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             _mapctl.camera.center;
                                       },
                                       onPositionChanged:
-                                          (position, hasGesture) {},
+                                          (position, hasGesture) {
+                                        _zoom = (5 +
+                                                ((40 - 20) *
+                                                    ((position.zoom - 16) /
+                                                        (18 - 16))))
+                                            .clamp(10, 30);
+                                      },
                                       onTap: (tapPosition, point) {
                                         _popupController.hideAllPopups();
                                       }),
@@ -341,89 +348,89 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             popupController: _popupController,
                                             onPopupEvent:
                                                 (event, selectedMarkers) {},
-                                            selectedMarkerBuilder:
-                                                (BuildContext context,
-                                                    Marker marker) {
-                                              // Check if the address is already in the cache
-                                              if (_addressCache
-                                                  .containsKey(marker.point)) {
-                                                // If cached, return the cached address immediately
-                                                var cachedAddress =
-                                                    _addressCache[marker.point];
-                                                var decodedData = cnv
-                                                    .jsonDecode(cachedAddress!);
-                                                var address =
-                                                    decodedData["addresses"][0]
-                                                            ["address"]
-                                                        ["streetNameAndNumber"];
-                                                return Card(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            4.0),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Text(
-                                                          address,
-                                                          style: const TextStyle(
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              } else {
-                                                // If not cached, fetch the address and cache it
-                                                return FutureBuilder(
-                                                  future: Future.wait([
-                                                    convertPointToAddress(
-                                                        marker.point)
-                                                  ]),
-                                                  builder: (context, snapshot) {
-                                                    if (snapshot
-                                                            .connectionState ==
-                                                        ConnectionState
-                                                            .waiting) {
-                                                      return const Card(
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  4.0),
-                                                          child:
-                                                              CircularProgressIndicator(),
-                                                        ),
-                                                      ); // Show loading while fetching the address
-                                                    } else if (snapshot
-                                                        .hasError) {
-                                                      return const Card(
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  4.0),
-                                                          child: Text(
-                                                              'Error fetching address'),
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      return const Card(
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  4.0),
-                                                          child: Text(
-                                                              'No address found'),
-                                                        ),
-                                                      );
-                                                    }
-                                                  },
-                                                );
-                                              }
-                                            },
+                                            //     selectedMarkerBuilder:
+                                            //         (BuildContext context,
+                                            //             Marker marker) {
+                                            //       // Check if the address is already in the cache
+                                            //       if (_addressCache
+                                            //           .containsKey(marker.point)) {
+                                            //         // If cached, return the cached address immediately
+                                            //         var cachedAddress =
+                                            //             _addressCache[marker.point];
+                                            //         var decodedData = cnv
+                                            //             .jsonDecode(cachedAddress!);
+                                            //         var address =
+                                            //             decodedData["addresses"][0]
+                                            //                     ["address"]
+                                            //                 ["streetNameAndNumber"];
+                                            //         return Card(
+                                            //           child: Padding(
+                                            //             padding:
+                                            //                 const EdgeInsets.all(
+                                            //                     4.0),
+                                            //             child: Column(
+                                            //               mainAxisSize:
+                                            //                   MainAxisSize.min,
+                                            //               children: [
+                                            //                 Text(
+                                            //                   address,
+                                            //                   style: const TextStyle(
+                                            //                       fontSize: 10,
+                                            //                       fontWeight:
+                                            //                           FontWeight
+                                            //                               .bold),
+                                            //                 ),
+                                            //               ],
+                                            //             ),
+                                            //           ),
+                                            //         );
+                                            //       } else {
+                                            //         // If not cached, fetch the address and cache it
+                                            //         return FutureBuilder(
+                                            //           future: Future.wait([
+                                            //             convertPointToAddress(
+                                            //                 marker.point)
+                                            //           ]),
+                                            //           builder: (context, snapshot) {
+                                            //             if (snapshot
+                                            //                     .connectionState ==
+                                            //                 ConnectionState
+                                            //                     .waiting) {
+                                            //               return const Card(
+                                            //                 child: Padding(
+                                            //                   padding:
+                                            //                       EdgeInsets.all(
+                                            //                           4.0),
+                                            //                   child:
+                                            //                       CircularProgressIndicator(),
+                                            //                 ),
+                                            //               ); // Show loading while fetching the address
+                                            //             } else if (snapshot
+                                            //                 .hasError) {
+                                            //               return const Card(
+                                            //                 child: Padding(
+                                            //                   padding:
+                                            //                       EdgeInsets.all(
+                                            //                           4.0),
+                                            //                   child: Text(
+                                            //                       'Error fetching address'),
+                                            //                 ),
+                                            //               );
+                                            //             } else {
+                                            //               return const Card(
+                                            //                 child: Padding(
+                                            //                   padding:
+                                            //                       EdgeInsets.all(
+                                            //                           4.0),
+                                            //                   child: Text(
+                                            //                       'No address found'),
+                                            //                 ),
+                                            //               );
+                                            //             }
+                                            //           },
+                                            //         );
+                                            //       }
+                                            //     },
                                           ),
                                         );
                                       },
@@ -557,8 +564,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             animation: _pulsatingAnimation,
             builder: (context, child) {
               return Container(
-                width: _pulsatingAnimation.value + 40,
-                height: _pulsatingAnimation.value + 40,
+                width: _pulsatingAnimation.value + _zoom,
+                height: _pulsatingAnimation.value + _zoom,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.blue.withOpacity(0.3),
@@ -567,8 +574,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
           Container(
-            width: _mapctl.camera.zoom,
-            height: _mapctl.camera.zoom,
+            width: (_zoom),
+            height: (_zoom),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.blue,

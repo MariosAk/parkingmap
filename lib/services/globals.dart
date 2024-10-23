@@ -54,7 +54,10 @@ postSkip(timesSkipped, time, latitude, longitude, latestLeavingID) async {
           "longitude": longitude,
           "latestLeavingID": latestLeavingID
         }),
-        headers: {"Content-Type": "application/json"});
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": securityToken!
+        });
   } catch (e) {}
 }
 
@@ -64,7 +67,10 @@ getPoints() async {
   try {
     await http.post(Uri.parse("${AppConfig.instance.apiUrl}/get-points"),
         body: cnv.jsonEncode({"user_id": userId}),
-        headers: {"Content-Type": "application/json"});
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": securityToken!
+        });
   } catch (e) {
     print(e);
   }
@@ -76,7 +82,10 @@ updatePoints(int? updatedPoints) async {
   try {
     await http.post(Uri.parse("${AppConfig.instance.apiUrl}/update-points"),
         body: cnv.jsonEncode({"user_id": userId, "points": updatedPoints}),
-        headers: {"Content-Type": "application/json"});
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": securityToken!
+        });
   } catch (e) {
     print(e);
   }
