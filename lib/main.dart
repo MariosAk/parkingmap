@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -34,7 +36,14 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  //await NotificationController.initializeLocalNotifications();
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   runApp(ChangeNotifierProvider(
     create: (context) => LocationProvider(),
     child: const MyApp(),
@@ -165,7 +174,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
         return markers;
       } else {
-        throw Exception('Failed to load markers');
+        throw Exception(
+            'Failed to load markers' + response.statusCode.toString());
       }
     } catch (e) {
       throw Exception(e);

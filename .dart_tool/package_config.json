@@ -224,6 +224,18 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "firebase_crashlytics",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics-4.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_crashlytics_platform_interface",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics_platform_interface-3.6.44",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "firebase_messaging",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging-15.1.3",
       "packageUri": "lib/",
@@ -1004,7 +1016,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-10-24T19:18:59.402448Z",
+  "generated": "2024-10-26T11:42:44.334585Z",
   "generator": "pub",
   "generatorVersion": "3.4.3",
   "flutterRoot": "file:///C:/fluttersrc/flutter",
