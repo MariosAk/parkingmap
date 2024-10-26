@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:location/location.dart';
 import 'package:parkingmap/tools/app_config.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 
+import '../model/location.dart';
+
 class DeclareSpotScreen extends StatelessWidget {
-  double latitude, longitude;
-  String token;
+  final String token;
 
-  DeclareSpotScreen(
-      {required this.latitude, required this.longitude, required this.token});
+  const DeclareSpotScreen({super.key, required this.token});
 
-  addLeaving() async {
+  addLeaving(LocationData? location) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       var userId = prefs.getString('userid');
@@ -23,8 +25,8 @@ class DeclareSpotScreen extends StatelessWidget {
           Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
           body: cnv.jsonEncode({
             "user_id": userId.toString(),
-            "lat": latitude.toString(),
-            "long": longitude.toString(),
+            "lat": location!.latitude!.toString(),
+            "long": location!.longitude!.toString(),
             "uid": token,
             "newParking": "false",
           }),
@@ -45,8 +47,8 @@ class DeclareSpotScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Parking Spot',
-          style:
-              GoogleFonts.robotoSlab(textStyle: TextStyle(color: Colors.black)),
+          style: GoogleFonts.robotoSlab(
+              textStyle: const TextStyle(color: Colors.black)),
         ),
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white, // You can change the color here
@@ -72,7 +74,10 @@ class DeclareSpotScreen extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () {
                   // Add your logic to declare the parking spot here
-                  addLeaving();
+                  final location =
+                      Provider.of<LocationProvider>(context, listen: false)
+                          .currentLocation;
+                  addLeaving(location);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Spot has been vacated!")),
                   );
@@ -100,7 +105,7 @@ class DeclareSpotScreen extends StatelessWidget {
             Text(
               "Tap the button to notify others that the spot is now available.",
               style: GoogleFonts.robotoSlab(
-                textStyle: TextStyle(
+                textStyle: const TextStyle(
                   fontSize: 16, // Description font size
                 ),
               ),

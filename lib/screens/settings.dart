@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 
 class SettingsScreen extends StatefulWidget {
@@ -10,8 +9,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true; // Toggle for notifications
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,13 +69,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           textStyle: const TextStyle(color: Colors.black),
                         ),
                       ),
-                      value: _notificationsEnabled,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _notificationsEnabled = value;
-                          // Handle notification logic
-                        });
-                      },
+                      value: false,
+                      onChanged: null,
                       secondary: const Icon(Icons.notifications,
                           color: Colors.blueAccent),
                     ),
@@ -94,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       onTap: () {
-                        _changePassword(context);
+                        globals.showSoonToComeToast(context);
                       },
                     ),
                     const Divider(color: Colors.black),

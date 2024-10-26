@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:parkingmap/model/location.dart';
 import 'package:parkingmap/screens/claim.dart';
 import 'package:parkingmap/screens/declare.dart';
 import 'package:parkingmap/screens/enableLocation.dart';
-import 'package:parkingmap/screens/introductionScreen.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/MarkerEventBus.dart';
@@ -25,11 +24,10 @@ import 'package:geocoding/geocoding.dart';
 import 'dart:convert' as cnv;
 import 'dart:convert';
 import 'screens/settings.dart';
-import 'services/SqliteService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'tools/app_config.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,11 +35,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   //await NotificationController.initializeLocalNotifications();
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => LocationProvider(),
+    child: const MyApp(),
+  ));
 }
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message");
   NotificationController.createNewNotification();
 }
 
@@ -57,8 +57,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(),
-      //home: MyDatabase(),
-      //home: IntroScreen(),
     ));
   }
 }
@@ -70,7 +68,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  //initialize firebase values
+  // #region declarations
   late final FirebaseMessaging _messaging;
   PushNotification? notification;
   String? token, address, fcm_token;
@@ -92,8 +90,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   OverlayState? overlayState;
 
-  SqliteService sqliteService = SqliteService();
-
   bool? entered;
   //late SharedPreferences prefs;
   String? email;
@@ -113,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   late PageController _pageViewController;
   ValueNotifier<int> _notifier = ValueNotifier(0);
   ValueNotifier<double> notifierImageScale = ValueNotifier(15);
+  // #endregion
 
   Future<List<Marker>> updateBounds(
       LatLngBounds bounds, double currentZoom) async {
@@ -215,14 +212,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future notificationsCount() async {
-    count = await SqliteService().getNotificationCount();
     if (screens.isEmpty) {
-      screens.add(HomePage(address, token, _currentPosition!.latitude,
-          _currentPosition!.longitude, count, markers, updateBounds));
-      screens.add(DeclareSpotScreen(
-          latitude: _currentPosition!.latitude,
-          longitude: _currentPosition!.longitude,
-          token: token.toString()));
+      screens.add(HomePage(address, token, count, markers, updateBounds));
+      screens.add(DeclareSpotScreen(token: token.toString()));
       screens.add(SettingsScreen());
     }
   }
@@ -241,7 +233,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   getUserID() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       email = AuthService().email;
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/get-userid"),
@@ -277,16 +268,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   checkForInitialState() async {
-    //await Firebase.initializeApp();
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? initialMessage) {
-      print('initialMessage data: ${initialMessage?.data}');
       if (initialMessage != null) {
-        // PushNotification notification = PushNotification(
-        //   title: initialMessage.notification?.title,
-        //   body: initialMessage.notification?.body,
-        // );
         NotificationController.createNewNotification();
       }
     });
@@ -312,22 +297,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     checkForInitialState();
 
     super.initState();
+    Provider.of<LocationProvider>(context, listen: false).onLocationUpdated =
+        (newLocation) {};
+    Provider.of<LocationProvider>(context, listen: false).initializeLocation();
     _isUserLogged = AuthService().isUserLogged();
-    // FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    //   if (user == null) {
-    //     setState(() {
-    //       entered = false; // User is signed out
-    //     });
-    //     print("User is currently signed out!");
-    //   } else {
-    //     setState(() {
-    //       entered = true; // User is signed out
-    //     });
-    //     print("User is signed in!");
-
-    //     // Update the UI or redirect as needed
-    //   }
-    // });
     WidgetsBinding.instance.addObserver(this);
     _getPosition = _determinePosition();
     registerNotification();
@@ -350,12 +323,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         // widget is resumed
-        print("???resumed");
         if (serviceStatusValue != 'enabled') {
-          //   Navigator.of(context).pushAndRemoveUntil(
-          //       MaterialPageRoute(builder: (context) => const MyHomePage()),
-          //       (Route route) => false);
-          // } else {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const EnableLocation()),
               (Route route) => false);
@@ -363,18 +331,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.inactive:
         // widget is inactive
-        print("???inactive");
         break;
       case AppLifecycleState.paused:
         // widget is paused
-        print("???paused");
         break;
       case AppLifecycleState.detached:
         // widget is detached
-        print("???detached");
         break;
       case AppLifecycleState.hidden:
-        // TODO: Handle this case.
         break;
     }
   }
@@ -433,12 +397,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    // if (!(position.latitude >= 40.5530246503162 &&
-    //     position.latitude <= 40.6600 &&
-    //     position.longitude >= 22.87426837242212 &&
-    //     position.longitude <= 22.9900)) {
-    //   return Future.error('Location out of bounds');
-    // }
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -449,11 +407,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         _currentPosition = position;
         address =
             "${place.locality}, ${place.subLocality},${place.street}, ${place.postalCode}";
-        print("///// $address");
       });
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
   }
 
   Future sharedPref() async {
@@ -464,7 +419,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future _getDevToken() async {
     fcm_token = await FirebaseMessaging.instance.getToken();
-    print("DEV TOKEN FIREBASE CLOUD MESSAGING -> $fcm_token");
+  }
+
+  Future appInitializations() async {
+    await _getPosition;
+    await globals.initializeSecurityToken();
+    registerFcmToken();
+    notificationsCount();
   }
 
   @override
@@ -473,12 +434,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return const LoginPage();
     } else {
       return FutureBuilder(
-          future: Future.wait([
-            _getPosition,
-            globals.initializeSecurityToken(),
-            registerFcmToken(),
-            notificationsCount()
-          ]),
+          future: Future.wait([appInitializations()]),
           builder: (context, snapshot) {
             // Future done with no errors
             if (snapshot.connectionState == ConnectionState.done &&
@@ -549,90 +505,4 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           });
     }
   }
-  // @override
-  // Widget build(BuildContext context) {
-  //   return StreamBuilder<User?>(
-  //     stream: FirebaseAuth.instance.authStateChanges(),
-  //     builder: (context, authSnapshot) {
-  //       if (authSnapshot.connectionState == ConnectionState.active) {
-  //         if (authSnapshot.hasData) //user is signed in
-  //         {
-  //           return FutureBuilder(
-  //               future: Future.wait(
-  //                   [_getPosition, registerFcmToken(), notificationsCount()]),
-  //               builder: (context, snapshot) {
-  //                 // Future done with no errors
-  //                 if (snapshot.connectionState == ConnectionState.done &&
-  //                     !snapshot.hasError) {
-  //                   // if (entered == null || entered == false) {
-  //                   //   return const LoginPage();
-  //                   //} else {
-  //                   return Scaffold(
-  //                     body: screens[selectedIndex],
-  //                     bottomNavigationBar: BottomNavigationBar(
-  //                       selectedItemColor: Colors.blue,
-  //                       backgroundColor: Colors.white,
-  //                       items: const [
-  //                         BottomNavigationBarItem(
-  //                           icon: Icon(Icons.map),
-  //                           label: 'Map',
-  //                         ),
-  //                         BottomNavigationBarItem(
-  //                           icon: Icon(Icons.add_location_alt),
-  //                           label: 'Declare',
-  //                         ),
-  //                         BottomNavigationBarItem(
-  //                           icon: Icon(Icons.settings),
-  //                           label: 'Settings',
-  //                         ),
-  //                       ],
-  //                       currentIndex: selectedIndex,
-  //                       onTap: (index) {
-  //                         setState(() {
-  //                           selectedIndex = index;
-  //                         });
-  //                       },
-  //                     ),
-  //                   );
-  //                 }
-  //                 //}
-
-  //                 // Future with some errors
-  //                 else if (snapshot.connectionState == ConnectionState.done &&
-  //                     snapshot.hasError) {
-  //                   if (snapshot.error == 'Location out of bounds') {
-  //                     return const UnsupportedLocation();
-  //                   }
-  //                   return const EnableLocation();
-  //                 } else {
-  //                   return Scaffold(
-  //                     body: Center(
-  //                       child: SizedBox(
-  //                         width: MediaQuery.of(context).size.width / 1.5,
-  //                         height: MediaQuery.of(context).size.width / 1.5,
-  //                         child:
-  //                             const CircularProgressIndicator(strokeWidth: 10),
-  //                       ),
-  //                     ),
-  //                   );
-  //                 }
-  //               });
-  //         } else {
-  //           return const LoginPage();
-  //         }
-  //       } else {
-  //         // While waiting for authentication state
-  //         return Scaffold(
-  //           body: Center(
-  //             child: SizedBox(
-  //               width: MediaQuery.of(context).size.width / 1.5,
-  //               height: MediaQuery.of(context).size.width / 1.5,
-  //               child: const CircularProgressIndicator(strokeWidth: 10),
-  //             ),
-  //           ),
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
 }

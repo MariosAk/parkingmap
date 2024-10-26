@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:email_validator/email_validator.dart';
-import 'package:parkingmap/screens/carPick.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/tools/app_config.dart';
@@ -46,7 +44,6 @@ class _RegisterPageState extends State<RegisterPage> {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-      //print("LATLON " + response.body);
       registrationStatus = response.body;
       if (registrationStatus.contains("successful")) {
         registrationSuccess = true;
@@ -64,7 +61,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future _getDevToken() async {
     token = await FirebaseMessaging.instance.getToken();
-    print("DEV TOKEN FIREBASE CLOUD MESSAGING -> $token");
   }
 
   @override

@@ -61,8 +61,6 @@ class NotificationController {
     if (receivedAction.actionType == ActionType.SilentAction ||
         receivedAction.actionType == ActionType.SilentBackgroundAction) {
       // For background actions, you must hold the execution until the end
-      print(
-          'Message sent via notification input: "${receivedAction.buttonKeyInput}"');
       await executeLongTaskInBackground();
     } else {
       MyApp.navigatorKey.currentState?.pushNamedAndRemoveUntil(
@@ -140,12 +138,9 @@ class NotificationController {
   ///     BACKGROUND TASKS TEST
   ///  *********************************************
   static Future<void> executeLongTaskInBackground() async {
-    print("starting long task");
     await Future.delayed(const Duration(seconds: 4));
     final url = Uri.parse("http://google.com");
     final re = await http.get(url);
-    print(re.body);
-    print("long task done");
   }
 
   ///  *********************************************

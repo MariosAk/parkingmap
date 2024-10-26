@@ -1,34 +1,31 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'package:parkingmap/model/location.dart';
 import 'package:parkingmap/model/pushnotificationModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:parkingmap/services/MarkerEventBus.dart';
-import 'package:parkingmap/tools/app_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert' as cnv;
-import 'package:badges/badges.dart' as bdg;
-import 'package:parkingmap/screens/notifications_page.dart' as notificationPage;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   String? address, token;
-  double latitude;
-  double longitude;
   int notificationCount;
   List<Marker> markers;
   Function(LatLngBounds, double) updateBounds;
-  HomePage(this.address, this.token, this.latitude, this.longitude,
-      this.notificationCount, this.markers, this.updateBounds,
+  HomePage(this.address, this.token, this.notificationCount, this.markers,
+      this.updateBounds,
       {super.key});
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  // #region variables
   PushNotification? notification;
   String? token, address;
   DateTime? notifReceiveTime;
@@ -88,9 +85,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   late StreamSubscription<LocationData>? _locationSubscription;
   LocationData? _currentLocation;
-  bool _shouldCenterOnLocation = false;
+  LatLng? previousLocation;
+  bool _shouldCenterOnLocation = true;
 
   double _zoom = 20;
+  // #endregion
 
   @override
   void dispose() {
@@ -115,9 +114,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) async {
         if (mapEvent is MapEventMoveEnd) {
           // Perform actions when the map movement ends
-          var newPositionMarkers = await widget.updateBounds(
-              _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
-          addMarker(newPositionMarkers);
+          // var newPositionMarkers = await widget.updateBounds(
+          //     _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
+          // addMarker(newPositionMarkers);
+          _shouldCenterOnLocation = false;
+          updateBoundsAddMarkers();
         }
       });
     });
@@ -135,7 +136,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       convertPointToAddress(markerPosition);
     });
 
-    //updateLocation();
+    previousLocation = LatLng(
+        Provider.of<LocationProvider>(context, listen: false)
+            .currentLocation!
+            .latitude!,
+        Provider.of<LocationProvider>(context, listen: false)
+            .currentLocation!
+            .longitude!);
+
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 2),
@@ -147,6 +155,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         value = (value + 1) % 100;
       });
     });
+  }
+
+  Future updateBoundsAddMarkers() async {
+    var newPositionMarkers = await widget.updateBounds(
+        _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
+    addMarker(newPositionMarkers);
   }
 
   Future<String?> convertPointToAddress(LatLng marker) async {
@@ -217,10 +231,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _currentLocation = currentLocation;
         LatLng currentLatLng =
             LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        pulsatingMarkerPosition = currentLatLng;
-        // Move the map to the user's current position
-        if (_shouldCenterOnLocation) {
-          _mapctl.move(currentLatLng, 18.0);
+        if (currentLatLng.latitude != previousLocation!.latitude &&
+            currentLatLng.longitude != previousLocation!.longitude) {
+          pulsatingMarkerPosition = currentLatLng;
+          // Move the map to the user's current position
+          if (_shouldCenterOnLocation) {
+            _mapctl.move(currentLatLng, 18.0);
+          }
+          updateBoundsAddMarkers();
+          previousLocation = currentLatLng;
         }
       });
     });
@@ -228,12 +247,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _centerOnCurrentLocation() {
     if (_currentLocation != null) {
+      _shouldCenterOnLocation = true;
       _mapctl.move(
           new LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
           18.0); // Center map on current location
+      updateBoundsAddMarkers();
     } else {
       // Handle the case where currentPosition is still null
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Unable to get current location. Please try again.'),
       ));
     }
@@ -298,7 +319,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   options: MapOptions(
                                       initialCenter: savedMapPosition == null
                                           ? LatLng(
-                                              widget.latitude, widget.longitude)
+                                              Provider.of<LocationProvider>(
+                                                      context)
+                                                  .currentLocation!
+                                                  .latitude!,
+                                              Provider.of<LocationProvider>(
+                                                      context)
+                                                  .currentLocation!
+                                                  .longitude!)
                                           : LatLng(savedMapPosition!.latitude,
                                               savedMapPosition!.longitude),
                                       initialZoom: 18,
@@ -348,89 +376,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             popupController: _popupController,
                                             onPopupEvent:
                                                 (event, selectedMarkers) {},
-                                            //     selectedMarkerBuilder:
-                                            //         (BuildContext context,
-                                            //             Marker marker) {
-                                            //       // Check if the address is already in the cache
-                                            //       if (_addressCache
-                                            //           .containsKey(marker.point)) {
-                                            //         // If cached, return the cached address immediately
-                                            //         var cachedAddress =
-                                            //             _addressCache[marker.point];
-                                            //         var decodedData = cnv
-                                            //             .jsonDecode(cachedAddress!);
-                                            //         var address =
-                                            //             decodedData["addresses"][0]
-                                            //                     ["address"]
-                                            //                 ["streetNameAndNumber"];
-                                            //         return Card(
-                                            //           child: Padding(
-                                            //             padding:
-                                            //                 const EdgeInsets.all(
-                                            //                     4.0),
-                                            //             child: Column(
-                                            //               mainAxisSize:
-                                            //                   MainAxisSize.min,
-                                            //               children: [
-                                            //                 Text(
-                                            //                   address,
-                                            //                   style: const TextStyle(
-                                            //                       fontSize: 10,
-                                            //                       fontWeight:
-                                            //                           FontWeight
-                                            //                               .bold),
-                                            //                 ),
-                                            //               ],
-                                            //             ),
-                                            //           ),
-                                            //         );
-                                            //       } else {
-                                            //         // If not cached, fetch the address and cache it
-                                            //         return FutureBuilder(
-                                            //           future: Future.wait([
-                                            //             convertPointToAddress(
-                                            //                 marker.point)
-                                            //           ]),
-                                            //           builder: (context, snapshot) {
-                                            //             if (snapshot
-                                            //                     .connectionState ==
-                                            //                 ConnectionState
-                                            //                     .waiting) {
-                                            //               return const Card(
-                                            //                 child: Padding(
-                                            //                   padding:
-                                            //                       EdgeInsets.all(
-                                            //                           4.0),
-                                            //                   child:
-                                            //                       CircularProgressIndicator(),
-                                            //                 ),
-                                            //               ); // Show loading while fetching the address
-                                            //             } else if (snapshot
-                                            //                 .hasError) {
-                                            //               return const Card(
-                                            //                 child: Padding(
-                                            //                   padding:
-                                            //                       EdgeInsets.all(
-                                            //                           4.0),
-                                            //                   child: Text(
-                                            //                       'Error fetching address'),
-                                            //                 ),
-                                            //               );
-                                            //             } else {
-                                            //               return const Card(
-                                            //                 child: Padding(
-                                            //                   padding:
-                                            //                       EdgeInsets.all(
-                                            //                           4.0),
-                                            //                   child: Text(
-                                            //                       'No address found'),
-                                            //                 ),
-                                            //               );
-                                            //             }
-                                            //           },
-                                            //         );
-                                            //       }
-                                            //     },
                                           ),
                                         );
                                       },

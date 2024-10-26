@@ -1,13 +1,11 @@
 library parkingmap.globals;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
-import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/auth_service.dart';
 
 bool heroOverlay = false;
@@ -101,5 +99,11 @@ Future<void> signOutAndNavigate(BuildContext context) async {
   Navigator.of(context).pushAndRemoveUntil(
     MaterialPageRoute(builder: (context) => const LoginPage()),
     (Route<dynamic> route) => false,
+  );
+}
+
+showSoonToComeToast(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Soon to come!")),
   );
 }
