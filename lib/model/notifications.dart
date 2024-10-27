@@ -1,11 +1,11 @@
 class NotificationsColumn {
   static final List<String> values = [
     /// Add all fields
-    entry_id,
+    entryId,
     address, time, carType, status
   ];
 
-  static const String entry_id = 'id';
+  static const String entryId = 'id';
   static const String address = 'address';
   static const String time = 'time';
   static const String carType = 'carType';
@@ -13,21 +13,21 @@ class NotificationsColumn {
 }
 
 class Notifications {
-  late String entry_id;
+  late String entryId;
   late String address;
   late String time;
   late String carType;
   late String status;
   Notifications.empty();
   Notifications(
-      {required this.entry_id,
+      {required this.entryId,
       required this.address,
       required this.time,
       required this.carType,
       required this.status});
 
   Notifications.fromMap(Map<String, dynamic> item)
-      : entry_id = item[NotificationsColumn.entry_id],
+      : entryId = item[NotificationsColumn.entryId],
         address = item[NotificationsColumn.address],
         time = item[NotificationsColumn.time],
         carType = item[NotificationsColumn.carType],
@@ -35,7 +35,7 @@ class Notifications {
 
   Map<String, Object> toMap() {
     return {
-      NotificationsColumn.entry_id: entry_id,
+      NotificationsColumn.entryId: entryId,
       NotificationsColumn.address: address,
       NotificationsColumn.time: time,
       NotificationsColumn.carType: carType,

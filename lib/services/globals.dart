@@ -1,5 +1,6 @@
 library parkingmap.globals;
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/tools/app_config.dart';
@@ -27,8 +28,8 @@ cancelSearch() async {
     await http.delete(Uri.parse('${AppConfig.instance.apiUrl}/cancel-search'),
         body: cnv.jsonEncode({"user_id": userId}),
         headers: {"Content-Type": "application/json"});
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
   }
 }
 
@@ -37,8 +38,8 @@ deleteLeaving(int latestLeavingID) async {
     await http.delete(Uri.parse("${AppConfig.instance.apiUrl}/delete-leaving"),
         body: cnv.jsonEncode({"leavingID": latestLeavingID}),
         headers: {"Content-Type": "application/json"});
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
   }
 }
 
@@ -56,7 +57,9 @@ postSkip(timesSkipped, time, latitude, longitude, latestLeavingID) async {
           "Content-Type": "application/json",
           "Authorization": securityToken!
         });
-  } catch (e) {}
+  } catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  }
 }
 
 getPoints() async {
@@ -69,8 +72,8 @@ getPoints() async {
           "Content-Type": "application/json",
           "Authorization": securityToken!
         });
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
   }
 }
 
@@ -84,8 +87,8 @@ updatePoints(int? updatedPoints) async {
           "Content-Type": "application/json",
           "Authorization": securityToken!
         });
-  } catch (e) {
-    print(e);
+  } catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
   }
 }
 
@@ -94,9 +97,9 @@ Future<void> signOutAndNavigate(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear(); // Clear all saved data
   AuthService().signOut();
-
+  if (!context.mounted) return;
   // Navigate to the login page and remove all previous routes
-  Navigator.of(context).pushAndRemoveUntil(
+  await Navigator.of(context).pushAndRemoveUntil(
     MaterialPageRoute(builder: (context) => const LoginPage()),
     (Route<dynamic> route) => false,
   );

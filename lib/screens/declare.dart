@@ -26,7 +26,7 @@ class DeclareSpotScreen extends StatelessWidget {
           body: cnv.jsonEncode({
             "user_id": userId.toString(),
             "lat": location!.latitude!.toString(),
-            "long": location!.longitude!.toString(),
+            "long": location.longitude!.toString(),
             "uid": token,
             "newParking": "false",
           }),

@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -13,10 +14,10 @@ class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  RegisterPageState createState() => RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class RegisterPageState extends State<RegisterPage> {
   TextEditingController textControllerEmail = TextEditingController();
   TextEditingController textControllerPassword = TextEditingController();
   TextEditingController textControllerRepeatPassword = TextEditingController();
@@ -30,7 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isObscuredRepeatPassword = true;
   bool errorMessageVisible = false;
 
-  Future<String> registerUser(uid, email, password, fcm_token) async {
+  Future registerUser(uid, email, password, fcmToken) async {
     try {
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/register-user"),
@@ -38,7 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
             "uid": uid,
             "email": email,
             "password": password,
-            "fcm_token": fcm_token
+            "fcm_token": fcmToken
           }),
           headers: {
             "Content-Type": "application/json",
@@ -52,10 +53,8 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         registrationSuccess = false;
       }
-      return registrationStatus;
-    } catch (e) {
-      print(e);
-      return e.toString();
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 
@@ -153,14 +152,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
-                        // Text(
-                        //   registrationMessage,
-                        //   style: GoogleFonts.lato(
-                        //     color:
-                        //         registrationSuccess ? Colors.green : Colors.red,
-                        //     fontSize: 18,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),

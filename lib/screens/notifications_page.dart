@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../model/notifications.dart';
-import '../services/SqliteService.dart';
+import '../services/sqlite_service.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
 
   @override
-  _NotificationPageState createState() => _NotificationPageState();
+  NotificationPageState createState() => NotificationPageState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
+class NotificationPageState extends State<NotificationPage> {
   SqliteService sqliteService = SqliteService();
   late Future<List<Notifications>> notifications;
   late List<Notifications> notificationlist;
@@ -122,7 +122,7 @@ class _NotificationPageState extends State<NotificationPage> {
                                       onDismissed: (direction) async {
                                         await getNotificationsList();
                                         await deleteFromDataBase(snapshot
-                                                .data![index].entry_id
+                                                .data![index].entryId
                                                 .toString())
                                             .then((value) => ScaffoldMessenger
                                                     .of(context)
@@ -196,7 +196,7 @@ class _NotificationPageState extends State<NotificationPage> {
           // Future with some errors
           else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasError) {
-            //print(snapshot.data![0].entry_id.toString());
+            //print(snapshot.data![0].entryId.toString());
             return Text("The error ${snapshot.error} occured");
           }
           // Future not done yet

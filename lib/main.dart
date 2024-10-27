@@ -6,12 +6,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:parkingmap/model/location.dart';
-import 'package:parkingmap/screens/claim.dart';
 import 'package:parkingmap/screens/declare.dart';
-import 'package:parkingmap/screens/enableLocation.dart';
+import 'package:parkingmap/screens/enable_location.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/screens/unsupported_location.dart';
-import 'package:parkingmap/services/MarkerEventBus.dart';
+import 'package:parkingmap/services/marker_event_bus.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/push_notification_service.dart';
 import 'package:vibration/vibration.dart';
@@ -19,7 +18,7 @@ import 'screens/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:parkingmap/model/pushnotificationModel.dart';
+import 'package:parkingmap/model/pushnotification_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -80,16 +79,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   // #region declarations
   late final FirebaseMessaging _messaging;
   PushNotification? notification;
-  String? token, address, fcm_token;
+  String? token, address, fcmtoken;
   DateTime? notifReceiveTime;
-  Position? _currentPosition;
   double height = 100;
 
   double width = 100;
 
   double latitude = 0, longitude = 0;
 
-  int index = 0, count = 0;
+  int index = 0;
 
   bool showGifSearching = false;
 
@@ -116,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool? _isUserLogged;
 
   late PageController _pageViewController;
-  ValueNotifier<int> _notifier = ValueNotifier(0);
+  final ValueNotifier<int> _notifier = ValueNotifier(0);
   ValueNotifier<double> notifierImageScale = ValueNotifier(15);
   // #endregion
 
@@ -146,8 +144,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           });
       var data = response.body;
       return data;
-    } catch (e) {
-      print(e);
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 
@@ -174,11 +172,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
         return markers;
       } else {
-        throw Exception(
-            'Failed to load markers' + response.statusCode.toString());
+        throw Exception('Failed to load markers: ${response.statusCode}');
       }
-    } catch (e) {
-      throw Exception(e);
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return List.empty();
     }
   }
 
@@ -217,29 +215,30 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         }
       });
     } else {
-      print('User declined or has not accepted permission');
+      var error = 'User declined or has not accepted permission';
+      FirebaseCrashlytics.instance.recordError(error, StackTrace.current);
     }
   }
 
   Future notificationsCount() async {
     if (screens.isEmpty) {
-      screens.add(HomePage(address, token, count, markers, updateBounds));
+      screens.add(HomePage(address, token, updateBounds));
       screens.add(DeclareSpotScreen(token: token.toString()));
-      screens.add(SettingsScreen());
+      screens.add(const SettingsScreen());
     }
   }
 
-  postInsertTime() async {
-    try {
-      var response = await http.post(
-          //Uri.parse("http://192.168.1.26:8080/pasthelwparking/searching.php"), //vm
-          Uri.parse("https://pasthelwparkingv1.000webhostapp.com/php/insert_time.php"),
-          body: {"time": '$notifReceiveTime', "uid": '$token'});
-      print(response.body);
-    } catch (e) {
-      print(e);
-    }
-  }
+  // postInsertTime() async {
+  //   try {
+  //     var response = await http.post(
+  //         //Uri.parse("http://192.168.1.26:8080/pasthelwparking/searching.php"), //vm
+  //         Uri.parse("https://pasthelwparkingv1.000webhostapp.com/php/insert_time.php"),
+  //         body: {"time": '$notifReceiveTime', "uid": '$token'});
+  //     print(response.body);
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   getUserID() async {
     try {
@@ -266,15 +265,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       await _getDevToken();
       var userId = token;
       http.post(Uri.parse("${AppConfig.instance.apiUrl}/register-fcmToken"),
-          body: cnv.jsonEncode({
-            "user_id": userId.toString(),
-            "fcm_token": fcm_token.toString()
-          }),
+          body: cnv.jsonEncode(
+              {"user_id": userId.toString(), "fcmtoken": fcmtoken.toString()}),
           headers: {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-    } catch (e) {}
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
   }
 
   checkForInitialState() async {
@@ -291,17 +290,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void initState() {
     NotificationController.startListeningNotificationEvents();
     // app is in background
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => ClaimPage(
-              int.parse(message.data["latestLeavingID"]),
-              message.data["user_id"],
-              double.parse(message.data["lat"]),
-              double.parse(message.data["long"]),
-              message.data["cartype"],
-              int.parse(message.data["times_skipped"]),
-              message.data["time"])));
-    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {});
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     //when app is terminated
     checkForInitialState();
@@ -405,8 +394,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+    LocationSettings locationSettings = const LocationSettings(
+      accuracy: LocationAccuracy.high,
+    );
+
+    Position position =
+        await Geolocator.getCurrentPosition(locationSettings: locationSettings);
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -414,11 +407,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       Placemark place = placemarks[0];
 
       setState(() {
-        _currentPosition = position;
         address =
             "${place.locality}, ${place.subLocality},${place.street}, ${place.postalCode}";
       });
-    } catch (e) {}
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
   }
 
   Future sharedPref() async {
@@ -428,7 +422,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future _getDevToken() async {
-    fcm_token = await FirebaseMessaging.instance.getToken();
+    fcmtoken = await FirebaseMessaging.instance.getToken();
   }
 
   Future appInitializations() async {
@@ -482,7 +476,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         onTap: (index) {
                           _notifier.value = index;
                           _pageViewController.animateToPage(_notifier.value,
-                              duration: Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500),
                               curve: Curves.ease);
                         },
                         selectedIconTheme: const IconThemeData(

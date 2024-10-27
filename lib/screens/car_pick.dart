@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:parkingmap/main.dart';
@@ -15,25 +16,23 @@ class CarPick extends StatefulWidget {
   final String? email;
   const CarPick(this.email, {super.key});
   @override
-  _CarPickState createState() => _CarPickState();
+  CarPickState createState() => CarPickState();
 }
 
-class _CarPickState extends State<CarPick> {
+class CarPickState extends State<CarPick> {
   int tappedIndex = 100;
   List<bool> borders = [];
 
   registerCar(String carType, String? email) async {
     try {
-      var response = await http.post(
-          Uri.parse("${AppConfig.instance.apiUrl}/register-car"),
+      await http.post(Uri.parse("${AppConfig.instance.apiUrl}/register-car"),
           body: cnv.jsonEncode({"carType": carType, "email": email}),
           headers: {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-      print(response.body);
-    } catch (e) {
-      print(e);
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 

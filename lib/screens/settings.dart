@@ -4,11 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 
 class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  SettingsScreenState createState() => SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Change Password Dialog
   void _changePassword(BuildContext context) {
-    final TextEditingController _passwordController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -187,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _passwordController,
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "New Password",
@@ -204,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                _updatePassword(_passwordController.text);
+                _updatePassword(passwordController.text);
                 Navigator.of(context).pop();
               },
               child: Text(
@@ -238,8 +240,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (user != null && newPassword.isNotEmpty) {
       try {
         await user.updatePassword(newPassword);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Password updated successfully!")),
+          const SnackBar(content: Text("Password updated successfully!")),
         );
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(

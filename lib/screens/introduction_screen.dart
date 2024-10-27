@@ -6,20 +6,10 @@ class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
 
   @override
-  _IntroScreenState createState() => _IntroScreenState();
+  IntroScreenState createState() => IntroScreenState();
 }
 
-class _IntroScreenState extends State<IntroScreen> {
-  Widget _buildFullscreenImage() {
-    return Image.asset(
-      'assets/fullscreen.jpg',
-      fit: BoxFit.cover,
-      height: double.infinity,
-      width: double.infinity,
-      alignment: Alignment.center,
-    );
-  }
-
+class IntroScreenState extends State<IntroScreen> {
   Widget _buildImage(String assetName, [double width = 350]) {
     return Image.asset('Assets/Images/$assetName', width: width);
   }
@@ -76,13 +66,13 @@ class _IntroScreenState extends State<IntroScreen> {
               onDone: () {
                 // When done button is press
                 Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                    MaterialPageRoute(builder: (context) => const MyHomePage()),
                     (Route route) => false);
               },
               onSkip: () {
                 // You can also override onSkip callback
                 Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                    MaterialPageRoute(builder: (context) => const MyHomePage()),
                     (Route route) => false);
               },
               showBackButton: false,

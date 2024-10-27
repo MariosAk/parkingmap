@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../model/notifications.dart';
@@ -43,7 +44,7 @@ class SqliteService {
       String id = i["id"].toString();
 
       Notifications newnewNotification = Notifications(
-          entry_id: id,
+          entryId: id,
           address: address,
           time: time,
           carType: carType,
@@ -57,8 +58,8 @@ class SqliteService {
     final db = await SqliteService.initializeDB();
     try {
       await db.delete("Notifications", where: "id = ?", whereArgs: [id]);
-    } catch (err) {
-      print("Something went wrong when deleting an item: $err");
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
     }
   }
 

@@ -140,7 +140,7 @@ class NotificationController {
   static Future<void> executeLongTaskInBackground() async {
     await Future.delayed(const Duration(seconds: 4));
     final url = Uri.parse("http://google.com");
-    final re = await http.get(url);
+    await http.get(url);
   }
 
   ///  *********************************************

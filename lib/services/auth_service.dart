@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class AuthService {
   final _auth = FirebaseAuth.instance;
@@ -69,7 +70,9 @@ class AuthService {
   Future<void> sendResetPasswordEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-    } catch (error) {}
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
   }
 
   Future<void> signOut() async {

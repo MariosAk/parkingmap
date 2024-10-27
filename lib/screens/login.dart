@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:parkingmap/main.dart';
-import 'package:parkingmap/screens/forgotPassword.dart';
-import 'package:parkingmap/screens/introductionScreen.dart';
+import 'package:parkingmap/screens/forgot_password.dart';
+import 'package:parkingmap/screens/introduction_screen.dart';
 import 'package:parkingmap/screens/register.dart';
-import 'package:parkingmap/tools/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert' as cnv;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:parkingmap/services/auth_service.dart';
 
@@ -15,31 +12,16 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   TextEditingController textControllerEmail = TextEditingController();
   TextEditingController textControllerPassword = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String loginResponseMessage = "";
   bool isObscuredPassword = true;
-
-  Future<String> loginUser(email, password) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      var response = await http.get(Uri.parse(
-          '${AppConfig.instance.apiUrl}/login-user?email=$email&password=$password'));
-      var datajson = cnv.jsonDecode(response.body)["results"];
-      await prefs.setString('userid',
-          datajson[0]["user_id"]); //datajson["rows"][0]["user_id"] postgresql
-      return response.body;
-    } catch (e) {
-      print(e);
-      return e.toString();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                                         var firstTime =
                                             prefs.getBool("firstLogIn");
                                         if (firstTime == null || firstTime) {
+                                          if (!context.mounted) return;
                                           Navigator.of(context)
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(
@@ -207,6 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                                         await prefs.setBool("isLoggedIn", true);
                                         await prefs.setString(
                                             "email", textControllerEmail.text);
+                                        if (!context.mounted) return;
                                         Navigator.of(context)
                                             .pushAndRemoveUntil(
                                                 MaterialPageRoute(

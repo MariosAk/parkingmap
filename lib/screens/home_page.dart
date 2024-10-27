@@ -2,29 +2,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:parkingmap/model/location.dart';
-import 'package:parkingmap/model/pushnotificationModel.dart';
+import 'package:parkingmap/model/pushnotification_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:parkingmap/services/MarkerEventBus.dart';
+import 'package:parkingmap/services/marker_event_bus.dart';
 import 'dart:convert' as cnv;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
-  String? address, token;
-  int notificationCount;
-  List<Marker> markers;
-  Function(LatLngBounds, double) updateBounds;
-  HomePage(this.address, this.token, this.notificationCount, this.markers,
-      this.updateBounds,
-      {super.key});
+  final String? address, token;
+  final Function(LatLngBounds, double) updateBounds;
+  const HomePage(this.address, this.token, this.updateBounds, {super.key});
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // #region variables
   PushNotification? notification;
   String? token, address;
@@ -44,8 +40,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool isSelected = false;
   double? containerHeight, containerWidth, x, y;
 
-  String ApiKey = 'AIzaSyBghQsgXKFjMw5LG79JTmLNgibSc2atYZM';
-  String TomTomApiKey = 'qa5MzxXesmBUxRLaWQnFRmMZ2D33kE7b';
+  String tomTomApiKey = 'qa5MzxXesmBUxRLaWQnFRmMZ2D33kE7b';
   final _controller = TextEditingController();
   String searchTxt = "";
   String lat = "";
@@ -69,7 +64,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Declare a variable to hold current bounds
   // Variable to hold the pulsating marker's position
   late LatLng pulsatingMarkerPosition;
-  LatLng? savedMapPosition = null;
 
   bool isMapInitialized = false;
 
@@ -81,7 +75,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Card card = const Card();
   bool convertedToAddress = false;
 
-  Map<LatLng, String> _addressCache = {};
+  final Map<LatLng, String> _addressCache = {};
 
   late StreamSubscription<LocationData>? _locationSubscription;
   LocationData? _currentLocation;
@@ -96,7 +90,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _controller.dispose();
     _animationController.dispose();
     timer.cancel();
-    subscription?.cancel();
+    subscription.cancel();
     _locationSubscription?.cancel();
     super.dispose();
   }
@@ -109,14 +103,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       List<Marker> initialMarkers = await widget.updateBounds(
           _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
-      //for (int i = 0; i < initialMarkers.length; i++) {}
       addMarker(initialMarkers);
       subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) async {
         if (mapEvent is MapEventMoveEnd) {
-          // Perform actions when the map movement ends
-          // var newPositionMarkers = await widget.updateBounds(
-          //     _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
-          // addMarker(newPositionMarkers);
           _shouldCenterOnLocation = false;
           updateBoundsAddMarkers();
         }
@@ -146,7 +135,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
     _pulsatingAnimation =
         Tween<double>(begin: 0, end: 20).animate(_animationController);
@@ -168,7 +157,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       //if (!convertedToAddress) {
       convertedToAddress = true;
       var response = await http.get(Uri.parse(
-          'https://api.tomtom.com/maps/orbis/places/reverseGeocode/${marker.latitude},${marker.longitude}.json?key=$TomTomApiKey&apiVersion=1'));
+          'https://api.tomtom.com/maps/orbis/places/reverseGeocode/${marker.latitude},${marker.longitude}.json?key=$tomTomApiKey&apiVersion=1'));
       if (response.statusCode == 200) {
         convertedToAddress = false;
         var decodedResponse = cnv.utf8.decode(response.bodyBytes);
@@ -203,23 +192,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Method to initialize and start location tracking
   void startLocationTracking() async {
     // Request permission to access location
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
     // Check if location service is enabled
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         return; // Exit if the service is not enabled
       }
     }
 
     // Check if permission is granted
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         return; // Exit if permission is not granted
       }
     }
@@ -227,21 +216,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // Subscribe to location updates
     _locationSubscription =
         location.onLocationChanged.listen((LocationData currentLocation) {
-      setState(() {
-        _currentLocation = currentLocation;
-        LatLng currentLatLng =
-            LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        if (currentLatLng.latitude != previousLocation!.latitude &&
-            currentLatLng.longitude != previousLocation!.longitude) {
-          pulsatingMarkerPosition = currentLatLng;
-          // Move the map to the user's current position
-          if (_shouldCenterOnLocation) {
-            _mapctl.move(currentLatLng, 18.0);
-          }
-          updateBoundsAddMarkers();
-          previousLocation = currentLatLng;
+      //if (mounted) {
+      // setState(() {
+      _currentLocation = currentLocation;
+      LatLng currentLatLng =
+          LatLng(currentLocation.latitude!, currentLocation.longitude!);
+      if (currentLatLng.latitude != previousLocation!.latitude &&
+          currentLatLng.longitude != previousLocation!.longitude) {
+        pulsatingMarkerPosition = currentLatLng;
+        // Move the map to the user's current position
+        if (_shouldCenterOnLocation) {
+          _mapctl.move(currentLatLng, 18.0);
         }
-      });
+        updateBoundsAddMarkers();
+        previousLocation = currentLatLng;
+      }
+      // });
+      //}
     });
   }
 
@@ -249,7 +240,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (_currentLocation != null) {
       _shouldCenterOnLocation = true;
       _mapctl.move(
-          new LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+          LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
           18.0); // Center map on current location
       updateBoundsAddMarkers();
     } else {
@@ -317,18 +308,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 child: FlutterMap(
                                   mapController: _mapctl,
                                   options: MapOptions(
-                                      initialCenter: savedMapPosition == null
-                                          ? LatLng(
-                                              Provider.of<LocationProvider>(
-                                                      context)
-                                                  .currentLocation!
-                                                  .latitude!,
-                                              Provider.of<LocationProvider>(
-                                                      context)
-                                                  .currentLocation!
-                                                  .longitude!)
-                                          : LatLng(savedMapPosition!.latitude,
-                                              savedMapPosition!.longitude),
+                                      initialCenter: LatLng(
+                                          Provider.of<LocationProvider>(context)
+                                              .currentLocation!
+                                              .latitude!,
+                                          Provider.of<LocationProvider>(context)
+                                              .currentLocation!
+                                              .longitude!),
                                       initialZoom: 18,
                                       minZoom: 16,
                                       maxZoom: 18,
