@@ -3,9 +3,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:parkingmap/model/latlng_bounds_model.dart';
 import 'package:parkingmap/model/location.dart';
+import 'package:parkingmap/model/marker_model.dart';
 import 'package:parkingmap/screens/declare.dart';
 import 'package:parkingmap/screens/enable_location.dart';
 import 'package:parkingmap/screens/login.dart';
@@ -13,6 +16,7 @@ import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/marker_event_bus.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/push_notification_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 import 'screens/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -29,9 +33,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'tools/app_config.dart';
 import 'package:provider/provider.dart';
+import 'package:parkingmap/services/hive_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final dir = await getApplicationDocumentsDirectory();
+  Hive.init(dir.path);
+  Hive.registerAdapter(MarkerModelAdapter());
+  Hive.registerAdapter(LatLngBoundsModelAdapter());
+  Hive.openBox<List>("markersBox");
+  Hive.openBox("cacheBox");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -116,15 +127,63 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   late PageController _pageViewController;
   final ValueNotifier<int> _notifier = ValueNotifier(0);
   ValueNotifier<double> notifierImageScale = ValueNotifier(15);
+
+  final markersBox = "markersBox";
+  final cacheBox = "cacheBox";
   // #endregion
+
+// Function to check if current camera bounds are within expanded bounds
+  bool isWithinExpandedBounds(
+      LatLngBounds currentBounds, LatLngBounds expandedBounds) {
+    // Check if the current bounds fit within the expanded bounds
+    return (currentBounds.southWest.latitude >=
+            expandedBounds.southWest.latitude &&
+        currentBounds.southWest.longitude >=
+            expandedBounds.southWest.longitude &&
+        currentBounds.northEast.latitude <= expandedBounds.northEast.latitude &&
+        currentBounds.northEast.longitude <=
+            expandedBounds.northEast.longitude);
+  }
 
   Future<List<Marker>> updateBounds(
       LatLngBounds bounds, double currentZoom) async {
-    postNewVisibleBounds(bounds.southWest.latitude, bounds.southWest.longitude,
-        bounds.northEast.latitude, bounds.northEast.longitude, email);
-    // Fetch markers asynchronously
-    var updatedMarkers = await getMarkersInBounds(bounds, currentZoom);
-    return updatedMarkers;
+    var cachedMarkers = await HiveService(markersBox).getAllCachedMarkers();
+    var expandedBounds =
+        await HiveService(cacheBox).getExpandedBoundsFromCache();
+    if (cachedMarkers.isEmpty ||
+        expandedBounds == null ||
+        !isWithinExpandedBounds(bounds, expandedBounds)) {
+      postNewVisibleBounds(
+          bounds.southWest.latitude,
+          bounds.southWest.longitude,
+          bounds.northEast.latitude,
+          bounds.northEast.longitude,
+          email);
+      // Fetch markers asynchronously
+      var updatedMarkers = await getMarkersInBounds(bounds, currentZoom);
+      var mappedMarkers = updatedMarkers.map((marker) {
+        return MarkerModel(
+            latitude: marker.point.latitude,
+            longitude: marker.point.longitude,
+            width: marker.width,
+            height: marker.height,
+            alignment: marker.alignment,
+            rotate: marker.rotate);
+      }).toList();
+      await HiveService(markersBox).addMarkersToCache(mappedMarkers);
+      await HiveService(cacheBox).addExpandedBoundsToCache(bounds);
+      return updatedMarkers;
+    }
+    List<Marker> mrkList = List.empty(growable: true);
+    for (MarkerModel cmrk in cachedMarkers.first) {
+      mrkList.add(cmrk.toMarker());
+    }
+    return mrkList;
+    //   return cachedMarkers.map((marker) {
+    //     return Marker(
+    //         point: LatLng(marker.latitude, marker.longitude),
+    //         child: Image.asset('Assets/Images/parking-location.png', scale: 18));
+    //   }).toList();
   }
 
   postNewVisibleBounds(swLat, swLong, neLat, neLong, userid) async {
