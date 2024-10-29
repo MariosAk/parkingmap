@@ -240,17 +240,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     // Subscribe to location updates
     _locationSubscription =
-        location.onLocationChanged.listen((LocationData currentLocation) {
+        location.onLocationChanged.listen((LocationData currentLocation) async {
       //if (mounted) {
       // setState(() {
       var oldTopic = cellTopic;
       cellTopic = calculateCellTopic(
           currentLocation.latitude!, currentLocation.longitude!);
+      print(cellTopic);
       if (oldTopic != cellTopic) {
         if (oldTopic.isNotEmpty) {
-          FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
+          await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
         }
-        FirebaseMessaging.instance.subscribeToTopic(cellTopic);
+        await FirebaseMessaging.instance
+            .subscribeToTopic(cellTopic)
+            .catchError((error) {
+          print(error);
+        });
       }
       _currentLocation = currentLocation;
       LatLng currentLatLng =

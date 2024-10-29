@@ -37,15 +37,15 @@ import 'package:parkingmap/services/hive_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   Hive.registerAdapter(MarkerModelAdapter());
   Hive.registerAdapter(LatLngBoundsModelAdapter());
-  Hive.openBox<List>("markersBox");
-  Hive.openBox("cacheBox");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Hive.openBox<List>("markersBox");
+  await Hive.openBox("cacheBox");
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
@@ -242,7 +242,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void registerNotification() async {
     // 1. Initialize the Firebase app
-    await Firebase.initializeApp();
+    //await Firebase.initializeApp();
     // 2. Instantiate Firebase Messaging
     _messaging = FirebaseMessaging.instance;
     bool? vibrationEnabled = await Vibration.hasVibrator();
@@ -276,6 +276,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             }
           } else {
             await HiveService(markersBox).deleteAllCachedMarkers();
+            setState(() {});
           }
         }
       });
