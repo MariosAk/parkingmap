@@ -1,16 +1,23 @@
 import 'dart:async';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:parkingmap/model/location.dart';
+import 'package:parkingmap/model/marker_model.dart';
 import 'package:parkingmap/model/pushnotification_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/services/marker_event_bus.dart';
 import 'dart:convert' as cnv;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_map_math/flutter_geo_math.dart';
+import 'package:parkingmap/services/globals.dart' as globals;
 
 class HomePage extends StatefulWidget {
   final String? address, token;
@@ -83,6 +90,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _shouldCenterOnLocation = true;
 
   double _zoom = 20;
+  String cellTopic = "";
   // #endregion
 
   @override
@@ -174,6 +182,23 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  Future deleteMarker(Marker marker, String topic) async {
+    try {
+      await http.post(Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
+          body: cnv.jsonEncode({
+            "latitude": marker.point.latitude.toString(),
+            "longitude": marker.point.longitude.toString(),
+            "topic": topic
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
+
   void addMarker(List<Marker> newMarkers) {
     bool exists = _markersNotifier.value.any((existingMarker) {
       return newMarkers.any((marker) => marker.point == existingMarker.point);
@@ -218,6 +243,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         location.onLocationChanged.listen((LocationData currentLocation) {
       //if (mounted) {
       // setState(() {
+      var oldTopic = cellTopic;
+      cellTopic = calculateCellTopic(
+          currentLocation.latitude!, currentLocation.longitude!);
+      if (oldTopic != cellTopic) {
+        if (oldTopic.isNotEmpty) {
+          FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
+        }
+        FirebaseMessaging.instance.subscribeToTopic(cellTopic);
+      }
       _currentLocation = currentLocation;
       LatLng currentLatLng =
           LatLng(currentLocation.latitude!, currentLocation.longitude!);
@@ -236,6 +270,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
+  String calculateCellTopic(double latitude, double longitude) {
+    const gridCellSize = 0.05;
+    int latCell = ((latitude) / gridCellSize).floor();
+    int lngCell = ((longitude) / gridCellSize).floor();
+    cellTopic = 'thessaloniki_${latCell}_$lngCell';
+    return cellTopic;
+  }
+
   void _centerOnCurrentLocation() {
     if (_currentLocation != null) {
       _shouldCenterOnLocation = true;
@@ -249,6 +291,40 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         content: Text('Unable to get current location. Please try again.'),
       ));
     }
+  }
+
+  void markSpotAsTaken(Marker marker) {
+    if (_currentLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Unable to get current location. Please try again.'),
+      ));
+      return;
+    }
+    FlutterMapMath flutterMapMath = FlutterMapMath();
+    double distance = flutterMapMath.distanceBetween(
+        _currentLocation!.latitude!,
+        _currentLocation!.longitude!,
+        marker.point.latitude,
+        marker.point.longitude,
+        "meters");
+    if (distance > 125) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('You have to be closer to this spot.'),
+      ));
+      return;
+    }
+    MarkerModel markerModel = MarkerModel(
+        latitude: marker.point.latitude,
+        longitude: marker.point.longitude,
+        width: marker.width,
+        height: marker.height,
+        alignment: marker.alignment,
+        rotate: marker.rotate);
+    HiveService("markersBox").deleteCachedMarker(markerModel);
+    if (_markersNotifier.value.contains(marker)) {
+      _markersNotifier.value.remove(marker);
+    }
+    deleteMarker(marker, cellTopic);
   }
 
   @override
@@ -361,7 +437,23 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             markers: markers,
                                             popupController: _popupController,
                                             onPopupEvent:
-                                                (event, selectedMarkers) {},
+                                                (event, selectedMarkers) {
+                                              if (selectedMarkers.isNotEmpty) {
+                                                // Assuming you want to show the dialog for the first selected marker
+                                                Marker selectedMarker =
+                                                    selectedMarkers.first;
+
+                                                // Show the AlertDialog when the popup is tapped
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext
+                                                          context) =>
+                                                      _showMarkAsTakenDialog(
+                                                          context,
+                                                          selectedMarker),
+                                                );
+                                              }
+                                            },
                                           ),
                                         );
                                       },
@@ -478,6 +570,53 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
         ));
+  }
+
+  Widget _showMarkAsTakenDialog(BuildContext context, Marker marker) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0), // Rounded corners
+      ),
+      backgroundColor: Colors.white, // Match the app's theme
+      title: Text(
+        "Declare Spot as Taken",
+        style: GoogleFonts.robotoSlab(
+          fontWeight: FontWeight.w600,
+          color: Colors.blue[900],
+        ),
+      ),
+      content: const Text(
+        "Are you sure this spot is no longer available?",
+        style: TextStyle(color: Colors.black87),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Dismiss dialog
+          },
+          child: Text(
+            "Cancel",
+            style: GoogleFonts.robotoSlab(
+              fontWeight: FontWeight.w500,
+              color: Colors.red,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            markSpotAsTaken(marker);
+            Navigator.of(context).pop(); // Dismiss dialog
+          },
+          child: Text(
+            "Confirm",
+            style: GoogleFonts.robotoSlab(
+              fontWeight: FontWeight.w500,
+              color: Colors.blue[900],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildPulsatingMarker() {

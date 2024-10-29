@@ -428,6 +428,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "flutter_map_math",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map_math-0.1.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "flutter_native_splash",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_native_splash-2.4.1",
       "packageUri": "lib/",
@@ -1220,7 +1226,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-10-27T21:39:52.586085Z",
+  "generated": "2024-10-28T19:49:33.369337Z",
   "generator": "pub",
   "generatorVersion": "3.4.3",
   "flutterRoot": "file:///C:/fluttersrc/flutter",

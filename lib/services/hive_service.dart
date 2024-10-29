@@ -61,9 +61,10 @@ class HiveService {
   }
 
 //delete specific
-  Future<void> deleteCachedMarker(int index) async {
+  Future<void> deleteCachedMarker(MarkerModel marker) async {
     var box = await _markerBox;
-    await box.deleteAt(index);
+    await box.delete(marker);
+    //await box.deleteAt(index);
   }
 
   //delete all

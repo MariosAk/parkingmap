@@ -170,6 +170,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             alignment: marker.alignment,
             rotate: marker.rotate);
       }).toList();
+      await HiveService(markersBox).deleteAllCachedMarkers();
       await HiveService(markersBox).addMarkersToCache(mappedMarkers);
       await HiveService(cacheBox).addExpandedBoundsToCache(bounds);
       return updatedMarkers;
@@ -265,11 +266,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           body: message.notification?.body,
         );
         if (notification != null) {
-          latitude = double.parse(message.data['lat']);
-          longitude = double.parse(message.data['long']);
-          MarkerEventBus().addMarker(LatLng(latitude, longitude));
-          if (vibrationEnabled!) {
-            Vibration.vibrate();
+          var update = bool.parse(message.data['update']);
+          if (!update) {
+            latitude = double.parse(message.data['lat']);
+            longitude = double.parse(message.data['long']);
+            MarkerEventBus().addMarker(LatLng(latitude, longitude));
+            if (vibrationEnabled!) {
+              Vibration.vibrate();
+            }
+          } else {
+            await HiveService(markersBox).deleteAllCachedMarkers();
           }
         }
       });
@@ -459,6 +465,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     Position position =
         await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+    if (!(position.latitude >= 40.5530246503162 &&
+        position.latitude <= 40.6600 &&
+        position.longitude >= 22.87426837242212 &&
+        position.longitude <= 22.9900)) {
+      return Future.error('Location out of bounds');
+    }
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(position.latitude, position.longitude);
