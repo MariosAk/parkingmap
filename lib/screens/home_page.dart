@@ -186,7 +186,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void deleteMarkerReceived(LatLng markerLatLng) {
+  void deleteMarkerReceived(LatLng markerLatLng) async {
     bool exists = _markersNotifier.value.any((existingMarker) =>
         existingMarker.point.latitude == markerLatLng.latitude &&
         existingMarker.point.longitude == markerLatLng.longitude);
@@ -205,7 +205,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           height: marker.height,
           alignment: marker.alignment,
           rotate: marker.rotate);
-      HiveService("markersBox").deleteCachedMarker(markerModel);
+      await HiveService("markersBox").deleteCachedMarker(markerModel);
     }
   }
 
@@ -278,12 +278,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // Subscribe to location updates
     _locationSubscription =
         location.onLocationChanged.listen((LocationData currentLocation) async {
-      //if (mounted) {
-      // setState(() {
       var oldTopic = cellTopic;
       cellTopic = calculateCellTopic(
           currentLocation.latitude!, currentLocation.longitude!);
-      print(cellTopic);
       if (oldTopic != cellTopic) {
         if (oldTopic.isNotEmpty) {
           await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
@@ -307,8 +304,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         updateBoundsAddMarkers();
         previousLocation = currentLatLng;
       }
-      // });
-      //}
     });
   }
 
@@ -355,26 +350,26 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ));
       return;
     }
-    MarkerModel markerModel = MarkerModel(
-        latitude: marker.point.latitude,
-        longitude: marker.point.longitude,
-        width: marker.width,
-        height: marker.height,
-        alignment: marker.alignment,
-        rotate: marker.rotate);
-    await HiveService("markersBox").deleteCachedMarker(markerModel);
-    List<MarkerModel> list =
-        await HiveService("markersBox").getAllCachedMarkers();
-    var markersList = list.map((e) {
-      return Marker(
-          point: LatLng(e.latitude, e.longitude),
-          child: Image.asset('Assets/Images/parking-location.png', scale: 15),
-          alignment: e.alignment,
-          height: e.height,
-          rotate: e.rotate,
-          width: e.width);
-    }).toList();
-    _markersNotifier.value = markersList;
+    // MarkerModel markerModel = MarkerModel(
+    //     latitude: marker.point.latitude,
+    //     longitude: marker.point.longitude,
+    //     width: marker.width,
+    //     height: marker.height,
+    //     alignment: marker.alignment,
+    //     rotate: marker.rotate);
+    // await HiveService("markersBox").deleteCachedMarker(markerModel);
+    // List<MarkerModel> list =
+    //     await HiveService("markersBox").getAllCachedMarkers();
+    // var markersList = list.map((e) {
+    //   return Marker(
+    //       point: LatLng(e.latitude, e.longitude),
+    //       child: Image.asset('Assets/Images/parking-location.png', scale: 15),
+    //       alignment: e.alignment,
+    //       height: e.height,
+    //       rotate: e.rotate,
+    //       width: e.width);
+    // }).toList();
+    // _markersNotifier.value = markersList;
     await deleteMarker(marker, cellTopic);
   }
 

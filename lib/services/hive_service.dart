@@ -63,8 +63,14 @@ class HiveService {
 //delete specific
   Future<void> deleteCachedMarker(MarkerModel marker) async {
     var box = await _markerBox;
-    List<MarkerModel> list = await getAllCachedMarkers();
-    list.remove(marker);
+    List<MarkerModel> list =
+        List<MarkerModel>.from(await getAllCachedMarkers());
+    var markerToDelete = list
+        .where((element) =>
+            element.latitude == marker.latitude &&
+            element.longitude == marker.longitude)
+        .firstOrNull;
+    list.remove(markerToDelete);
     await box.put("cachedMarkers", list);
     //await box.deleteAt(index);
   }

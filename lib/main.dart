@@ -123,6 +123,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   LatLngBounds? currentBounds;
 
   bool? _isUserLogged;
+  bool shouldUpdate = false;
 
   late PageController _pageViewController;
   final ValueNotifier<int> _notifier = ValueNotifier(0);
@@ -150,9 +151,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     var cachedMarkers = await HiveService(markersBox).getAllCachedMarkers();
     var expandedBounds =
         await HiveService(cacheBox).getExpandedBoundsFromCache();
-    if (cachedMarkers.isEmpty ||
+    if ((cachedMarkers.isEmpty && shouldUpdate) ||
         expandedBounds == null ||
-        !isWithinExpandedBounds(bounds, expandedBounds)) {
+        !isWithinExpandedBounds(bounds, expandedBounds) ||
+        shouldUpdate) {
+      shouldUpdate = false;
       postNewVisibleBounds(
           bounds.southWest.latitude,
           bounds.southWest.longitude,
@@ -266,16 +269,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           body: message.notification?.body,
         );
         if (notification != null) {
-          var type = message.data['type'].toString();
-          latitude = double.parse(message.data['lat']);
-          longitude = double.parse(message.data['long']);
-          if (type == "add") {
-            MarkerEventBus().addMarker(LatLng(latitude, longitude));
-            if (vibrationEnabled!) {
-              Vibration.vibrate();
-            }
+          var update = bool.parse(message.data['update']);
+          if (update) {
+            shouldUpdate = true;
           } else {
-            MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
+            var type = message.data['type'].toString();
+            latitude = double.parse(message.data['lat']);
+            longitude = double.parse(message.data['long']);
+            if (type == "add") {
+              MarkerEventBus().addMarker(LatLng(latitude, longitude));
+              if (vibrationEnabled!) {
+                Vibration.vibrate();
+              }
+            } else {
+              MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
+            }
           }
         }
       });
@@ -371,6 +379,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     overlayState = Overlay.of(context);
     _toggleServiceStatusStream();
     _pageViewController = PageController(initialPage: selectedIndex);
+    shouldUpdate = true;
   }
 
   @override
