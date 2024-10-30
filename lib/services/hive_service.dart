@@ -20,14 +20,14 @@ class HiveService {
 //create
   Future<void> addMarkersToCache(List<MarkerModel> markers) async {
     var box = await _markerBox;
-    await box.add(markers);
+    await box.put("cachedMarkers", markers);
   }
 
   //read
   Future getAllCachedMarkers() async {
     var box = await _markerBox;
     //await box.clear();
-    return box.values.toList();
+    return box.get("cachedMarkers", defaultValue: List.empty());
   }
 
   Future<void> addExpandedBoundsToCache(LatLngBounds bounds) async {
@@ -63,13 +63,15 @@ class HiveService {
 //delete specific
   Future<void> deleteCachedMarker(MarkerModel marker) async {
     var box = await _markerBox;
-    await box.delete(marker);
+    List<MarkerModel> list = await getAllCachedMarkers();
+    list.remove(marker);
+    await box.put("cachedMarkers", list);
     //await box.deleteAt(index);
   }
 
   //delete all
   Future<void> deleteAllCachedMarkers() async {
     var box = await _markerBox;
-    await box.clear();
+    await box.delete("cachedMarkers");
   }
 }

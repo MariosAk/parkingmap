@@ -176,8 +176,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return updatedMarkers;
     }
     List<Marker> mrkList = List.empty(growable: true);
-    for (MarkerModel cmrk in cachedMarkers.first) {
-      mrkList.add(cmrk.toMarker());
+    for (var cmrk in cachedMarkers) {
+      mrkList.add((cmrk as MarkerModel).toMarker());
     }
     return mrkList;
     //   return cachedMarkers.map((marker) {
@@ -266,17 +266,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           body: message.notification?.body,
         );
         if (notification != null) {
-          var update = bool.parse(message.data['update']);
-          if (!update) {
-            latitude = double.parse(message.data['lat']);
-            longitude = double.parse(message.data['long']);
+          var type = message.data['type'].toString();
+          latitude = double.parse(message.data['lat']);
+          longitude = double.parse(message.data['long']);
+          if (type == "add") {
             MarkerEventBus().addMarker(LatLng(latitude, longitude));
             if (vibrationEnabled!) {
               Vibration.vibrate();
             }
           } else {
-            await HiveService(markersBox).deleteAllCachedMarkers();
-            setState(() {});
+            MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
           }
         }
       });

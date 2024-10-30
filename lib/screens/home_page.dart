@@ -121,16 +121,20 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
 
     // Listen to marker events from the event bus
-    MarkerEventBus().markerStream.listen((LatLng markerPosition) {
-      Marker mrk = Marker(
-        width: 80.0,
-        height: 80.0,
-        point: markerPosition,
-        child: Image.asset('Assets/Images/parking-location.png', scale: 15),
-      );
-      List<Marker> markers = [mrk];
-      addMarker(markers);
-      convertPointToAddress(markerPosition);
+    MarkerEventBus().markerStream.listen((MarkerEvent markerEvent) {
+      if (markerEvent.type == MarkerEventType.add) {
+        Marker mrk = Marker(
+          width: 80.0,
+          height: 80.0,
+          point: markerEvent.position,
+          child: Image.asset('Assets/Images/parking-location.png', scale: 15),
+        );
+        List<Marker> markers = [mrk];
+        addMarker(markers);
+        //convertPointToAddress(markerEvent.position);
+      } else if (markerEvent.type == MarkerEventType.delete) {
+        deleteMarkerReceived(markerEvent.position);
+      }
     });
 
     previousLocation = LatLng(
@@ -182,6 +186,29 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  void deleteMarkerReceived(LatLng markerLatLng) {
+    bool exists = _markersNotifier.value.any((existingMarker) =>
+        existingMarker.point.latitude == markerLatLng.latitude &&
+        existingMarker.point.longitude == markerLatLng.longitude);
+    if (exists) {
+      var marker = _markersNotifier.value
+          .where((existingMarker) =>
+              existingMarker.point.latitude == markerLatLng.latitude &&
+              existingMarker.point.longitude == markerLatLng.longitude)
+          .first;
+      _markersNotifier.value = List.from(_markersNotifier.value)
+        ..remove(marker);
+      MarkerModel markerModel = MarkerModel(
+          latitude: marker.point.latitude,
+          longitude: marker.point.longitude,
+          width: marker.width,
+          height: marker.height,
+          alignment: marker.alignment,
+          rotate: marker.rotate);
+      HiveService("markersBox").deleteCachedMarker(markerModel);
+    }
+  }
+
   Future deleteMarker(Marker marker, String topic) async {
     try {
       await http.post(Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
@@ -206,6 +233,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (!exists) {
       _markersNotifier.value = List.from(_markersNotifier.value)
         ..addAll(newMarkers);
+      var markerModels = newMarkers.map((newMarker) {
+        return MarkerModel(
+            alignment: newMarker.alignment,
+            height: newMarker.height,
+            width: newMarker.width,
+            latitude: newMarker.point.latitude,
+            longitude: newMarker.point.longitude,
+            rotate: newMarker.rotate);
+      }).toList();
+      HiveService("markersBox").addMarkersToCache(markerModels);
     }
     for (Marker marker in newMarkers) {
       if (!_addressCache.keys.any((element) => marker.point == element)) {
@@ -298,7 +335,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void markSpotAsTaken(Marker marker) {
+  Future<void> markSpotAsTaken(Marker marker) async {
     if (_currentLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Unable to get current location. Please try again.'),
@@ -325,11 +362,20 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         height: marker.height,
         alignment: marker.alignment,
         rotate: marker.rotate);
-    HiveService("markersBox").deleteCachedMarker(markerModel);
-    if (_markersNotifier.value.contains(marker)) {
-      _markersNotifier.value.remove(marker);
-    }
-    deleteMarker(marker, cellTopic);
+    await HiveService("markersBox").deleteCachedMarker(markerModel);
+    List<MarkerModel> list =
+        await HiveService("markersBox").getAllCachedMarkers();
+    var markersList = list.map((e) {
+      return Marker(
+          point: LatLng(e.latitude, e.longitude),
+          child: Image.asset('Assets/Images/parking-location.png', scale: 15),
+          alignment: e.alignment,
+          height: e.height,
+          rotate: e.rotate,
+          width: e.width);
+    }).toList();
+    _markersNotifier.value = markersList;
+    await deleteMarker(marker, cellTopic);
   }
 
   @override
