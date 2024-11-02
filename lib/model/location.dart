@@ -17,9 +17,8 @@ class LocationProvider with ChangeNotifier {
 
   Future<void> initializeLocation() async {
     final location = loc.Location();
-    PermissionStatus permissionStatus = await Permission.location.request();
 
-    if (permissionStatus.isGranted) {
+    if (await Permission.location.isGranted) {
       _currentLocation = await location.getLocation();
       notifyListeners();
       // Start listening for location updates

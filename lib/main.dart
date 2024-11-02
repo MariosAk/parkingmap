@@ -17,6 +17,7 @@ import 'package:parkingmap/services/marker_event_bus.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/push_notification_service.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:vibration/vibration.dart';
 import 'screens/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -34,6 +35,7 @@ import 'package:parkingmap/services/globals.dart' as globals;
 import 'tools/app_config.dart';
 import 'package:provider/provider.dart';
 import 'package:parkingmap/services/hive_service.dart';
+import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +63,7 @@ void main() async {
 }
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  NotificationController.createNewNotification();
+  //NotificationController.createNewNotification();
 }
 
 class MyApp extends StatelessWidget {
@@ -114,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   StreamSubscription<ServiceStatus>? _serviceStatusStreamSubscription;
   final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
-  late String serviceStatusValue;
+  String? serviceStatusValue;
 
   List<Widget> screens = [];
   int selectedIndex = 0;
@@ -124,6 +126,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   bool? _isUserLogged;
   bool shouldUpdate = false;
+
+  bool permissionsNotGranted = false;
+  String permissionToastTitle = "", permissionToastBody = "";
 
   late PageController _pageViewController;
   final ValueNotifier<int> _notifier = ValueNotifier(0);
@@ -243,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  void registerNotification() async {
+  Future registerNotification() async {
     // 1. Initialize the Firebase app
     //await Firebase.initializeApp();
     // 2. Instantiate Firebase Messaging
@@ -251,46 +256,45 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     bool? vibrationEnabled = await Vibration.hasVibrator();
 
     // 3. On iOS, this helps to take the user permissions
-    NotificationSettings settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      provisional: false,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      // For handling the received notifications
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        // Parse the message received
-        notifReceiveTime = DateTime.now();
-        //postInsertTime();
-        notification = PushNotification(
-          title: message.notification?.title,
-          body: message.notification?.body,
-        );
-        if (notification != null) {
-          var update = bool.parse(message.data['update']);
-          if (update) {
-            shouldUpdate = true;
-          } else {
-            var type = message.data['type'].toString();
-            latitude = double.parse(message.data['lat']);
-            longitude = double.parse(message.data['long']);
-            if (type == "add") {
-              MarkerEventBus().addMarker(LatLng(latitude, longitude));
-              if (vibrationEnabled!) {
-                Vibration.vibrate();
-              }
-            } else {
-              MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
+    // NotificationSettings settings = await _messaging.requestPermission(
+    //   alert: true,
+    //   badge: true,
+    //   provisional: false,
+    //   sound: true,
+    // );
+    //if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    // For handling the received notifications
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      // Parse the message received
+      notifReceiveTime = DateTime.now();
+      //postInsertTime();
+      notification = PushNotification(
+        title: message.notification?.title,
+        body: message.notification?.body,
+      );
+      if (notification != null) {
+        var update = bool.parse(message.data['update']);
+        if (update) {
+          shouldUpdate = true;
+        } else {
+          var type = message.data['type'].toString();
+          latitude = double.parse(message.data['lat']);
+          longitude = double.parse(message.data['long']);
+          if (type == "add") {
+            MarkerEventBus().addMarker(LatLng(latitude, longitude));
+            if (vibrationEnabled!) {
+              Vibration.vibrate();
             }
+          } else {
+            MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
           }
         }
-      });
-    } else {
-      var error = 'User declined or has not accepted permission';
-      FirebaseCrashlytics.instance.recordError(error, StackTrace.current);
-    }
+      }
+    });
+    // } else {
+    //   var error = 'User declined or has not accepted notification permission';
+    //   FirebaseCrashlytics.instance.recordError(error, StackTrace.current);
+    // }
   }
 
   Future notificationsCount() async {
@@ -354,21 +358,48 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         .getInitialMessage()
         .then((RemoteMessage? initialMessage) {
       if (initialMessage != null) {
-        NotificationController.createNewNotification();
+        //NotificationController.createNewNotification();
       }
     });
   }
 
   @override
   void initState() {
-    NotificationController.startListeningNotificationEvents();
+    super.initState();
+    requirePermissions();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (permissionsNotGranted) {
+        toastification.show(
+          context: context,
+          type: ToastificationType.warning,
+          style: ToastificationStyle.flat,
+          title: Text(permissionToastTitle),
+          description: Text(permissionToastBody),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          animationBuilder: (
+            context,
+            animation,
+            alignment,
+            child,
+          ) {
+            return ScaleTransition(
+              scale: animation,
+              child: child,
+            );
+          },
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
+        );
+        //return;
+      }
+    });
+    //NotificationController.startListeningNotificationEvents();
     // app is in background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {});
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     //when app is terminated
     checkForInitialState();
-
-    super.initState();
     Provider.of<LocationProvider>(context, listen: false).onLocationUpdated =
         (newLocation) {};
     Provider.of<LocationProvider>(context, listen: false).initializeLocation();
@@ -396,7 +427,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         // widget is resumed
-        if (serviceStatusValue != 'enabled') {
+        if (serviceStatusValue != null && serviceStatusValue != 'enabled') {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const EnableLocation()),
               (Route route) => false);
@@ -443,9 +474,54 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
+  void requirePermissions() async {
+    try {
+      // var status = await [
+      //   ph.Permission.location,
+      //   ph.Permission.notification,
+      // ].request();
+
+      // if (status[ph.Permission.location] != null &&
+      //     status[ph.Permission.location]!.isDenied) {
+      //   permissionToastTitle = "Location Permissions Needed";
+      //   permissionToastBody = "Plese grant location permissions.";
+      //   permissionsNotGranted = true;
+      //   return;
+      // }
+      // if (status[ph.Permission.notification] != null &&
+      //     status[ph.Permission.notification]!.isDenied) {
+      //   permissionToastTitle = "Notification Permissions Needed";
+      //   permissionToastBody = "Plese grant notification permissions.";
+      //   permissionsNotGranted = true;
+      //   return;
+      // }
+      // Request location permission first
+      var locationStatus = await ph.Permission.location.request();
+      if (locationStatus.isDenied) {
+        permissionToastTitle = "Location Permissions Needed";
+        permissionToastBody = "Please grant location permissions.";
+        permissionsNotGranted = true;
+        return;
+      }
+
+      // Then request notification permission
+      var notificationStatus = await ph.Permission.notification.request();
+      if (notificationStatus.isDenied) {
+        permissionToastTitle = "Notification Permissions Needed";
+        permissionToastBody = "Please grant notification permissions.";
+        permissionsNotGranted = true;
+        return;
+      }
+
+      // If both permissions are granted, set permissionsNotGranted to false
+      permissionsNotGranted = false;
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
+
   Future _determinePosition() async {
     bool serviceEnabled;
-    LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -453,19 +529,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return Future.error('Location services are disabled.');
     } else {
       serviceStatusValue = 'enabled';
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
     }
 
     LocationSettings locationSettings = const LocationSettings(
@@ -506,6 +569,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Future appInitializations() async {
+    //await requirePermissions();
     await _getPosition;
     await globals.initializeSecurityToken();
     registerFcmToken();

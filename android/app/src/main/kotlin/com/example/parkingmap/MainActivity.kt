@@ -1,4 +1,4 @@
-package com.example.parkingmap
+package com.maappinnovations.parkingmap
 
 import io.flutter.embedding.android.FlutterActivity
 

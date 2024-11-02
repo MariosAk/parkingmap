@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
+import 'package:toastification/toastification.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -241,12 +242,27 @@ class SettingsScreenState extends State<SettingsScreen> {
       try {
         await user.updatePassword(newPassword);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password updated successfully!")),
+        toastification.show(
+          context: context,
+          type: ToastificationType.success,
+          style: ToastificationStyle.flat,
+          title: const Text("Password updated successfully!"),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
         );
       } catch (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Password update failed: $error")),
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flat,
+          title: const Text("Password update failed"),
+          description: Text("$error"),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
         );
       }
     }

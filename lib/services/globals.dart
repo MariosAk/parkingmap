@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
+import 'package:toastification/toastification.dart';
 
 bool heroOverlay = false;
 bool searching = false;
@@ -106,7 +107,14 @@ Future<void> signOutAndNavigate(BuildContext context) async {
 }
 
 showSoonToComeToast(BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Soon to come!")),
+  toastification.show(
+    context: context,
+    type: ToastificationType.info,
+    style: ToastificationStyle.flat,
+    title: const Text("Soon to come!"),
+    alignment: Alignment.bottomCenter,
+    autoCloseDuration: const Duration(seconds: 4),
+    borderRadius: BorderRadius.circular(100.0),
+    boxShadow: lowModeShadow,
   );
 }

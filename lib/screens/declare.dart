@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
-
+import 'package:toastification/toastification.dart';
 import '../model/location.dart';
 
 class DeclareSpotScreen extends StatelessWidget {
@@ -78,8 +78,15 @@ class DeclareSpotScreen extends StatelessWidget {
                       Provider.of<LocationProvider>(context, listen: false)
                           .currentLocation;
                   addLeaving(location);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Spot has been vacated!")),
+                  toastification.show(
+                    context: context,
+                    type: ToastificationType.success,
+                    style: ToastificationStyle.flat,
+                    title: const Text("Spot has been vacated!"),
+                    alignment: Alignment.bottomCenter,
+                    autoCloseDuration: const Duration(seconds: 4),
+                    borderRadius: BorderRadius.circular(100.0),
+                    boxShadow: lowModeShadow,
                   );
                 },
                 style: ElevatedButton.styleFrom(

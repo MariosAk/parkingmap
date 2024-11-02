@@ -18,6 +18,7 @@ import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map_math/flutter_geo_math.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
+import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
   final String? address, token;
@@ -287,9 +288,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         }
         await FirebaseMessaging.instance
             .subscribeToTopic(cellTopic)
-            .catchError((error) {
-          print(error);
-        });
+            .catchError((error) {});
       }
       _currentLocation = currentLocation;
       LatLng currentLatLng =
@@ -324,17 +323,31 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       updateBoundsAddMarkers();
     } else {
       // Handle the case where currentPosition is still null
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unable to get current location. Please try again.'),
-      ));
+      toastification.show(
+        context: context,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flat,
+        title: const Text("Unable to get current location. Please try again."),
+        alignment: Alignment.bottomCenter,
+        autoCloseDuration: const Duration(seconds: 4),
+        borderRadius: BorderRadius.circular(100.0),
+        boxShadow: lowModeShadow,
+      );
     }
   }
 
   Future<void> markSpotAsTaken(Marker marker) async {
     if (_currentLocation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unable to get current location. Please try again.'),
-      ));
+      toastification.show(
+        context: context,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flat,
+        title: const Text("Unable to get current location. Please try again."),
+        alignment: Alignment.bottomCenter,
+        autoCloseDuration: const Duration(seconds: 4),
+        borderRadius: BorderRadius.circular(100.0),
+        boxShadow: lowModeShadow,
+      );
       return;
     }
     FlutterMapMath flutterMapMath = FlutterMapMath();
@@ -345,31 +358,18 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         marker.point.longitude,
         "meters");
     if (distance > 125) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('You have to be closer to this spot.'),
-      ));
+      toastification.show(
+        context: context,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flat,
+        title: const Text("You have to be closer to this spot."),
+        alignment: Alignment.bottomCenter,
+        autoCloseDuration: const Duration(seconds: 4),
+        borderRadius: BorderRadius.circular(100.0),
+        boxShadow: lowModeShadow,
+      );
       return;
     }
-    // MarkerModel markerModel = MarkerModel(
-    //     latitude: marker.point.latitude,
-    //     longitude: marker.point.longitude,
-    //     width: marker.width,
-    //     height: marker.height,
-    //     alignment: marker.alignment,
-    //     rotate: marker.rotate);
-    // await HiveService("markersBox").deleteCachedMarker(markerModel);
-    // List<MarkerModel> list =
-    //     await HiveService("markersBox").getAllCachedMarkers();
-    // var markersList = list.map((e) {
-    //   return Marker(
-    //       point: LatLng(e.latitude, e.longitude),
-    //       child: Image.asset('Assets/Images/parking-location.png', scale: 15),
-    //       alignment: e.alignment,
-    //       height: e.height,
-    //       rotate: e.rotate,
-    //       width: e.width);
-    // }).toList();
-    // _markersNotifier.value = markersList;
     await deleteMarker(marker, cellTopic);
   }
 
@@ -461,7 +461,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         urlTemplate:
                                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                                         userAgentPackageName:
-                                            "com.example.parkingmap"),
+                                            "com.maappinnovations.parkingmap"),
                                     if (isMapInitialized)
                                       _buildPulsatingMarker(),
                                     Positioned(

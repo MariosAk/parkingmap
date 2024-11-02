@@ -79,5 +79,6 @@ class HiveService {
   Future<void> deleteAllCachedMarkers() async {
     var box = await _markerBox;
     await box.delete("cachedMarkers");
+    await box.put("cachedMarkers", List<MarkerModel>.empty(growable: true));
   }
 }
