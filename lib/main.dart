@@ -619,11 +619,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               return const EnableLocation();
             } else {
               return Scaffold(
+                backgroundColor: Colors.white,
                 body: Center(
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width / 1.5,
                     height: MediaQuery.of(context).size.width / 1.5,
-                    child: const CircularProgressIndicator(strokeWidth: 10),
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 10,
+                      backgroundColor: Colors.white,
+                      color: Colors.blue,
+                    ),
                   ),
                 ),
               );

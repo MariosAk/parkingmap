@@ -77,10 +77,14 @@ class IntroScreenState extends State<IntroScreen> {
               },
               showBackButton: false,
               showSkipButton: true,
-              skip: const Icon(Icons.skip_next),
-              next: const Icon(Icons.arrow_right),
-              done: const Text("Done",
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              skip: Text(
+                "Skip",
+                style: TextStyle(color: Colors.blue[900], fontSize: 20),
+              ),
+              next: Text("Next",
+                  style: TextStyle(color: Colors.blue[900], fontSize: 20)),
+              done: Text("Done",
+                  style: TextStyle(color: Colors.blue[900], fontSize: 20)),
               dotsDecorator: DotsDecorator(
                   size: const Size.square(10.0),
                   activeSize: const Size(20.0, 10.0),

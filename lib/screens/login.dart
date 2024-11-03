@@ -137,7 +137,7 @@ class LoginPageState extends State<LoginPage> {
                                 });
                               },
                             )),
-                        obscureText: true,
+                        obscureText: isObscuredPassword,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';

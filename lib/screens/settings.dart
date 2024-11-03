@@ -38,6 +38,7 @@ class SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -81,7 +82,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       onTap: () {
-                        _showAccountInfo(context);
+                        //_showAccountInfo(context);
                       },
                     ),
                     const Divider(color: Colors.black),
@@ -143,7 +144,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         onPressed: () async {
-                          globals.signOutAndNavigate(context);
+                          _confirmSignOut(context);
                         },
                         child: Text(
                           'Sign Out',
@@ -163,6 +164,85 @@ class SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _confirmSignOut(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows for the content to be scrollable
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height *
+              0.5, // Set height to half the screen
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16.0)), // Rounded top corners
+          ),
+          child: Column(
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: Colors.yellow[700],
+                  size: 50,
+                ),
+              ]),
+              const SizedBox(height: 16), // Add spacing
+              const Text(
+                "Are you sure you want to sign out?",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                "If you sign out you will have to fill your email and password again. Do you want to continue?",
+                style: TextStyle(fontSize: 16, color: Colors.black45),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () async {
+                    globals.signOutAndNavigate(context);
+                  },
+                  child: Text(
+                    'Sign Out',
+                    style: GoogleFonts.robotoSlab(
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss dialog
+                },
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.robotoSlab(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -209,7 +289,7 @@ class SettingsScreenState extends State<SettingsScreen> {
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height *
-              0.3, // Set height to half the screen
+              0.5, // Set height to half the screen
           padding: const EdgeInsets.all(16.0),
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -263,6 +343,18 @@ class SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss dialog
+                },
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.robotoSlab(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ],
           ),
         );
@@ -312,92 +404,114 @@ class SettingsScreenState extends State<SettingsScreen> {
       context: context,
       isScrollControlled: true, // Allows for the content to be scrollable
       builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height *
-              0.3, // Set height to half the screen
-          padding: const EdgeInsets.all(16.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-                top: Radius.circular(16.0)), // Rounded top corners
-          ),
-          child: Column(
-            children: [
-              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(
-                  Icons.warning_rounded,
-                  color: Colors.red,
-                  size: 50,
-                ),
-              ]),
-              const SizedBox(height: 16), // Add spacing
-              _buildTextField("Email", emailController, false),
-              const SizedBox(height: 10),
-              _buildTextField("Password", passwordController, true),
-              const Spacer(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+        return SingleChildScrollView(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              height: MediaQuery.of(context).size.height *
+                  0.5, // Set height to half the screen
+              padding: const EdgeInsets.all(16.0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.0)), // Rounded top corners
+              ),
+              child: Column(
+                children: [
+                  const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.warning_rounded,
+                          color: Colors.red,
+                          size: 50,
+                        ),
+                      ]),
+                  const Text(
+                    "Use your credentials to verify as a last step for authentication.",
+                    style: TextStyle(fontSize: 16, color: Colors.black45),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                onPressed: () async {
-                  try {
-                    var userID = await AuthService().getCurrentUserUID();
-                    AuthService()
-                        .deleteCurrentUser(
-                            emailController.text, passwordController.text)
-                        .then(
-                      (value) async {
-                        if (value) {
-                          await deleteUser(userID);
-                          await global.signOutAndNavigate(context,
-                              accountDeleted: true);
-                        } else {
-                          toastification.show(
-                              context: context,
-                              type: ToastificationType.error,
-                              style: ToastificationStyle.flat,
-                              title: const Text("Something went wrong"),
-                              description:
-                                  const Text("Your account was not deleted."),
-                              alignment: Alignment.bottomCenter,
-                              autoCloseDuration: const Duration(seconds: 4),
-                              borderRadius: BorderRadius.circular(100.0),
-                              boxShadow: lowModeShadow,
-                              showProgressBar: false);
-                        }
-                      },
-                    );
-                  } catch (error) {
-                    toastification.show(
-                        context: context,
-                        type: ToastificationType.error,
-                        style: ToastificationStyle.flat,
-                        title: const Text("Something went wrong"),
-                        description:
-                            const Text("Your account was not deleted."),
-                        alignment: Alignment.bottomCenter,
-                        autoCloseDuration: const Duration(seconds: 4),
-                        borderRadius: BorderRadius.circular(100.0),
-                        boxShadow: lowModeShadow,
-                        showProgressBar: false);
-                  }
-                },
-                child: Text(
-                  'Delete Account',
-                  style: GoogleFonts.robotoSlab(
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+                  const SizedBox(height: 16), // Add spacing
+                  _buildTextField("Email", emailController, false),
+                  const SizedBox(height: 10),
+                  _buildTextField("Password", passwordController, true),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    onPressed: () async {
+                      try {
+                        var userID = await AuthService().getCurrentUserUID();
+                        AuthService()
+                            .deleteCurrentUser(
+                                emailController.text, passwordController.text)
+                            .then(
+                          (value) async {
+                            if (value) {
+                              await deleteUser(userID);
+                              await global.signOutAndNavigate(context,
+                                  accountDeleted: true);
+                            } else {
+                              toastification.show(
+                                  context: context,
+                                  type: ToastificationType.error,
+                                  style: ToastificationStyle.flat,
+                                  title: const Text("Something went wrong"),
+                                  description: const Text(
+                                      "Your account was not deleted."),
+                                  alignment: Alignment.bottomCenter,
+                                  autoCloseDuration: const Duration(seconds: 4),
+                                  borderRadius: BorderRadius.circular(100.0),
+                                  boxShadow: lowModeShadow,
+                                  showProgressBar: false);
+                            }
+                          },
+                        );
+                      } catch (error) {
+                        toastification.show(
+                            context: context,
+                            type: ToastificationType.error,
+                            style: ToastificationStyle.flat,
+                            title: const Text("Something went wrong"),
+                            description:
+                                const Text("Your account was not deleted."),
+                            alignment: Alignment.bottomCenter,
+                            autoCloseDuration: const Duration(seconds: 4),
+                            borderRadius: BorderRadius.circular(100.0),
+                            boxShadow: lowModeShadow,
+                            showProgressBar: false);
+                      }
+                    },
+                    child: Text(
+                      'Delete Account',
+                      style: GoogleFonts.robotoSlab(
+                        textStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Dismiss dialog
+                    },
+                    child: Text(
+                      "Cancel",
+                      style: GoogleFonts.robotoSlab(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
+            ));
       },
     );
   }
