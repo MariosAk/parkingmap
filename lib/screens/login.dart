@@ -7,9 +7,11 @@ import 'package:parkingmap/screens/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:parkingmap/services/auth_service.dart';
+import 'package:toastification/toastification.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool? accountDeleted;
+  const LoginPage({this.accountDeleted = false, super.key});
 
   @override
   LoginPageState createState() => LoginPageState();
@@ -22,6 +24,26 @@ class LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String loginResponseMessage = "";
   bool isObscuredPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.accountDeleted != null && widget.accountDeleted!) {
+      Future.delayed(Duration.zero, () {
+        toastification.show(
+            context: context,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flat,
+            title: const Text("Account deleted successfully"),
+            alignment: Alignment.bottomCenter,
+            autoCloseDuration: const Duration(seconds: 4),
+            borderRadius: BorderRadius.circular(100.0),
+            boxShadow: lowModeShadow,
+            showProgressBar: false);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

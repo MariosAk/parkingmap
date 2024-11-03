@@ -94,27 +94,30 @@ updatePoints(int? updatedPoints) async {
 }
 
 // Function to sign out the user
-Future<void> signOutAndNavigate(BuildContext context) async {
+Future<void> signOutAndNavigate(BuildContext context,
+    {bool? accountDeleted}) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear(); // Clear all saved data
   AuthService().signOut();
   if (!context.mounted) return;
   // Navigate to the login page and remove all previous routes
   await Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(builder: (context) => const LoginPage()),
+    MaterialPageRoute(
+        builder: (context) =>
+            LoginPage(accountDeleted: accountDeleted ?? false)),
     (Route<dynamic> route) => false,
   );
 }
 
 showSoonToComeToast(BuildContext context) {
   toastification.show(
-    context: context,
-    type: ToastificationType.info,
-    style: ToastificationStyle.flat,
-    title: const Text("Soon to come!"),
-    alignment: Alignment.bottomCenter,
-    autoCloseDuration: const Duration(seconds: 4),
-    borderRadius: BorderRadius.circular(100.0),
-    boxShadow: lowModeShadow,
-  );
+      context: context,
+      type: ToastificationType.info,
+      style: ToastificationStyle.flat,
+      title: const Text("Soon to come!"),
+      alignment: Alignment.bottomCenter,
+      autoCloseDuration: const Duration(seconds: 4),
+      borderRadius: BorderRadius.circular(100.0),
+      boxShadow: lowModeShadow,
+      showProgressBar: false);
 }

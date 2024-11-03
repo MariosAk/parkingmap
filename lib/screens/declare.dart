@@ -79,15 +79,15 @@ class DeclareSpotScreen extends StatelessWidget {
                           .currentLocation;
                   addLeaving(location);
                   toastification.show(
-                    context: context,
-                    type: ToastificationType.success,
-                    style: ToastificationStyle.flat,
-                    title: const Text("Spot has been vacated!"),
-                    alignment: Alignment.bottomCenter,
-                    autoCloseDuration: const Duration(seconds: 4),
-                    borderRadius: BorderRadius.circular(100.0),
-                    boxShadow: lowModeShadow,
-                  );
+                      context: context,
+                      type: ToastificationType.success,
+                      style: ToastificationStyle.flat,
+                      title: const Text("Spot has been vacated!"),
+                      alignment: Alignment.bottomCenter,
+                      autoCloseDuration: const Duration(seconds: 4),
+                      borderRadius: BorderRadius.circular(100.0),
+                      boxShadow: lowModeShadow,
+                      showProgressBar: false);
                 },
                 style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(

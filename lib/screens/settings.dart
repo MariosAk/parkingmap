@@ -1,8 +1,15 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as cnv;
+import 'package:parkingmap/services/globals.dart' as global;
+
+import '../tools/app_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,6 +19,21 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
+  Future deleteUser(String? userID) async {
+    try {
+      if (userID != null) {
+        await http.delete(Uri.parse("${AppConfig.instance.apiUrl}/delete-user"),
+            body: cnv.jsonEncode({"userID": userID}),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": globals.securityToken!
+            });
+      }
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,6 +116,20 @@ class SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const Divider(color: Colors.black),
 
+                    ListTile(
+                      leading: const Icon(Icons.no_accounts, color: Colors.red),
+                      title: Text(
+                        "Delete Account",
+                        style: GoogleFonts.robotoSlab(
+                          textStyle: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      onTap: () {
+                        _deleteAccountPrompt(context);
+                      },
+                    ),
+                    const Divider(color: Colors.black),
+
                     // Sign Out Button
                     const SizedBox(height: 40),
                     SizedBox(
@@ -161,6 +197,206 @@ class SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _deleteAccountPrompt(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows for the content to be scrollable
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height *
+              0.3, // Set height to half the screen
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16.0)), // Rounded top corners
+          ),
+          child: Column(
+            children: [
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: Colors.red,
+                  size: 50,
+                ),
+              ]),
+              const SizedBox(height: 16), // Add spacing
+              const Text(
+                "Are you sure?",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                "If you delete your account you won't be able to log in with it anymore. This action is irreversible. Do you want to continue?",
+                style: TextStyle(fontSize: 16, color: Colors.black45),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    _doDelete();
+                  },
+                  child: Text(
+                    'Delete Account',
+                    style: GoogleFonts.robotoSlab(
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTextField(
+      String label, TextEditingController controller, bool isPassword) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // Align label to start
+      children: [
+        TextField(
+          controller: controller,
+          obscureText: isPassword,
+          style: GoogleFonts.robotoSlab(
+            textStyle: const TextStyle(color: Colors.black), // Text color
+          ),
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: GoogleFonts.robotoSlab(
+              textStyle: const TextStyle(color: Colors.black54),
+            ),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.black), // Underline color
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(
+                  color: Colors.red), // Change underline color when focused
+            ),
+            errorBorder: const UnderlineInputBorder(
+              borderSide:
+                  BorderSide(color: Colors.red), // Underline color for errors
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+                vertical: 12.0), // Padding inside the TextField
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _doDelete() {
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows for the content to be scrollable
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height *
+              0.3, // Set height to half the screen
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16.0)), // Rounded top corners
+          ),
+          child: Column(
+            children: [
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: Colors.red,
+                  size: 50,
+                ),
+              ]),
+              const SizedBox(height: 16), // Add spacing
+              _buildTextField("Email", emailController, false),
+              const SizedBox(height: 10),
+              _buildTextField("Password", passwordController, true),
+              const Spacer(),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () async {
+                  try {
+                    var userID = await AuthService().getCurrentUserUID();
+                    AuthService()
+                        .deleteCurrentUser(
+                            emailController.text, passwordController.text)
+                        .then(
+                      (value) async {
+                        if (value) {
+                          await deleteUser(userID);
+                          await global.signOutAndNavigate(context,
+                              accountDeleted: true);
+                        } else {
+                          toastification.show(
+                              context: context,
+                              type: ToastificationType.error,
+                              style: ToastificationStyle.flat,
+                              title: const Text("Something went wrong"),
+                              description:
+                                  const Text("Your account was not deleted."),
+                              alignment: Alignment.bottomCenter,
+                              autoCloseDuration: const Duration(seconds: 4),
+                              borderRadius: BorderRadius.circular(100.0),
+                              boxShadow: lowModeShadow,
+                              showProgressBar: false);
+                        }
+                      },
+                    );
+                  } catch (error) {
+                    toastification.show(
+                        context: context,
+                        type: ToastificationType.error,
+                        style: ToastificationStyle.flat,
+                        title: const Text("Something went wrong"),
+                        description:
+                            const Text("Your account was not deleted."),
+                        alignment: Alignment.bottomCenter,
+                        autoCloseDuration: const Duration(seconds: 4),
+                        borderRadius: BorderRadius.circular(100.0),
+                        boxShadow: lowModeShadow,
+                        showProgressBar: false);
+                  }
+                },
+                child: Text(
+                  'Delete Account',
+                  style: GoogleFonts.robotoSlab(
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -243,27 +479,27 @@ class SettingsScreenState extends State<SettingsScreen> {
         await user.updatePassword(newPassword);
         if (!mounted) return;
         toastification.show(
-          context: context,
-          type: ToastificationType.success,
-          style: ToastificationStyle.flat,
-          title: const Text("Password updated successfully!"),
-          alignment: Alignment.bottomCenter,
-          autoCloseDuration: const Duration(seconds: 4),
-          borderRadius: BorderRadius.circular(100.0),
-          boxShadow: lowModeShadow,
-        );
+            context: context,
+            type: ToastificationType.success,
+            style: ToastificationStyle.flat,
+            title: const Text("Password updated successfully!"),
+            alignment: Alignment.bottomCenter,
+            autoCloseDuration: const Duration(seconds: 4),
+            borderRadius: BorderRadius.circular(100.0),
+            boxShadow: lowModeShadow,
+            showProgressBar: false);
       } catch (error) {
         toastification.show(
-          context: context,
-          type: ToastificationType.error,
-          style: ToastificationStyle.flat,
-          title: const Text("Password update failed"),
-          description: Text("$error"),
-          alignment: Alignment.bottomCenter,
-          autoCloseDuration: const Duration(seconds: 4),
-          borderRadius: BorderRadius.circular(100.0),
-          boxShadow: lowModeShadow,
-        );
+            context: context,
+            type: ToastificationType.error,
+            style: ToastificationStyle.flat,
+            title: const Text("Password update failed"),
+            description: Text("$error"),
+            alignment: Alignment.bottomCenter,
+            autoCloseDuration: const Duration(seconds: 4),
+            borderRadius: BorderRadius.circular(100.0),
+            boxShadow: lowModeShadow,
+            showProgressBar: false);
       }
     }
   }

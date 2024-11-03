@@ -104,4 +104,22 @@ class AuthService {
       return null;
     }
   }
+
+  Future<bool> deleteCurrentUser(String email, String password) async {
+    try {
+      var user = _auth.currentUser;
+      if (user != null) {
+        AuthCredential credential =
+            EmailAuthProvider.credential(email: email, password: password);
+        await user.reauthenticateWithCredential(credential);
+        await user.delete();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return false;
+    }
+  }
 }

@@ -1,0 +1,1 @@
+ C:\\projects\\parkingmap\\.dart_tool\\flutter_build\\6e2ac213dff3ac857b89a4c3853c638f\\native_assets.yaml: 

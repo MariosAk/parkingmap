@@ -15,7 +15,6 @@ import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/marker_event_bus.dart';
 import 'package:parkingmap/services/auth_service.dart';
-import 'package:parkingmap/services/push_notification_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:vibration/vibration.dart';
@@ -90,7 +89,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   // #region declarations
-  late final FirebaseMessaging _messaging;
   PushNotification? notification;
   String? token, address, fcmtoken;
   DateTime? notifReceiveTime;
@@ -252,7 +250,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // 1. Initialize the Firebase app
     //await Firebase.initializeApp();
     // 2. Instantiate Firebase Messaging
-    _messaging = FirebaseMessaging.instance;
     bool? vibrationEnabled = await Vibration.hasVibrator();
 
     // 3. On iOS, this helps to take the user permissions
@@ -370,27 +367,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (permissionsNotGranted) {
         toastification.show(
-          context: context,
-          type: ToastificationType.warning,
-          style: ToastificationStyle.flat,
-          title: Text(permissionToastTitle),
-          description: Text(permissionToastBody),
-          alignment: Alignment.bottomCenter,
-          autoCloseDuration: const Duration(seconds: 4),
-          animationBuilder: (
-            context,
-            animation,
-            alignment,
-            child,
-          ) {
-            return ScaleTransition(
-              scale: animation,
-              child: child,
-            );
-          },
-          borderRadius: BorderRadius.circular(100.0),
-          boxShadow: lowModeShadow,
-        );
+            context: context,
+            type: ToastificationType.warning,
+            style: ToastificationStyle.flat,
+            title: Text(permissionToastTitle),
+            description: Text(permissionToastBody),
+            alignment: Alignment.bottomCenter,
+            autoCloseDuration: const Duration(seconds: 4),
+            animationBuilder: (
+              context,
+              animation,
+              alignment,
+              child,
+            ) {
+              return ScaleTransition(
+                scale: animation,
+                child: child,
+              );
+            },
+            borderRadius: BorderRadius.circular(100.0),
+            boxShadow: lowModeShadow,
+            showProgressBar: false);
         //return;
       }
     });
@@ -476,25 +473,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void requirePermissions() async {
     try {
-      // var status = await [
-      //   ph.Permission.location,
-      //   ph.Permission.notification,
-      // ].request();
-
-      // if (status[ph.Permission.location] != null &&
-      //     status[ph.Permission.location]!.isDenied) {
-      //   permissionToastTitle = "Location Permissions Needed";
-      //   permissionToastBody = "Plese grant location permissions.";
-      //   permissionsNotGranted = true;
-      //   return;
-      // }
-      // if (status[ph.Permission.notification] != null &&
-      //     status[ph.Permission.notification]!.isDenied) {
-      //   permissionToastTitle = "Notification Permissions Needed";
-      //   permissionToastBody = "Plese grant notification permissions.";
-      //   permissionsNotGranted = true;
-      //   return;
-      // }
       // Request location permission first
       var locationStatus = await ph.Permission.location.request();
       if (locationStatus.isDenied) {

@@ -324,30 +324,32 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } else {
       // Handle the case where currentPosition is still null
       toastification.show(
-        context: context,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flat,
-        title: const Text("Unable to get current location. Please try again."),
-        alignment: Alignment.bottomCenter,
-        autoCloseDuration: const Duration(seconds: 4),
-        borderRadius: BorderRadius.circular(100.0),
-        boxShadow: lowModeShadow,
-      );
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flat,
+          title:
+              const Text("Unable to get current location. Please try again."),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
+          showProgressBar: false);
     }
   }
 
   Future<void> markSpotAsTaken(Marker marker) async {
     if (_currentLocation == null) {
       toastification.show(
-        context: context,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flat,
-        title: const Text("Unable to get current location. Please try again."),
-        alignment: Alignment.bottomCenter,
-        autoCloseDuration: const Duration(seconds: 4),
-        borderRadius: BorderRadius.circular(100.0),
-        boxShadow: lowModeShadow,
-      );
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flat,
+          title:
+              const Text("Unable to get current location. Please try again."),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
+          showProgressBar: false);
       return;
     }
     FlutterMapMath flutterMapMath = FlutterMapMath();
@@ -359,15 +361,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         "meters");
     if (distance > 125) {
       toastification.show(
-        context: context,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flat,
-        title: const Text("You have to be closer to this spot."),
-        alignment: Alignment.bottomCenter,
-        autoCloseDuration: const Duration(seconds: 4),
-        borderRadius: BorderRadius.circular(100.0),
-        boxShadow: lowModeShadow,
-      );
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flat,
+          title: const Text("You have to be closer to this spot."),
+          alignment: Alignment.bottomCenter,
+          autoCloseDuration: const Duration(seconds: 4),
+          borderRadius: BorderRadius.circular(100.0),
+          boxShadow: lowModeShadow,
+          showProgressBar: false);
       return;
     }
     await deleteMarker(marker, cellTopic);
