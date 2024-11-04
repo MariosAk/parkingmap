@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:parkingmap/model/latlng_bounds_model.dart';
@@ -193,7 +194,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     //   }).toList();
   }
 
-  postNewVisibleBounds(swLat, swLong, neLat, neLong, userid) async {
+  Future<Response?> postNewVisibleBounds(
+      swLat, swLong, neLat, neLong, userid) async {
     try {
       var response = await http.post(
           Uri.parse('${AppConfig.instance.apiUrl}/update-bounds'),
@@ -208,10 +210,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-      var data = response.body;
-      return data;
+      return response;
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
     }
   }
 
@@ -238,7 +240,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
         return markers;
       } else {
-        throw Exception('Failed to load markers: ${response.statusCode}');
+        globals.showServerErrorToast(context);
+        return List.empty();
       }
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
@@ -296,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future notificationsCount() async {
     if (screens.isEmpty) {
-      screens.add(HomePage(address, token, updateBounds));
+      screens.add(HomePage(address, updateBounds));
       screens.add(DeclareSpotScreen(token: token.toString()));
       screens.add(const SettingsScreen());
     }
@@ -314,28 +317,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   //   }
   // }
 
-  getUserID() async {
-    try {
-      email = AuthService().email;
-      var response = await http.post(
-          Uri.parse("${AppConfig.instance.apiUrl}/get-userid"),
-          body: cnv.jsonEncode({"email": email.toString()}),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-      if (response.body.isNotEmpty) {
-        var decoded = cnv.jsonDecode(response.body);
-        token = decoded["user_id"];
-      }
-    } catch (e) {
-      return e.toString();
-    }
-  }
+  // getUserID() async {
+  //   try {
+  //     email = AuthService().email;
+  //     var response = await http.post(
+  //         Uri.parse("${AppConfig.instance.apiUrl}/get-userid"),
+  //         body: cnv.jsonEncode({"email": email.toString()}),
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           "Authorization": globals.securityToken!
+  //         });
+  //     if (response.body.isNotEmpty) {
+  //       var decoded = cnv.jsonDecode(response.body);
+  //       token = decoded["user_id"];
+  //     }
+  //   } catch (e) {
+  //     return e.toString();
+  //   }
+  // }
 
   Future registerFcmToken() async {
     try {
-      await getUserID();
+      token = await AuthService().getCurrentUserUID();
       await _getDevToken();
       var userId = token;
       http.post(Uri.parse("${AppConfig.instance.apiUrl}/register-fcmToken"),
@@ -395,6 +398,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // app is in background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {});
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      registerFcmToken();
+    });
     //when app is terminated
     checkForInitialState();
     Provider.of<LocationProvider>(context, listen: false).onLocationUpdated =

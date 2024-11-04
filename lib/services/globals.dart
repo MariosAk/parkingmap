@@ -121,3 +121,29 @@ showSoonToComeToast(BuildContext context) {
       boxShadow: lowModeShadow,
       showProgressBar: false);
 }
+
+showServerErrorToast(BuildContext context) {
+  toastification.show(
+      context: context,
+      type: ToastificationType.error,
+      style: ToastificationStyle.flat,
+      title: const Text("There was a server error"),
+      alignment: Alignment.bottomCenter,
+      autoCloseDuration: const Duration(seconds: 4),
+      borderRadius: BorderRadius.circular(100.0),
+      boxShadow: lowModeShadow,
+      showProgressBar: false);
+}
+
+showSuccessfullToast(BuildContext context, String message) {
+  toastification.show(
+      context: context,
+      type: ToastificationType.success,
+      style: ToastificationStyle.flat,
+      title: Text(message),
+      alignment: Alignment.bottomCenter,
+      autoCloseDuration: const Duration(seconds: 4),
+      borderRadius: BorderRadius.circular(100.0),
+      boxShadow: lowModeShadow,
+      showProgressBar: false);
+}

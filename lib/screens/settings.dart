@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
@@ -19,18 +20,23 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  Future deleteUser(String? userID) async {
+  Future<Response?> deleteUser(String? userID) async {
     try {
       if (userID != null) {
-        await http.delete(Uri.parse("${AppConfig.instance.apiUrl}/delete-user"),
+        var response = await http.delete(
+            Uri.parse("${AppConfig.instance.apiUrl}/delete-user"),
             body: cnv.jsonEncode({"userID": userID}),
             headers: {
               "Content-Type": "application/json",
               "Authorization": globals.securityToken!
             });
+        return response;
+      } else {
+        return null;
       }
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
     }
   }
 
@@ -453,9 +459,17 @@ class SettingsScreenState extends State<SettingsScreen> {
                             .then(
                           (value) async {
                             if (value) {
-                              await deleteUser(userID);
-                              await global.signOutAndNavigate(context,
-                                  accountDeleted: true);
+                              deleteUser(userID).then(
+                                (value) {
+                                  if (value != null &&
+                                      value.statusCode == 200) {
+                                    global.signOutAndNavigate(context,
+                                        accountDeleted: true);
+                                  } else {
+                                    globals.showServerErrorToast(context);
+                                  }
+                                },
+                              );
                             } else {
                               toastification.show(
                                   context: context,
@@ -473,18 +487,20 @@ class SettingsScreenState extends State<SettingsScreen> {
                           },
                         );
                       } catch (error) {
-                        toastification.show(
-                            context: context,
-                            type: ToastificationType.error,
-                            style: ToastificationStyle.flat,
-                            title: const Text("Something went wrong"),
-                            description:
-                                const Text("Your account was not deleted."),
-                            alignment: Alignment.bottomCenter,
-                            autoCloseDuration: const Duration(seconds: 4),
-                            borderRadius: BorderRadius.circular(100.0),
-                            boxShadow: lowModeShadow,
-                            showProgressBar: false);
+                        if (context.mounted) {
+                          toastification.show(
+                              context: context,
+                              type: ToastificationType.error,
+                              style: ToastificationStyle.flat,
+                              title: const Text("Something went wrong"),
+                              description:
+                                  const Text("Your account was not deleted."),
+                              alignment: Alignment.bottomCenter,
+                              autoCloseDuration: const Duration(seconds: 4),
+                              borderRadius: BorderRadius.circular(100.0),
+                              boxShadow: lowModeShadow,
+                              showProgressBar: false);
+                        }
                       }
                     },
                     child: Text(

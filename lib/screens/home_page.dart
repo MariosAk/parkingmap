@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:location/location.dart';
 import 'package:parkingmap/model/location.dart';
 import 'package:parkingmap/model/marker_model.dart';
@@ -21,9 +22,9 @@ import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
-  final String? address, token;
+  final String? address;
   final Function(LatLngBounds, double) updateBounds;
-  const HomePage(this.address, this.token, this.updateBounds, {super.key});
+  const HomePage(this.address, this.updateBounds, {super.key});
   @override
   HomePageState createState() => HomePageState();
 }
@@ -31,7 +32,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // #region variables
   PushNotification? notification;
-  String? token, address;
+  String? address;
   DateTime? notifReceiveTime;
   double height = 100;
 
@@ -210,9 +211,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  Future deleteMarker(Marker marker, String topic) async {
+  Future<Response?> deleteMarker(Marker marker, String topic) async {
     try {
-      await http.post(Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
+      var response = await http.post(
+          Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
           body: cnv.jsonEncode({
             "latitude": marker.point.latitude.toString(),
             "longitude": marker.point.longitude.toString(),
@@ -222,8 +224,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
+      return response;
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
     }
   }
 
@@ -372,7 +376,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           showProgressBar: false);
       return;
     }
-    await deleteMarker(marker, cellTopic);
+    deleteMarker(marker, cellTopic).then(
+      (value) {
+        if (value != null && value.statusCode == 200) {
+          globals.showSuccessfullToast(context, "Spot was deleted.");
+        } else {
+          globals.showServerErrorToast(context);
+        }
+      },
+    );
   }
 
   @override

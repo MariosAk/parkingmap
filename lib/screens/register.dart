@@ -23,7 +23,6 @@ class RegisterPageState extends State<RegisterPage> {
   TextEditingController textControllerRepeatPassword = TextEditingController();
   bool isEmailValid = false;
   bool registrationSuccess = false;
-  late String registrationStatus;
   String? token;
   String registrationMessage = "";
   final _formKey = GlobalKey<FormState>();
@@ -45,11 +44,8 @@ class RegisterPageState extends State<RegisterPage> {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-      registrationStatus = response.body;
-      if (registrationStatus.contains("successful")) {
+      if (response.statusCode == 200) {
         registrationSuccess = true;
-      } else if (registrationStatus.contains("exists")) {
-        registrationSuccess = false;
       } else {
         registrationSuccess = false;
       }

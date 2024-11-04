@@ -1,5 +1,7 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
 import 'package:location/location.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +18,7 @@ class DeclareSpotScreen extends StatelessWidget {
 
   const DeclareSpotScreen({super.key, required this.token});
 
-  addLeaving(LocationData? location) async {
+  Future<Response?> addLeaving(LocationData? location) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       var userId = prefs.getString('userid');
@@ -34,9 +36,10 @@ class DeclareSpotScreen extends StatelessWidget {
             "Content-Type": "application/json",
             "Authorization": globals.securityToken!
           });
-      return response.body;
-    } catch (e) {
-      return e.toString();
+      return response;
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
     }
   }
 
@@ -77,17 +80,24 @@ class DeclareSpotScreen extends StatelessWidget {
                   final location =
                       Provider.of<LocationProvider>(context, listen: false)
                           .currentLocation;
-                  addLeaving(location);
-                  toastification.show(
-                      context: context,
-                      type: ToastificationType.success,
-                      style: ToastificationStyle.flat,
-                      title: const Text("Spot has been vacated!"),
-                      alignment: Alignment.bottomCenter,
-                      autoCloseDuration: const Duration(seconds: 4),
-                      borderRadius: BorderRadius.circular(100.0),
-                      boxShadow: lowModeShadow,
-                      showProgressBar: false);
+                  addLeaving(location).then(
+                    (value) {
+                      if (value != null && value.statusCode == 200) {
+                        toastification.show(
+                            context: context,
+                            type: ToastificationType.success,
+                            style: ToastificationStyle.flat,
+                            title: const Text("Spot has been vacated!"),
+                            alignment: Alignment.bottomCenter,
+                            autoCloseDuration: const Duration(seconds: 4),
+                            borderRadius: BorderRadius.circular(100.0),
+                            boxShadow: lowModeShadow,
+                            showProgressBar: false);
+                      } else {
+                        globals.showServerErrorToast(context);
+                      }
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(
