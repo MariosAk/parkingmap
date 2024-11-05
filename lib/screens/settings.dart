@@ -404,7 +404,6 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildTextField(
       String label, TextEditingController controller, bool isPassword) {
-    double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     double titleFontSize = screenWidth * 0.035;
     return Column(
@@ -447,8 +446,6 @@ class SettingsScreenState extends State<SettingsScreen> {
     double screenWidth = MediaQuery.of(context).size.width;
     double iconSize = screenWidth * 0.12;
     double contentFontSize = screenWidth * 0.035;
-    double buttonFontSizeWidth = screenWidth * 0.7;
-    double buttonFontSizeHeight = screenHeight * 0.05;
     double buttonContentSize = screenWidth * 0.045;
     double sizedboxSize = screenHeight * 0.01;
     final TextEditingController passwordController = TextEditingController();
