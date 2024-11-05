@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -488,13 +490,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         return;
       }
 
-      // Then request notification permission
-      var notificationStatus = await ph.Permission.notification.request();
-      if (notificationStatus.isDenied) {
-        permissionToastTitle = "Notification Permissions Needed";
-        permissionToastBody = "Please grant notification permissions.";
-        permissionsNotGranted = true;
-        return;
+      if (Platform.isAndroid) {
+        final deviceInfo = DeviceInfoPlugin();
+        final androidInfo = await deviceInfo.androidInfo;
+        if (androidInfo.version.sdkInt >= 33) {
+          // Then request notification permission
+          var notificationStatus = await ph.Permission.notification.request();
+          if (notificationStatus.isDenied) {
+            permissionToastTitle = "Notification Permissions Needed";
+            permissionToastBody = "Please grant notification permissions.";
+            permissionsNotGranted = true;
+            return;
+          }
+        }
       }
 
       // If both permissions are granted, set permissionsNotGranted to false

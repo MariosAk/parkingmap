@@ -5,7 +5,6 @@ import 'package:http/http.dart';
 import 'package:location/location.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
@@ -20,9 +19,7 @@ class DeclareSpotScreen extends StatelessWidget {
 
   Future<Response?> addLeaving(LocationData? location) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      var userId = prefs.getString('userid');
-      userId = await AuthService().getCurrentUserUID();
+      var userId = await AuthService().getCurrentUserUID();
       var response = await http.post(
           Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
           body: cnv.jsonEncode({

@@ -238,7 +238,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (!exists) {
       _markersNotifier.value = List.from(_markersNotifier.value)
         ..addAll(newMarkers);
-      var markerModels = newMarkers.map((newMarker) {
+      var markerModels = _markersNotifier.value.map((newMarker) {
         return MarkerModel(
             alignment: newMarker.alignment,
             height: newMarker.height,
