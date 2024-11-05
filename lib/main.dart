@@ -570,6 +570,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double selectedIconSize = screenWidth * 0.08;
+    double iconsSize = screenWidth * 0.04;
     if (_isUserLogged == null || !_isUserLogged!) {
       return const LoginPage();
     } else {
@@ -592,6 +595,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     valueListenable: _notifier,
                     builder: (BuildContext context, int value, Widget? child) {
                       return BottomNavigationBar(
+                        iconSize: iconsSize,
                         unselectedItemColor: Colors.blue[900],
                         backgroundColor: Colors.white,
                         items: const [
@@ -615,10 +619,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.ease);
                         },
-                        selectedIconTheme: const IconThemeData(
-                          color: Color.fromARGB(255, 0, 140,
+                        selectedIconTheme: IconThemeData(
+                          color: const Color.fromARGB(255, 0, 140,
                               255), // change color of the selected icon
-                          size: 35, // change size of the selected icon
+                          size:
+                              selectedIconSize, // change size of the selected icon
                         ),
                       );
                     }),

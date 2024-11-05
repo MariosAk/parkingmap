@@ -394,6 +394,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 _mapctl.camera.visibleBounds.northEast)
             .contains(element.point))
         .length;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double addressTextSize = screenWidth * 0.05;
+    double sizedboxSize = screenHeight * 0.015;
+    double listTextSize = screenWidth * 0.035;
     return Container(
         color: Colors.white,
         child: SafeArea(
@@ -437,8 +442,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 ),
                               ],
                             ),
-                            height: MediaQuery.of(context).size.height / 2.5,
-                            width: MediaQuery.of(context).size.width,
+                            height: screenHeight / 2.5,
+                            width: screenWidth,
                             child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15.0),
                                 child: FlutterMap(
@@ -528,26 +533,27 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             style: GoogleFonts.robotoSlab(
                                 textStyle: TextStyle(color: Colors.blue[900]),
                                 fontWeight: FontWeight.w600,
-                                fontSize: 20),
+                                fontSize: addressTextSize),
                             textAlign: TextAlign.left,
                           ),
                         ),
                       ],
                     )),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: sizedboxSize),
                   Text(
                     "Available spots: $spots",
                     style: GoogleFonts.robotoSlab(
                         textStyle: TextStyle(color: Colors.blue[900]),
                         fontWeight: FontWeight.w900,
-                        fontSize: 20),
+                        fontSize: addressTextSize),
                     textAlign: TextAlign.left,
                   ),
                   Expanded(
                       child: spots > 0
                           ? ListView.builder(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.01),
                               itemCount: _markersNotifier.value.length,
                               itemBuilder: (context, index) {
                                 try {
@@ -567,10 +573,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                                     return Card(
                                       color: Colors.blue[50],
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 15.0,
-                                          vertical:
-                                              5.0), // Margin around the card
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: screenWidth * 0.04,
+                                          vertical: screenHeight *
+                                              0.004), // Margin around the card
                                       elevation:
                                           4, // Elevation for shadow effect
                                       shape: RoundedRectangleBorder(
@@ -594,15 +600,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                               Image.asset(
                                                   'Assets/Images/parking-location.png',
                                                   scale: 15),
-                                              const SizedBox(
-                                                  width:
-                                                      15), // Space between icon and text
+                                              SizedBox(
+                                                  width: screenWidth *
+                                                      0.05), // Space between icon and text
                                               Expanded(
                                                 child: Text(
                                                   '$address',
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize:
-                                                        16, // Larger font size
+                                                        listTextSize, // Larger font size
                                                     fontWeight: FontWeight
                                                         .bold, // Bold text
                                                     color: Colors
