@@ -116,14 +116,16 @@ class DeclareSpotScreen extends StatelessWidget {
                 height: 10), // Space between button and the next section
 
             // Description text below the button
-            Text(
-              "Tap the button to notify others that the spot is now available.",
-              style: GoogleFonts.robotoSlab(
-                textStyle: const TextStyle(
-                  fontSize: 16, // Description font size
+            Center(
+              child: Text(
+                "Tap the button to notify others that the spot is now available.",
+                style: GoogleFonts.robotoSlab(
+                  textStyle: const TextStyle(
+                    fontSize: 16, // Description font size
+                  ),
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),

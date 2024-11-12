@@ -571,6 +571,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     double selectedIconSize = screenWidth * 0.08;
     double iconsSize = screenWidth * 0.04;
     if (_isUserLogged == null || !_isUserLogged!) {
@@ -595,20 +596,29 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     valueListenable: _notifier,
                     builder: (BuildContext context, int value, Widget? child) {
                       return BottomNavigationBar(
-                        iconSize: iconsSize,
+                        // iconSize: iconsSize,
                         unselectedItemColor: Colors.blue[900],
                         backgroundColor: Colors.white,
-                        items: const [
+                        items: [
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.map),
+                            icon: SizedBox(
+                              height: screenHeight * 0.03,
+                              child: const Icon(Icons.map),
+                            ),
                             label: 'Map',
                           ),
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.add_location_alt),
+                            icon: SizedBox(
+                              height: screenHeight * 0.03,
+                              child: const Icon(Icons.add_location_alt),
+                            ),
                             label: 'Declare',
                           ),
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.settings),
+                            icon: SizedBox(
+                              height: screenHeight * 0.03,
+                              child: const Icon(Icons.settings),
+                            ),
                             label: 'Settings',
                           ),
                         ],
@@ -622,8 +632,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         selectedIconTheme: IconThemeData(
                           color: const Color.fromARGB(255, 0, 140,
                               255), // change color of the selected icon
-                          size:
-                              selectedIconSize, // change size of the selected icon
+                          // size:
+                          //     selectedIconSize, // change size of the selected icon
                         ),
                       );
                     }),

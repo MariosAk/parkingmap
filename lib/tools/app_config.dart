@@ -9,7 +9,7 @@ class AppConfig {
   // Private constructor
   AppConfig._internal()
       : apiUrl = kReleaseMode
-            ? 'https://parking-backend-gmj3.onrender.com'
+            ? 'http://192.168.1.26:3000' //'https://parking-backend-gmj3.onrender.com'
             : 'http://192.168.1.26:3000';
 
   // Getter to access the instance

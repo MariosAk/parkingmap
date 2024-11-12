@@ -394,11 +394,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 _mapctl.camera.visibleBounds.northEast)
             .contains(element.point))
         .length;
+    final shortestSide = MediaQuery.of(context).size.shortestSide;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    double addressTextSize = screenWidth * 0.05;
+    double multiplier = shortestSide >= 600 ? 0.02 : 0.05;
+    double multiplierList = shortestSide >= 600 ? 0.02 : 0.035;
+    double addressTextSize = screenWidth * multiplier;
     double sizedboxSize = screenHeight * 0.015;
-    double listTextSize = screenWidth * 0.035;
+    double listTextSize = screenWidth * multiplierList;
     return Container(
         color: Colors.white,
         child: SafeArea(

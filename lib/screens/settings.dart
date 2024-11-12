@@ -174,15 +174,6 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _confirmSignOut(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = screenWidth * 0.12;
-    double titleFontSize = screenWidth * 0.065;
-    double contentFontSize = screenWidth * 0.035;
-    double buttonFontSizeWidth = screenWidth * 0.7;
-    double buttonFontSizeHeight = screenHeight * 0.05;
-    double buttonContentSize = screenWidth * 0.045;
-    double sizedboxSize = screenHeight * 0.02;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Allows for the content to be scrollable
@@ -202,27 +193,25 @@ class SettingsScreenState extends State<SettingsScreen> {
                 Icon(
                   Icons.warning_rounded,
                   color: Colors.yellow[700],
-                  size: iconSize,
+                  size: 50,
                 ),
               ]),
-              SizedBox(height: sizedboxSize), // Add spacing
-              Text(
+              const SizedBox(height: 16), // Add spacing
+              const Text(
                 "Are you sure you want to sign out?",
-                style: TextStyle(
-                    fontSize: titleFontSize, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              Text(
+              const Text(
                 "If you sign out you will have to fill your email and password again. Do you want to continue?",
-                style:
-                    TextStyle(fontSize: contentFontSize, color: Colors.black45),
+                style: TextStyle(fontSize: 16, color: Colors.black45),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: sizedboxSize),
+              const SizedBox(height: 25),
 
               SizedBox(
-                width: buttonFontSizeWidth,
-                height: buttonFontSizeHeight,
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
@@ -236,9 +225,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                   child: Text(
                     'Sign Out',
                     style: GoogleFonts.robotoSlab(
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         color: Colors.white,
-                        fontSize: buttonContentSize,
+                        fontSize: 22,
                       ),
                     ),
                   ),
@@ -300,102 +289,78 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _deleteAccountPrompt(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = screenWidth * 0.12;
-    double titleFontSize = screenWidth * 0.065;
-    double contentFontSize = screenWidth * 0.035;
-    double buttonFontSizeWidth = screenWidth * 0.7;
-    double buttonFontSizeHeight = screenHeight * 0.05;
-    double buttonContentSize = screenWidth * 0.045;
-    double sizedboxSize = screenHeight * 0.02;
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
+      isScrollControlled: true, // Allows for the content to be scrollable
       builder: (BuildContext context) {
-        return FractionallySizedBox(
-          heightFactor: 0.4, // Set height to half the screen
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(16.0),
+        return Container(
+          height: MediaQuery.of(context).size.height *
+              0.5, // Set height to half the screen
+          padding: const EdgeInsets.all(16.0),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16.0)), // Rounded top corners
+          ),
+          child: Column(
+            children: [
+              const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: Colors.red,
+                  size: 50,
                 ),
+              ]),
+              const SizedBox(height: 16), // Add spacing
+              const Text(
+                "Are you sure?",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.warning_rounded,
-                          color: Colors.red,
-                          size: iconSize,
-                        ),
-                      ],
+              const Text(
+                "If you delete your account you won't be able to log in with it anymore. This action is irreversible. Do you want to continue?",
+                style: TextStyle(fontSize: 16, color: Colors.black45),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    SizedBox(height: sizedboxSize),
-                    Text(
-                      "Are you sure?",
-                      style: TextStyle(
-                          fontSize: titleFontSize, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      "If you delete your account you won't be able to log in with it anymore. This action is irreversible. Do you want to continue?",
-                      style: TextStyle(
-                          fontSize: contentFontSize, color: Colors.black45),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: sizedboxSize),
-                    SizedBox(
-                      width: buttonFontSizeWidth,
-                      height: buttonFontSizeHeight,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          _doDelete();
-                        },
-                        child: Text(
-                          'Delete Account',
-                          style: GoogleFonts.robotoSlab(
-                            textStyle: TextStyle(
-                              color: Colors.white,
-                              fontSize: buttonContentSize,
-                            ),
-                          ),
-                        ),
+                  ),
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    _doDelete();
+                  },
+                  child: Text(
+                    'Delete Account',
+                    style: GoogleFonts.robotoSlab(
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        "Cancel",
-                        style: GoogleFonts.robotoSlab(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss dialog
+                },
+                child: Text(
+                  "Cancel",
+                  style: GoogleFonts.robotoSlab(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -404,8 +369,6 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildTextField(
       String label, TextEditingController controller, bool isPassword) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double titleFontSize = screenWidth * 0.035;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, // Align label to start
       children: [
@@ -413,14 +376,12 @@ class SettingsScreenState extends State<SettingsScreen> {
           controller: controller,
           obscureText: isPassword,
           style: GoogleFonts.robotoSlab(
-            textStyle: TextStyle(
-                color: Colors.black, fontSize: titleFontSize), // Text color
+            textStyle: const TextStyle(color: Colors.black), // Text color
           ),
           decoration: InputDecoration(
             labelText: label,
             labelStyle: GoogleFonts.robotoSlab(
-              textStyle:
-                  TextStyle(color: Colors.black54, fontSize: titleFontSize),
+              textStyle: const TextStyle(color: Colors.black54),
             ),
             enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.black), // Underline color
@@ -442,12 +403,6 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _doDelete() {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = screenWidth * 0.12;
-    double contentFontSize = screenWidth * 0.035;
-    double buttonContentSize = screenWidth * 0.045;
-    double sizedboxSize = screenHeight * 0.01;
     final TextEditingController passwordController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     showModalBottomSheet(
@@ -468,24 +423,25 @@ class SettingsScreenState extends State<SettingsScreen> {
               ),
               child: Column(
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(
-                      Icons.warning_rounded,
-                      color: Colors.red,
-                      size: iconSize,
-                    ),
-                  ]),
-                  Text(
+                  const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.warning_rounded,
+                          color: Colors.red,
+                          size: 50,
+                        ),
+                      ]),
+                  const Text(
                     "Use your credentials to verify as a last step for authentication.",
-                    style: TextStyle(
-                        fontSize: contentFontSize, color: Colors.black45),
+                    style: TextStyle(fontSize: 16, color: Colors.black45),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: sizedboxSize), // Add spacing
+                  const SizedBox(height: 16), // Add spacing
                   _buildTextField("Email", emailController, false),
-                  //SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildTextField("Password", passwordController, true),
-                  SizedBox(height: sizedboxSize),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -549,9 +505,9 @@ class SettingsScreenState extends State<SettingsScreen> {
                     child: Text(
                       'Delete Account',
                       style: GoogleFonts.robotoSlab(
-                        textStyle: TextStyle(
+                        textStyle: const TextStyle(
                           color: Colors.white,
-                          fontSize: buttonContentSize,
+                          fontSize: 16,
                         ),
                       ),
                     ),
