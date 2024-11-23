@@ -3,6 +3,7 @@ library parkingmap.globals;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:parkingmap/screens/login.dart';
+import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -13,11 +14,20 @@ import 'package:toastification/toastification.dart';
 bool heroOverlay = false;
 bool searching = false;
 String? securityToken = "";
+String points = "0";
 
 Future initializeSecurityToken() async {
   AuthService().getCurrentUserIdToken().then(
     (value) {
       securityToken = value;
+    },
+  );
+}
+
+Future initializePoints() async {
+  HiveService("").getPointsFromCache().then(
+    (value) {
+      points = value;
     },
   );
 }
@@ -69,21 +79,6 @@ getPoints() async {
   try {
     await http.post(Uri.parse("${AppConfig.instance.apiUrl}/get-points"),
         body: cnv.jsonEncode({"user_id": userId}),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": securityToken!
-        });
-  } catch (error, stackTrace) {
-    FirebaseCrashlytics.instance.recordError(error, stackTrace);
-  }
-}
-
-updatePoints(int? updatedPoints) async {
-  final prefs = await SharedPreferences.getInstance();
-  var userId = prefs.getString('userid');
-  try {
-    await http.post(Uri.parse("${AppConfig.instance.apiUrl}/update-points"),
-        body: cnv.jsonEncode({"user_id": userId, "points": updatedPoints}),
         headers: {
           "Content-Type": "application/json",
           "Authorization": securityToken!

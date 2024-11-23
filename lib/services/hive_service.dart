@@ -2,11 +2,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:parkingmap/model/latlng_bounds_model.dart';
 import 'package:parkingmap/model/marker_model.dart';
+import 'package:parkingmap/services/points_service.dart';
+
+import 'globals.dart';
 
 class HiveService {
   final _markersboxName = "markersBox";
   final _cacheboxName = "cacheBox";
   static final HiveService _instance = HiveService._internal();
+  final pointsService = PointsService();
 
   HiveService._internal();
 
@@ -80,5 +84,21 @@ class HiveService {
     var box = await _markerBox;
     await box.delete("cachedMarkers");
     await box.put("cachedMarkers", List<MarkerModel>.empty(growable: true));
+  }
+
+  Future<void> addPointsToCache(String points) async {
+    var box = await _cacheBox;
+    var encryptedPoints = await pointsService.encryptPoints(points);
+    await box.put("points", encryptedPoints);
+  }
+
+  Future<String> getPointsFromCache() async {
+    var box = await _cacheBox;
+    final encryptedPoints = box.get("points");
+    if (encryptedPoints != null) {
+      var points = pointsService.decryptPoints(encryptedPoints);
+      return points;
+    }
+    return "0";
   }
 }

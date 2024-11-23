@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart';
 import 'package:location/location.dart';
+import 'package:parkingmap/services/points_service.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -90,6 +91,8 @@ class DeclareSpotScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(100.0),
                             boxShadow: lowModeShadow,
                             showProgressBar: false);
+
+                        PointsService().updatePoints();
                       } else {
                         globals.showServerErrorToast(context);
                       }

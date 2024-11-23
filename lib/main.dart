@@ -564,16 +564,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     //await requirePermissions();
     await _getPosition;
     await globals.initializeSecurityToken();
+    await globals.initializePoints();
     registerFcmToken();
     notificationsCount();
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    double selectedIconSize = screenWidth * 0.08;
-    double iconsSize = screenWidth * 0.04;
     if (_isUserLogged == null || !_isUserLogged!) {
       return const LoginPage();
     } else {

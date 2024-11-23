@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:parkingmap/services/globals.dart';
 import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/services/marker_event_bus.dart';
 import 'dart:convert' as cnv;
@@ -387,6 +388,169 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  void _purchasePriorityPrompt(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows for the content to be scrollable
+      backgroundColor: Colors.transparent, // Makes the background transparent
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.4,
+          maxChildSize: 0.75,
+          builder: (_, controller) {
+            return Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(24.0),
+                ), // More pronounced rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Handle bar for better UX
+                    Container(
+                      width: 50,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+
+                    // Reward Icon
+                    Image.asset(
+                      'Assets/Images/reward.png',
+                      scale: 12,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Title
+                    const Text(
+                      "Redeem Your Points!",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Subtitle
+                    const Text(
+                      "Earn points every time you declare an empty parking spot. Once your points reach 100, you can redeem them to get into a priority queue for a spot.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Points display
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "$points / 100",
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Redeem button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 0, 174, 255),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () async {
+                          var currentPoints = int.tryParse(points);
+                          if (currentPoints != null && currentPoints >= 100) {
+                          } else {
+                            toastification.show(
+                                context: context,
+                                type: ToastificationType.warning,
+                                style: ToastificationStyle.flat,
+                                title:
+                                    const Text("You dont have enough points!"),
+                                alignment: Alignment.bottomCenter,
+                                autoCloseDuration: const Duration(seconds: 4),
+                                borderRadius: BorderRadius.circular(100.0),
+                                boxShadow: lowModeShadow,
+                                showProgressBar: false);
+                          }
+                        },
+                        child: Text(
+                          'Take Priority',
+                          style: GoogleFonts.robotoSlab(
+                            textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Cancel button
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Dismiss dialog
+                      },
+                      child: Text(
+                        "Cancel",
+                        style: GoogleFonts.robotoSlab(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var spots = _markersNotifier.value
@@ -418,6 +582,20 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               automaticallyImplyLeading: false,
               centerTitle: false,
+              //leading: Image.asset('Assets/Images/reward.png', scale: 20),
+              actions: [
+                GestureDetector(
+                    onTap: () {
+                      _purchasePriorityPrompt(context);
+                    },
+                    child: Image.asset('Assets/Images/reward.png', scale: 15)),
+                Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 10),
+                    child: Text(globals.points,
+                        style: GoogleFonts.robotoSlab(
+                            textStyle: const TextStyle(
+                                color: Colors.lightBlue, fontSize: 25))))
+              ],
             ),
             body: Center(
               child: Column(

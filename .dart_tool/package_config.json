@@ -44,6 +44,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "asn1lib",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/asn1lib-1.5.8",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "async",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
       "packageUri": "lib/",
@@ -222,6 +228,12 @@
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dots_indicator-2.1.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "encrypt",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/encrypt-5.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "equatable",
@@ -462,6 +474,42 @@
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_provider-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.14"
+    },
+    {
+      "name": "flutter_secure_storage",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage-9.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_linux",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_macos",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_platform_interface",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_platform_interface-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_web",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_windows",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "flutter_speed_dial",
@@ -914,6 +962,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "pointycastle",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pointycastle-3.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
       "name": "polylabel",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/polylabel-1.0.1",
       "packageUri": "lib/",
@@ -1244,7 +1298,7 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-11-11T16:32:10.577305Z",
+  "generated": "2024-11-22T17:23:32.941429Z",
   "generator": "pub",
   "generatorVersion": "3.4.3",
   "flutterRoot": "file:///C:/fluttersrc/flutter",

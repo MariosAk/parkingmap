@@ -80,6 +80,8 @@ dependencies:
   flutter_map_math: ^0.1.7
   fluttertoast: ^8.2.8
   toastification: ^2.3.0
+  encrypt: ^5.0.3
+  flutter_secure_storage: ^9.2.2
 
 dependency_overrides:
     package_info_plus: any
