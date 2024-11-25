@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:location/location.dart';
@@ -11,12 +12,14 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart';
 import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/services/marker_event_bus.dart';
 import 'dart:convert' as cnv;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:parkingmap/tools/app_config.dart';
+import 'package:parkingmap/tools/radar_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map_math/flutter_geo_math.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
@@ -94,6 +97,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   double _zoom = 20;
   String cellTopic = "";
+  late ValueNotifier<bool> radarVisibility;
   // #endregion
 
   @override
@@ -159,6 +163,29 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         value = (value + 1) % 100;
       });
     });
+
+    radarVisibility = ValueNotifier<bool>(globals.premiumSearchState);
+  }
+
+  Future<Response?> addSearching() async {
+    try {
+      var userId = await AuthService().getCurrentUserUID();
+      var response = await http.post(
+          Uri.parse('${AppConfig.instance.apiUrl}/add-searching'),
+          body: cnv.jsonEncode({
+            "user_id": userId.toString(),
+            "lat": _currentLocation!.latitude!.toString(),
+            "long": _currentLocation!.longitude!.toString()
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+      return response;
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
+    }
   }
 
   Future updateBoundsAddMarkers() async {
@@ -499,6 +526,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         onPressed: () async {
                           var currentPoints = int.tryParse(points);
                           if (currentPoints != null && currentPoints >= 100) {
+                            _showCurrentOrCustomLocationDialog(context);
                           } else {
                             toastification.show(
                                 context: context,
@@ -575,27 +603,74 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             appBar: AppBar(
               elevation: 0,
               backgroundColor: Colors.transparent,
-              title: Text(
-                "ParkingMap",
-                style: GoogleFonts.robotoSlab(
-                    textStyle: const TextStyle(color: Colors.black)),
-              ),
-              automaticallyImplyLeading: false,
-              centerTitle: false,
-              //leading: Image.asset('Assets/Images/reward.png', scale: 20),
-              actions: [
-                GestureDetector(
-                    onTap: () {
-                      _purchasePriorityPrompt(context);
+              flexibleSpace: Row(
+                children: [
+                  // Left-side title
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      "ParkingMap",
+                      style: GoogleFonts.robotoSlab(
+                        textStyle:
+                            const TextStyle(color: Colors.black, fontSize: 18),
+                      ),
+                    ),
+                  ),
+
+                  ValueListenableBuilder<bool>(
+                    valueListenable: radarVisibility,
+                    builder: (context, value, child) {
+                      return Visibility(
+                        visible: radarVisibility.value,
+                        replacement: const Expanded(
+                          child: Center(
+                            child: SizedBox(
+                              width: 50, // Same size as the radar widget
+                              height: 50, // Same size as the radar widget
+                            ),
+                          ),
+                        ),
+                        child:
+                            // Spacer to push radar widget to center
+                            const Expanded(
+                          child: Center(
+                            child: RotatingRadarWidget(
+                              size: 50,
+                              color: Colors.lightBlueAccent,
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    child: Image.asset('Assets/Images/reward.png', scale: 15)),
-                Padding(
-                    padding: const EdgeInsets.only(left: 5, right: 10),
-                    child: Text(globals.points,
-                        style: GoogleFonts.robotoSlab(
+                  ),
+
+                  // Right-side actions
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _purchasePriorityPrompt(context);
+                        },
+                        child:
+                            Image.asset('Assets/Images/reward.png', scale: 15),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5, right: 10),
+                        child: Text(
+                          globals.points,
+                          style: GoogleFonts.robotoSlab(
                             textStyle: const TextStyle(
-                                color: Colors.lightBlue, fontSize: 25))))
-              ],
+                              color: Colors.lightBlue,
+                              fontSize: 25,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             body: Center(
               child: Column(
@@ -662,6 +737,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                                         userAgentPackageName:
                                             "com.maappinnovations.parkingmap"),
+                                    // CircleLayer(
+                                    //   circles: [
+                                    //     CircleMarker(
+                                    //       point: LatLng(40.629485,
+                                    //           22.948015), // Center of the circle
+                                    //       color: Colors.blue.withOpacity(
+                                    //           0.3), // Fill color with opacity
+                                    //       borderStrokeWidth: 2.0,
+                                    //       borderColor:
+                                    //           Colors.blue, // Border color
+                                    //       useRadiusInMeter:
+                                    //           true, // Use radius in meters
+                                    //       radius: 500, // Radius in meters
+                                    //     ),
+                                    //   ],
+                                    // ),
                                     if (isMapInitialized)
                                       _buildPulsatingMarker(),
                                     Positioned(
@@ -901,6 +992,54 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCurrentOrCustomLocationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: Image.asset('Assets/Images/circleArea.png',
+                        scale: 7, fit: BoxFit.cover)),
+                const SizedBox(height: 10),
+                const Text(
+                  "We will create a circle to determine the area of priority. Do you want to use your current location as a center point for the circle or set a custom location?",
+                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                )
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                addSearching();
+                HiveService("").setPremiumSearchStateToCache(true);
+                radarVisibility.value = true;
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                "Current Location",
+                style: TextStyle(color: Colors.blueAccent, fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                "Custom Location",
+                style: TextStyle(color: Colors.blueAccent, fontSize: 16),
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 }

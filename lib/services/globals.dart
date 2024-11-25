@@ -11,7 +11,7 @@ import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:toastification/toastification.dart';
 
-bool heroOverlay = false;
+bool premiumSearchState = false;
 bool searching = false;
 String? securityToken = "";
 String points = "0";
@@ -28,6 +28,14 @@ Future initializePoints() async {
   HiveService("").getPointsFromCache().then(
     (value) {
       points = value;
+    },
+  );
+}
+
+Future initializePremiumSearchState() async {
+  HiveService("").getPremiumSearchStateFromCache().then(
+    (value) {
+      premiumSearchState = value;
     },
   );
 }

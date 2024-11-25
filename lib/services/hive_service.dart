@@ -4,8 +4,6 @@ import 'package:parkingmap/model/latlng_bounds_model.dart';
 import 'package:parkingmap/model/marker_model.dart';
 import 'package:parkingmap/services/points_service.dart';
 
-import 'globals.dart';
-
 class HiveService {
   final _markersboxName = "markersBox";
   final _cacheboxName = "cacheBox";
@@ -100,5 +98,21 @@ class HiveService {
       return points;
     }
     return "0";
+  }
+
+  Future<void> setPremiumSearchStateToCache(bool state) async {
+    var box = await _cacheBox;
+    var strState = state.toString();
+    await box.put("premiumSearchState", strState);
+  }
+
+  Future<bool> getPremiumSearchStateFromCache() async {
+    var box = await _cacheBox;
+    var strState = box.get("premiumSearchState").toString();
+    if (strState.isNotEmpty && strState != "null") {
+      return bool.parse(strState);
+    } else {
+      return false;
+    }
   }
 }

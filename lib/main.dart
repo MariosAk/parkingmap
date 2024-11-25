@@ -565,6 +565,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await _getPosition;
     await globals.initializeSecurityToken();
     await globals.initializePoints();
+    await globals.initializePremiumSearchState();
     registerFcmToken();
     notificationsCount();
   }
