@@ -276,6 +276,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       );
       if (notification != null) {
         var update = bool.parse(message.data['update']);
+        var points = int.tryParse(message.data['points']);
+        if (points != null) {
+          var type = message.data['type'].toString();
+          if (type == "addPoints") {
+            HiveService("").addPointsToCache(points.toString());
+          } else {}
+        }
         if (update) {
           shouldUpdate = true;
         } else {
@@ -337,6 +344,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   //     return e.toString();
   //   }
   // }
+
+  Future updateUserID() async {
+    try {
+      var userID = await AuthService().getCurrentUserUID();
+      var email = AuthService().email ?? "";
+      http.put(Uri.parse("${AppConfig.instance.apiUrl}/update-userid"),
+          body: cnv.jsonEncode({"user_id": userID.toString(), "email": email}),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
 
   Future registerFcmToken() async {
     try {
@@ -566,6 +588,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await globals.initializeSecurityToken();
     await globals.initializePoints();
     await globals.initializePremiumSearchState();
+    updateUserID();
     registerFcmToken();
     notificationsCount();
   }
