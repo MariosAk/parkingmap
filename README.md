@@ -1,6 +1,6 @@
-# Pasthelw Parking App 🚗
+# HelpMePark Parking App 🚗
 
-**Pasthelw Parking** is a mobile application designed to help users find and share parking spots easily. It allows users to declare when they're leaving a spot, and others can search the area to see available parking spots in real-time.
+**HelpMePark Parking** is a mobile application designed to help users find and share parking spots easily. It allows users to declare when they're leaving a spot, and others can search the area to see available parking spots in real-time.
 
 ---
 
