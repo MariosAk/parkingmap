@@ -1,6 +1,7 @@
-library parkingmap.globals;
+library;
 
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/services/hive_service.dart';
@@ -15,6 +16,11 @@ bool premiumSearchState = false;
 bool searching = false;
 String? securityToken = "";
 String points = "0";
+String? fcmToken = "";
+
+Future getDevToken() async {
+  fcmToken = await FirebaseMessaging.instance.getToken();
+}
 
 Future initializeSecurityToken() async {
   AuthService().getCurrentUserIdToken().then(
@@ -40,7 +46,7 @@ Future initializePremiumSearchState() async {
   );
 }
 
-cancelSearch() async {
+Future<void> cancelSearch() async {
   final prefs = await SharedPreferences.getInstance();
   var userId = prefs.getString('userid');
   try {
@@ -52,7 +58,7 @@ cancelSearch() async {
   }
 }
 
-deleteLeaving(int latestLeavingID) async {
+Future<void> deleteLeaving(int latestLeavingID) async {
   try {
     await http.delete(Uri.parse("${AppConfig.instance.apiUrl}/delete-leaving"),
         body: cnv.jsonEncode({"leavingID": latestLeavingID}),
@@ -62,7 +68,7 @@ deleteLeaving(int latestLeavingID) async {
   }
 }
 
-postSkip(timesSkipped, time, latitude, longitude, latestLeavingID) async {
+Future<void> postSkip(timesSkipped, time, latitude, longitude, latestLeavingID) async {
   try {
     await http.post(Uri.parse("${AppConfig.instance.apiUrl}/parking-skipped"),
         body: cnv.jsonEncode({
@@ -81,7 +87,7 @@ postSkip(timesSkipped, time, latitude, longitude, latestLeavingID) async {
   }
 }
 
-getPoints() async {
+Future<void> getPoints() async {
   final prefs = await SharedPreferences.getInstance();
   var userId = prefs.getString('userid');
   try {
@@ -112,7 +118,7 @@ Future<void> signOutAndNavigate(BuildContext context,
   );
 }
 
-showSoonToComeToast(BuildContext context) {
+void showSoonToComeToast(BuildContext context) {
   toastification.show(
       context: context,
       type: ToastificationType.info,
@@ -125,7 +131,7 @@ showSoonToComeToast(BuildContext context) {
       showProgressBar: false);
 }
 
-showServerErrorToast(BuildContext context) {
+void showServerErrorToast(BuildContext context) {
   toastification.show(
       context: context,
       type: ToastificationType.error,
@@ -138,7 +144,7 @@ showServerErrorToast(BuildContext context) {
       showProgressBar: false);
 }
 
-showSuccessfullToast(BuildContext context, String message) {
+void showSuccessfullToast(BuildContext context, String message) {
   toastification.show(
       context: context,
       type: ToastificationType.success,

@@ -1,10 +1,8 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:parkingmap/main.dart';
-import 'dart:convert' as cnv;
-import 'package:parkingmap/services/globals.dart' as globals;
-import 'package:parkingmap/tools/app_config.dart';
+import 'package:parkingmap/services/user_service.dart';
+
+import '../dependency_injection.dart';
 
 class Car {
   Image image;
@@ -23,18 +21,7 @@ class CarPickState extends State<CarPick> {
   int tappedIndex = 100;
   List<bool> borders = [];
 
-  registerCar(String carType, String? email) async {
-    try {
-      await http.post(Uri.parse("${AppConfig.instance.apiUrl}/register-car"),
-          body: cnv.jsonEncode({"carType": carType, "email": email}),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    }
-  }
+  final UserService _userService = getIt<UserService>();
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +164,7 @@ class CarPickState extends State<CarPick> {
                                     ),
                                     onPressed: () => () {
                                       Navigator.pop(context);
-                                      registerCar(
+                                      _userService.registerCar(
                                           carList[index].carType, widget.email);
                                       Navigator.of(context).push(
                                           MaterialPageRoute(

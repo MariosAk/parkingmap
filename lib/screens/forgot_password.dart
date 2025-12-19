@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:parkingmap/services/auth_service.dart';
 
+import '../dependency_injection.dart';
+
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -11,6 +13,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
+  final AuthService _authService = getIt<AuthService>();
   bool _isLoading = false;
   bool _isEmailSent = false;
 
@@ -20,7 +23,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _isLoading = true;
     });
 
-    await AuthService().sendResetPasswordEmail(email);
+    await _authService.sendResetPasswordEmail(email);
 
     setState(() {
       _isLoading = false;

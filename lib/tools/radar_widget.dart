@@ -5,10 +5,10 @@ class RotatingRadarWidget extends StatefulWidget {
   final Color color; // Color of the radar sweep
 
   const RotatingRadarWidget({
-    Key? key,
+    super.key,
     this.size = 300,
     this.color = Colors.blue,
-  }) : super(key: key);
+  });
 
   @override
   _RotatingRadarWidgetState createState() => _RotatingRadarWidgetState();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../dependency_injection.dart';
 import '../model/notifications.dart';
 import '../services/sqlite_service.dart';
 
@@ -11,7 +12,7 @@ class NotificationPage extends StatefulWidget {
 }
 
 class NotificationPageState extends State<NotificationPage> {
-  SqliteService sqliteService = SqliteService();
+  final SqliteService _sqliteService = getIt<SqliteService>();
   late Future<List<Notifications>> notifications;
   late List<Notifications> notificationlist;
 
@@ -23,11 +24,11 @@ class NotificationPageState extends State<NotificationPage> {
   }
 
   Future<List<Notifications>> getNotificationsList() async {
-    return await SqliteService().getNotifications();
+    return await _sqliteService.getNotifications();
   }
 
   Future<void> deleteFromDataBase(String id) async {
-    return await SqliteService().deleteItem(id);
+    return await _sqliteService.deleteItem(id);
   }
 
   AssetImage notificationImage(String cT) {

@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:toastification/toastification.dart';
 
+import '../dependency_injection.dart';
+
 class LoginPage extends StatefulWidget {
   final bool? accountDeleted;
   const LoginPage({this.accountDeleted = false, super.key});
@@ -24,6 +26,7 @@ class LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String loginResponseMessage = "";
   bool isObscuredPassword = true;
+  final AuthService _authService = getIt<AuthService>();
 
   @override
   void initState() {
@@ -175,7 +178,7 @@ class LoginPageState extends State<LoginPage> {
                                       _isLoading = true;
                                     });
                                     try {
-                                      AuthService()
+                                      _authService
                                           .loginUserWithEmailAndPassword(
                                               textControllerEmail.text,
                                               textControllerPassword.text)

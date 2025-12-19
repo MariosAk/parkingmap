@@ -1,45 +1,21 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
-import 'package:location/location.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:parkingmap/services/parking_service.dart';
 import 'package:parkingmap/services/points_service.dart';
-import 'package:parkingmap/tools/app_config.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' as cnv;
-import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
+import '../dependency_injection.dart';
 import '../model/location.dart';
+import '../services/auth_service.dart';
 
 class DeclareSpotScreen extends StatelessWidget {
-  final String token;
+  final ParkingService _parkingService = getIt<ParkingService>();
+  final PointsService _pointsService = getIt<PointsService>();
+  final AuthService _authService = getIt<AuthService>();
 
-  const DeclareSpotScreen({super.key, required this.token});
-
-  Future<Response?> addLeaving(LocationData? location) async {
-    try {
-      var userId = await AuthService().getCurrentUserUID();
-      var response = await http.post(
-          Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
-          body: cnv.jsonEncode({
-            "user_id": userId.toString(),
-            "lat": location!.latitude!.toString(),
-            "long": location.longitude!.toString(),
-            "uid": token,
-            "newParking": "false",
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-      return response;
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return null;
-    }
-  }
+  DeclareSpotScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,14 +49,14 @@ class DeclareSpotScreen extends StatelessWidget {
             // Button: "I have vacated a parking spot"
             Center(
               child: ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   // Add your logic to declare the parking spot here
                   final location =
                       Provider.of<LocationProvider>(context, listen: false)
                           .currentLocation;
-                  addLeaving(location).then(
+                  _parkingService.addLeaving(location, await _authService.getCurrentUserUID()).then(
                     (value) {
-                      if (value != null && value.statusCode == 200) {
+                      if (value) {
                         toastification.show(
                             context: context,
                             type: ToastificationType.success,
@@ -92,7 +68,8 @@ class DeclareSpotScreen extends StatelessWidget {
                             boxShadow: lowModeShadow,
                             showProgressBar: false);
 
-                        PointsService().updatePoints();
+                        _pointsService.updatePoints();
+                        //_parkingService.addMarkerFromNotification(new LatLng(location!.latitude!, location!.longitude!));
                       } else {
                         globals.showServerErrorToast(context);
                       }

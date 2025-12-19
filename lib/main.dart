@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:parkingmap/model/latlng_bounds_model.dart';
@@ -16,11 +15,14 @@ import 'package:parkingmap/screens/declare.dart';
 import 'package:parkingmap/screens/enable_location.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/screens/unsupported_location.dart';
-import 'package:parkingmap/services/marker_event_bus.dart';
 import 'package:parkingmap/services/auth_service.dart';
+import 'package:parkingmap/services/init_service.dart';
+import 'package:parkingmap/services/parking_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:vibration/vibration.dart';
+import 'dependency_injection.dart';
+import 'model/parkingspot_model.dart';
 import 'screens/home_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,13 +32,11 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:convert' as cnv;
-import 'dart:convert';
 import 'screens/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'tools/app_config.dart';
 import 'package:provider/provider.dart';
-import 'package:parkingmap/services/hive_service.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
@@ -44,10 +44,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  setupLocator();
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   Hive.registerAdapter(MarkerModelAdapter());
   Hive.registerAdapter(LatLngBoundsModelAdapter());
+  Hive.registerAdapter(ParkingSpotModelAdapter());
   await Hive.openBox<List>("markersBox");
   await Hive.openBox("cacheBox");
   FlutterError.onError = (errorDetails) {
@@ -119,14 +121,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final GeolocatorPlatform _geolocatorPlatform = GeolocatorPlatform.instance;
   String? serviceStatusValue;
 
-  List<Widget> screens = [];
+  final List<Widget> screens = [
+    const HomePage(),
+    DeclareSpotScreen(),
+    const SettingsScreen(),
+  ];
   int selectedIndex = 0;
 
   List<Marker> markers = [];
   LatLngBounds? currentBounds;
 
   bool? _isUserLogged;
-  bool shouldUpdate = false;
+
 
   bool permissionsNotGranted = false;
   String permissionToastTitle = "", permissionToastBody = "";
@@ -134,122 +140,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   late PageController _pageViewController;
   final ValueNotifier<int> _notifier = ValueNotifier(0);
   ValueNotifier<double> notifierImageScale = ValueNotifier(15);
+  final ParkingService _parkingService = getIt<ParkingService>();
+  final InitService _initService = getIt<InitService>();
 
-  final markersBox = "markersBox";
-  final cacheBox = "cacheBox";
   // #endregion
 
-// Function to check if current camera bounds are within expanded bounds
-  bool isWithinExpandedBounds(
-      LatLngBounds currentBounds, LatLngBounds expandedBounds) {
-    // Check if the current bounds fit within the expanded bounds
-    return (currentBounds.southWest.latitude >=
-            expandedBounds.southWest.latitude &&
-        currentBounds.southWest.longitude >=
-            expandedBounds.southWest.longitude &&
-        currentBounds.northEast.latitude <= expandedBounds.northEast.latitude &&
-        currentBounds.northEast.longitude <=
-            expandedBounds.northEast.longitude);
-  }
 
-  Future<List<Marker>> updateBounds(
-      LatLngBounds bounds, double currentZoom) async {
-    var cachedMarkers = await HiveService(markersBox).getAllCachedMarkers();
-    var expandedBounds =
-        await HiveService(cacheBox).getExpandedBoundsFromCache();
-    if ((cachedMarkers.isEmpty && shouldUpdate) ||
-        expandedBounds == null ||
-        !isWithinExpandedBounds(bounds, expandedBounds) ||
-        shouldUpdate) {
-      shouldUpdate = false;
-      postNewVisibleBounds(
-          bounds.southWest.latitude,
-          bounds.southWest.longitude,
-          bounds.northEast.latitude,
-          bounds.northEast.longitude,
-          email);
-      // Fetch markers asynchronously
-      var updatedMarkers = await getMarkersInBounds(bounds, currentZoom);
-      var mappedMarkers = updatedMarkers.map((marker) {
-        return MarkerModel(
-            latitude: marker.point.latitude,
-            longitude: marker.point.longitude,
-            width: marker.width,
-            height: marker.height,
-            alignment: marker.alignment,
-            rotate: marker.rotate);
-      }).toList();
-      await HiveService(markersBox).deleteAllCachedMarkers();
-      await HiveService(markersBox).addMarkersToCache(mappedMarkers);
-      await HiveService(cacheBox).addExpandedBoundsToCache(bounds);
-      return updatedMarkers;
-    }
-    List<Marker> mrkList = List.empty(growable: true);
-    for (var cmrk in cachedMarkers) {
-      mrkList.add((cmrk as MarkerModel).toMarker());
-    }
-    return mrkList;
-    //   return cachedMarkers.map((marker) {
-    //     return Marker(
-    //         point: LatLng(marker.latitude, marker.longitude),
-    //         child: Image.asset('Assets/Images/parking-location.png', scale: 18));
-    //   }).toList();
-  }
-
-  Future<Response?> postNewVisibleBounds(
-      swLat, swLong, neLat, neLong, userid) async {
-    try {
-      var response = await http.post(
-          Uri.parse('${AppConfig.instance.apiUrl}/update-bounds'),
-          body: cnv.jsonEncode({
-            "email": email,
-            "sw_lat": swLat.toString(),
-            "sw_long": swLong.toString(),
-            "ne_lat": neLat.toString(),
-            "ne_long": neLong.toString()
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-      return response;
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return null;
-    }
-  }
-
-  Future<List<Marker>> getMarkersInBounds(
-      LatLngBounds bounds, double currentZoom) async {
-    try {
-      final url =
-          '${AppConfig.instance.apiUrl}/markers?swLat=${bounds.southWest.latitude}&swLng=${bounds.southWest.longitude}&neLat=${bounds.northEast.latitude}&neLng=${bounds.northEast.longitude}';
-
-      final response = await http.get(Uri.parse(url),
-          headers: {"Authorization": globals.securityToken!});
-
-      if (response.statusCode == 200) {
-        List<dynamic> markersData = json.decode(response.body);
-        // Manually create Marker objects from the response
-        List<Marker> markers = markersData.map((data) {
-          return Marker(
-            width: 80.0,
-            height: 80.0,
-            point: LatLng(data['latitude'], data['longitude']),
-            child: Image.asset('Assets/Images/parking-location.png', scale: 18),
-          );
-        }).toList();
-
-        return markers;
-      } else {
-        globals.showServerErrorToast(context);
-        return List.empty();
-      }
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return List.empty();
-    }
-  }
 
   Future registerNotification() async {
     // 1. Initialize the Firebase app
@@ -276,29 +172,31 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       );
       if (notification != null) {
         var update = bool.parse(message.data['update']);
-        var points = int.tryParse(message.data['points']);
+        /*var points = int.tryParse(message.data['points']);
         if (points != null) {
           var type = message.data['type'].toString();
           if (type == "addPoints") {
             HiveService("").addPointsToCache(points.toString());
           } else {}
-        }
-        if (update) {
-          shouldUpdate = true;
-        } else {
+        }*/
+        //if (update) {
+        //  _parkingService.shouldUpdate = true;
+        //} else {
           var type = message.data['type'].toString();
+          var address = message.data['address'].toString();
           latitude = double.parse(message.data['lat']);
           longitude = double.parse(message.data['long']);
+          final point = LatLng(latitude, longitude);
           if (type == "add") {
-            MarkerEventBus().addMarker(LatLng(latitude, longitude));
-            if (vibrationEnabled!) {
+            _parkingService.addMarkerFromNotification(point, address);
+            if (vibrationEnabled) {
               Vibration.vibrate();
             }
           } else {
-            MarkerEventBus().deleteMarker(LatLng(latitude, longitude));
+            _parkingService.removeMarkerFromNotification(point);
           }
         }
-      }
+      //}
     });
     // } else {
     //   var error = 'User declined or has not accepted notification permission';
@@ -306,13 +204,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // }
   }
 
-  Future notificationsCount() async {
-    if (screens.isEmpty) {
-      screens.add(HomePage(address, updateBounds));
-      screens.add(DeclareSpotScreen(token: token.toString()));
-      screens.add(const SettingsScreen());
-    }
-  }
+  // Future notificationsCount() async {
+  //   if (screens.isEmpty) {
+  //     screens.add(HomePage());
+  //     screens.add(DeclareSpotScreen(token: token.toString()));
+  //     screens.add(const SettingsScreen());
+  //   }
+  // }
 
   // postInsertTime() async {
   //   try {
@@ -360,24 +258,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future registerFcmToken() async {
-    try {
-      token = await AuthService().getCurrentUserUID();
-      await _getDevToken();
-      var userId = token;
-      http.post(Uri.parse("${AppConfig.instance.apiUrl}/register-fcmToken"),
-          body: cnv.jsonEncode(
-              {"user_id": userId.toString(), "fcmtoken": fcmtoken.toString()}),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    }
-  }
-
-  checkForInitialState() async {
+  Future<void> checkForInitialState() async {
     FirebaseMessaging.instance
         .getInitialMessage()
         .then((RemoteMessage? initialMessage) {
@@ -423,7 +304,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {});
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      registerFcmToken();
+      _initService.registerFcmToken();
     });
     //when app is terminated
     checkForInitialState();
@@ -437,7 +318,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     overlayState = Overlay.of(context);
     _toggleServiceStatusStream();
     _pageViewController = PageController(initialPage: selectedIndex);
-    shouldUpdate = true;
   }
 
   @override
@@ -474,7 +354,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
   }
 
-  _toggleServiceStatusStream() {
+  void _toggleServiceStatusStream() {
     if (_serviceStatusStreamSubscription == null) {
       final serviceStatusStream = _geolocatorPlatform.getServiceStatusStream();
       _serviceStatusStreamSubscription =
@@ -578,10 +458,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     entered = prefs.getBool("isLoggedIn");
   }
 
-  Future _getDevToken() async {
-    fcmtoken = await FirebaseMessaging.instance.getToken();
-  }
-
   Future appInitializations() async {
     //await requirePermissions();
     await _getPosition;
@@ -589,8 +465,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await globals.initializePoints();
     await globals.initializePremiumSearchState();
     updateUserID();
-    registerFcmToken();
-    notificationsCount();
+    _initService.registerFcmToken();
+    //notificationsCount();
   }
 
   @override

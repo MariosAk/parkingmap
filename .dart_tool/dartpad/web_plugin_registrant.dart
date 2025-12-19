@@ -12,7 +12,7 @@ import 'package:firebase_analytics_web/firebase_analytics_web.dart';
 import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
 import 'package:firebase_messaging_web/firebase_messaging_web.dart';
-import 'package:flutter_keyboard_visibility_web/flutter_keyboard_visibility_web.dart';
+import 'package:flutter_keyboard_visibility_temp_fork/flutter_keyboard_visibility_web.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
 import 'package:flutter_secure_storage_web/flutter_secure_storage_web.dart';
 import 'package:fluttertoast/fluttertoast_web.dart';
@@ -31,7 +31,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebaseAuthWeb.registerWith(registrar);
   FirebaseCoreWeb.registerWith(registrar);
   FirebaseMessagingWeb.registerWith(registrar);
-  FlutterKeyboardVisibilityPlugin.registerWith(registrar);
+  FlutterKeyboardVisibilityTempForkWeb.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);
   FlutterSecureStorageWeb.registerWith(registrar);
   FluttertoastWebPlugin.registerWith(registrar);

@@ -1,16 +1,14 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' as cnv;
 import 'package:parkingmap/services/globals.dart' as global;
 
-import '../tools/app_config.dart';
+import '../dependency_injection.dart';
+import '../services/user_service.dart';
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -20,25 +18,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  Future<Response?> deleteUser(String? userID) async {
-    try {
-      if (userID != null) {
-        var response = await http.delete(
-            Uri.parse("${AppConfig.instance.apiUrl}/delete-user"),
-            body: cnv.jsonEncode({"userID": userID}),
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": globals.securityToken!
-            });
-        return response;
-      } else {
-        return null;
-      }
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return null;
-    }
-  }
+
+  final UserService _userService = getIt<UserService>();
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +439,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                             .then(
                           (value) async {
                             if (value) {
-                              deleteUser(userID).then(
+                              _userService.deleteUser(userID).then(
                                 (value) {
                                   if (value != null &&
                                       value.statusCode == 200) {

@@ -5,10 +5,14 @@ import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as cnv;
+import '../dependency_injection.dart';
 import 'encryption_service.dart';
 import 'globals.dart';
 
 class PointsService {
+
+  final AuthService _authService = getIt<AuthService>();
+
   Future<String> encryptPoints(String data) async {
     final encryptionService = EncryptionService();
     final key = await encryptionService.getEncryptionKey();
@@ -44,8 +48,8 @@ class PointsService {
     }
   }
 
-  updatePointsDB(int? updatedPoints) async {
-    var userId = await AuthService().getCurrentUserUID();
+  Future<void> updatePointsDB(int? updatedPoints) async {
+    var userId = await _authService.getCurrentUserUID();
     try {
       await http.post(Uri.parse("${AppConfig.instance.apiUrl}/update-points"),
           body: cnv.jsonEncode({"user_id": userId, "points": updatedPoints}),

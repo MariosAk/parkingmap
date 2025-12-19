@@ -9,7 +9,7 @@
     },
     {
       "name": "_flutterfire_internals",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/_flutterfire_internals-1.3.44",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/_flutterfire_internals-1.3.64",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -33,27 +33,27 @@
     },
     {
       "name": "archive",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/archive-3.6.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/archive-4.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "args",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.5.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.7.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "asn1lib",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/asn1lib-1.5.8",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/asn1lib-1.6.5",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "async",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "avatar_glow",
@@ -63,7 +63,7 @@
     },
     {
       "name": "awesome_notifications",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/awesome_notifications-0.9.3+1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/awesome_notifications-0.10.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -75,9 +75,9 @@
     },
     {
       "name": "boolean_selector",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/boolean_selector-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.1"
     },
     {
       "name": "build",
@@ -87,15 +87,15 @@
     },
     {
       "name": "build_config",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_config-1.1.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_config-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.6"
     },
     {
       "name": "build_daemon",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_daemon-4.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_daemon-4.1.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.7"
     },
     {
       "name": "build_resolvers",
@@ -105,15 +105,15 @@
     },
     {
       "name": "build_runner",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.11",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner-2.4.13",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.5"
     },
     {
       "name": "build_runner_core",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-7.3.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/build_runner_core-7.3.2",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.5"
     },
     {
       "name": "built_collection",
@@ -123,21 +123,21 @@
     },
     {
       "name": "built_value",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/built_value-8.9.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/built_value-8.12.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "characters",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.3.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/characters-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "checked_yaml",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/checked_yaml-2.0.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/checked_yaml-2.0.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.8"
     },
     {
       "name": "cli_util",
@@ -153,21 +153,21 @@
     },
     {
       "name": "clock",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/clock-1.1.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/clock-1.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "code_builder",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/code_builder-4.10.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/code_builder-4.11.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.7"
     },
     {
       "name": "collection",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.18.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.19.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "convert",
@@ -177,15 +177,15 @@
     },
     {
       "name": "crypto",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "csslib",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/csslib-1.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/csslib-1.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "curved_navigation_bar",
@@ -195,7 +195,7 @@
     },
     {
       "name": "dart_earcut",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dart_earcut-1.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dart_earcut-1.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -206,28 +206,40 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "dart_polylabel2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dart_polylabel2-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
       "name": "dart_style",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dart_style-2.3.6",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "device_info_plus",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus-11.1.0",
+      "name": "dbus",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dbus-0.7.11",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "2.17"
+    },
+    {
+      "name": "device_info_plus",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus-12.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
     },
     {
       "name": "device_info_plus_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.3",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.7"
     },
     {
       "name": "dots_indicator",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dots_indicator-2.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/dots_indicator-4.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.17"
     },
     {
       "name": "encrypt",
@@ -237,123 +249,123 @@
     },
     {
       "name": "equatable",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/equatable-2.0.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "fake_async",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fake_async-1.3.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "ffi",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fake_async-1.3.3",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
+      "name": "ffi",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/ffi-2.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
       "name": "file",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "firebase_analytics",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics-11.3.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics-12.0.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_analytics_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_platform_interface-4.2.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_platform_interface-5.0.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_analytics_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_web-0.5.10+2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_analytics_web-0.6.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "firebase_auth",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth-5.3.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth-6.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_auth_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth_platform_interface-7.4.7",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth_platform_interface-8.1.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_auth_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth_web-5.13.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth_web-6.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "firebase_core",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core-3.6.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core-4.2.1",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_core_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-5.3.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_platform_interface-6.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_core_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.18.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-3.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "firebase_crashlytics",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics-4.1.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics-5.0.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_crashlytics_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics_platform_interface-3.6.44",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_crashlytics_platform_interface-3.8.15",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_messaging",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging-15.1.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging-16.0.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_messaging_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_platform_interface-4.5.46",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_platform_interface-4.7.4",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "firebase_messaging_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_web-3.9.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_messaging_web-4.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "fixnum",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fixnum-1.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
     },
     {
       "name": "flutter",
-      "rootUri": "file:///C:/fluttersrc/flutter/packages/flutter",
+      "rootUri": "file:///C:/Users/Marios/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_bloc_pattern",
@@ -375,7 +387,7 @@
     },
     {
       "name": "flutter_dotenv",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dotenv-5.2.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dotenv-6.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -384,12 +396,6 @@
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_google_places_hoc081098-2.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
-    },
-    {
-      "name": "flutter_keyboard_visibility",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "flutter_keyboard_visibility_linux",
@@ -410,8 +416,8 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "flutter_keyboard_visibility_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0",
+      "name": "flutter_keyboard_visibility_temp_fork",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_keyboard_visibility_temp_fork-0.1.5",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -423,37 +429,37 @@
     },
     {
       "name": "flutter_launcher_icons",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.14.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.14.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-3.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_map",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map-7.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map-8.2.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.6"
     },
     {
       "name": "flutter_map_marker_popup",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map_marker_popup-7.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map_marker_popup-8.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "flutter_map_math",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map_math-0.1.7",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_map_math-0.2.4",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "flutter_native_splash",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_native_splash-2.4.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_native_splash-2.4.7",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -477,19 +483,19 @@
     },
     {
       "name": "flutter_secure_storage",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage-9.2.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage-9.2.4",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "flutter_secure_storage_linux",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "flutter_secure_storage_macos",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -519,19 +525,19 @@
     },
     {
       "name": "flutter_test",
-      "rootUri": "file:///C:/fluttersrc/flutter/packages/flutter_test",
+      "rootUri": "file:///C:/Users/Marios/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
     },
     {
       "name": "flutter_web_plugins",
-      "rootUri": "file:///C:/fluttersrc/flutter/packages/flutter_web_plugins",
+      "rootUri": "file:///C:/Users/Marios/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "fluttertoast",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fluttertoast-8.2.8",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/fluttertoast-9.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -542,22 +548,28 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "geocoding",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding-3.0.0",
+      "name": "geoclue",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geoclue-0.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "2.16"
+    },
+    {
+      "name": "geocoding",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "geocoding_android",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_android-3.3.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_android-4.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.3"
     },
     {
       "name": "geocoding_ios",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_ios-3.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geocoding_ios-3.1.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.3"
     },
     {
       "name": "geocoding_platform_interface",
@@ -567,63 +579,81 @@
     },
     {
       "name": "geolocator",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator-13.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator-14.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
     },
     {
       "name": "geolocator_android",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_android-4.6.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_android-5.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
     },
     {
       "name": "geolocator_apple",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_apple-2.3.7",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_apple-2.3.13",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "geolocator_linux",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_linux-0.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "geolocator_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_platform_interface-4.2.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_platform_interface-4.2.6",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
     },
     {
       "name": "geolocator_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_web-4.1.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_web-4.1.3",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.5"
     },
     {
       "name": "geolocator_windows",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_windows-0.2.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_windows-0.2.5",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "get_it",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/get_it-9.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "glob",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/glob-2.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/glob-2.1.3",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "google_api_headers",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/google_api_headers-4.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/google_api_headers-4.6.2",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.9"
     },
     {
       "name": "google_fonts",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/google_fonts-6.2.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/google_fonts-6.3.2",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.7"
     },
     {
       "name": "graphs",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/graphs-2.3.2",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "gsettings",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/gsettings-0.2.8",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "hive",
@@ -645,57 +675,57 @@
     },
     {
       "name": "html",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/html-0.15.6",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.2"
     },
     {
       "name": "http",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.2.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http-1.5.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "http_multi_server",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http_multi_server-3.2.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http_multi_server-3.2.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.2"
     },
     {
       "name": "http_parser",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "iconsax_flutter",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/iconsax_flutter-1.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/iconsax_flutter-1.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "image",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.15"
-    },
-    {
-      "name": "intl",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/image-4.5.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
-      "name": "introduction_screen",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/introduction_screen-3.1.14",
+      "name": "intl",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "introduction_screen",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/introduction_screen-4.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "io",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/io-1.0.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/io-1.0.5",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "isar",
@@ -729,27 +759,27 @@
     },
     {
       "name": "leak_tracker",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-11.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.10",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_testing",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
     {
       "name": "lints",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/lints-3.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "listenable_stream",
@@ -765,49 +795,49 @@
     },
     {
       "name": "location",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location-7.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location-8.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.6"
     },
     {
       "name": "location_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location_platform_interface-5.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location_platform_interface-6.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.6"
     },
     {
       "name": "location_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location_web-5.0.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/location_web-6.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.6"
     },
     {
       "name": "logger",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/logger-2.4.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/logger-2.6.2",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "logging",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/logging-1.2.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/logging-1.3.0",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.4"
     },
     {
       "name": "matcher",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.16+1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/matcher-0.12.17",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "material_color_utilities",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.8.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.11.1",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
     {
       "name": "meta",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.16.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -819,7 +849,7 @@
     },
     {
       "name": "mime",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/mime-1.0.6",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/mime-2.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -843,27 +873,27 @@
     },
     {
       "name": "package_config",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_config-2.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_config-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.4"
     },
     {
       "name": "package_info_plus",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus-8.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus-9.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "package_info_plus_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus_platform_interface-3.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "path",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.4"
     },
     {
       "name": "path_provider",
@@ -873,15 +903,15 @@
     },
     {
       "name": "path_provider_android",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.10",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_android-2.2.20",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_foundation",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/path_provider_foundation-2.4.3",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.9"
     },
     {
       "name": "path_provider_linux",
@@ -909,33 +939,33 @@
     },
     {
       "name": "permission_handler",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-11.3.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler-12.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
     },
     {
       "name": "permission_handler_android",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-12.0.12",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_android-13.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "3.5"
     },
     {
       "name": "permission_handler_apple",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_apple-9.4.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_apple-9.4.7",
       "packageUri": "lib/",
-      "languageVersion": "2.15"
+      "languageVersion": "2.18"
     },
     {
       "name": "permission_handler_html",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_html-0.1.3+2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_html-0.1.3+5",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "permission_handler_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-4.2.3",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_platform_interface-4.3.0",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.5"
     },
     {
       "name": "permission_handler_windows",
@@ -945,13 +975,13 @@
     },
     {
       "name": "petitparser",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/petitparser-6.0.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/petitparser-7.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "platform",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/platform-3.1.6",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
@@ -968,16 +998,16 @@
       "languageVersion": "3.2"
     },
     {
-      "name": "polylabel",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/polylabel-1.0.1",
+      "name": "pool",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pool-1.5.2",
       "packageUri": "lib/",
-      "languageVersion": "2.13"
+      "languageVersion": "3.4"
     },
     {
-      "name": "pool",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pool-1.5.1",
+      "name": "posix",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/posix-6.0.3",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "proj4dart",
@@ -987,21 +1017,21 @@
     },
     {
       "name": "provider",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "pub_semver",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.1.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pub_semver-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.4"
     },
     {
       "name": "pubspec_parse",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pubspec_parse-1.3.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/pubspec_parse-1.5.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.6"
     },
     {
       "name": "rxdart",
@@ -1017,21 +1047,21 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.3.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.5.3",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.5"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.3.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.15",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_foundation",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.5",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_linux",
@@ -1047,7 +1077,7 @@
     },
     {
       "name": "shared_preferences_web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_web-2.4.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_web-2.4.3",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -1059,27 +1089,27 @@
     },
     {
       "name": "shelf",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shelf-1.4.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shelf-1.4.2",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.4"
     },
     {
       "name": "shelf_web_socket",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shelf_web_socket-2.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/shelf_web_socket-2.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "show_up_animation",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/show_up_animation-2.0.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/show_up_animation-2.1.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.5"
     },
     {
       "name": "sky_engine",
-      "rootUri": "file:///C:/fluttersrc/flutter/bin/cache/pkg/sky_engine",
+      "rootUri": "file:///C:/Users/Marios/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "source_gen",
@@ -1089,33 +1119,45 @@
     },
     {
       "name": "source_helper",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/source_helper-1.3.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/source_helper-1.3.5",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.4"
     },
     {
       "name": "source_span",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/source_span-1.10.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "sprintf",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sprintf-7.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.1"
     },
     {
       "name": "sqflite",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.3.3+1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite-2.4.2",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_android",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_android-2.4.2+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
     },
     {
       "name": "sqflite_common",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_common-2.5.6",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "sqflite_darwin",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_darwin-2.4.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "sqflite_platform_interface",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/sqflite_platform_interface-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
     },
     {
       "name": "square_percent_indicater",
@@ -1131,63 +1173,63 @@
     },
     {
       "name": "stack_trace",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.11.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stack_trace-1.12.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.4"
     },
     {
       "name": "stream_channel",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stream_channel-2.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stream_channel-2.1.4",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.3"
     },
     {
       "name": "stream_transform",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stream_transform-2.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/stream_transform-2.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.1"
     },
     {
       "name": "string_scanner",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.2.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/string_scanner-1.4.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "3.1"
     },
     {
       "name": "synchronized",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/synchronized-3.1.0+1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/synchronized-3.4.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "term_glyph",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/term_glyph-1.2.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/term_glyph-1.2.2",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.1"
     },
     {
       "name": "test_api",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.6",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.5"
     },
     {
       "name": "timing",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/timing-1.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/timing-1.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.4"
     },
     {
       "name": "toastification",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/toastification-2.3.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/toastification-3.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "typed_data",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.3.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.5"
     },
     {
       "name": "unicode",
@@ -1203,69 +1245,69 @@
     },
     {
       "name": "uuid",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/uuid-4.5.2",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
       "name": "vector_math",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.1"
     },
     {
       "name": "vibration",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vibration-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "vibration_platform_interface",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vibration_platform_interface-0.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "vm_service",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-14.2.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "watcher",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vibration-3.1.4",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
     {
+      "name": "vibration_platform_interface",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vibration_platform_interface-0.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "vm_service",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "watcher",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/watcher-1.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "web",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
     {
       "name": "web_socket",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket-0.1.6",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket-1.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.4"
     },
     {
       "name": "web_socket_channel",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.1",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-3.0.3",
       "packageUri": "lib/",
       "languageVersion": "3.3"
     },
     {
       "name": "win32",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.5.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.15.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.8"
     },
     {
       "name": "win32_registry",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/win32_registry-1.1.5",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/win32_registry-2.1.0",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.7"
     },
     {
       "name": "wkt_parser",
@@ -1275,21 +1317,21 @@
     },
     {
       "name": "xdg_directories",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.0.4",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.1.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "xml",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.5.0",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.6.1",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.8"
     },
     {
       "name": "yaml",
-      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/yaml-3.1.2",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/yaml-3.1.3",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.4"
     },
     {
       "name": "parkingmap",
@@ -1298,10 +1340,9 @@
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-11-22T17:23:32.941429Z",
   "generator": "pub",
-  "generatorVersion": "3.4.3",
-  "flutterRoot": "file:///C:/fluttersrc/flutter",
-  "flutterVersion": "3.22.2",
+  "generatorVersion": "3.9.2",
+  "flutterRoot": "file:///C:/Users/Marios/flutter",
+  "flutterVersion": "3.35.7",
   "pubCache": "file:///C:/Users/Marios/AppData/Local/Pub/Cache"
 }

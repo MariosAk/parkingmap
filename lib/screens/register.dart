@@ -1,14 +1,12 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:parkingmap/screens/login.dart';
-import 'package:parkingmap/tools/app_config.dart';
+import 'package:parkingmap/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
-import 'package:parkingmap/services/globals.dart' as globals;
+
+import '../dependency_injection.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -29,30 +27,8 @@ class RegisterPageState extends State<RegisterPage> {
   bool isObscuredPassword = true;
   bool isObscuredRepeatPassword = true;
   bool errorMessageVisible = false;
-
-  Future registerUser(uid, email, password, fcmToken) async {
-    try {
-      var response = await http.post(
-          Uri.parse("${AppConfig.instance.apiUrl}/register-user"),
-          body: cnv.jsonEncode({
-            "uid": uid,
-            "email": email,
-            "password": password,
-            "fcm_token": fcmToken
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-      if (response.statusCode == 200) {
-        registrationSuccess = true;
-      } else {
-        registrationSuccess = false;
-      }
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    }
-  }
+  final UserService _userService = getIt<UserService>();
+  final AuthService _authService = getIt<AuthService>();
 
   Future _getDevToken() async {
     token = await FirebaseMessaging.instance.getToken();
@@ -283,13 +259,13 @@ class RegisterPageState extends State<RegisterPage> {
                                 onPressed: () async {
                                   if (_formKey.currentState!.validate()) {
                                     try {
-                                      await AuthService()
+                                      await _authService
                                           .createUserWithEmailAndPassword(
                                         textControllerEmail.text,
                                         textControllerPassword.text,
                                       )
-                                          .then((User? user) {
-                                        registerUser(
+                                          .then((User? user) async {
+                                        registrationSuccess = await _userService.registerUser(
                                           user!.uid,
                                           textControllerEmail.text,
                                           textControllerPassword.text,

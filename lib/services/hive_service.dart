@@ -2,13 +2,17 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:parkingmap/model/latlng_bounds_model.dart';
 import 'package:parkingmap/model/marker_model.dart';
+import 'package:parkingmap/model/parkingspot_model.dart';
+import 'package:parkingmap/services/parking_service.dart';
 import 'package:parkingmap/services/points_service.dart';
+
+import '../dependency_injection.dart';
 
 class HiveService {
   final _markersboxName = "markersBox";
   final _cacheboxName = "cacheBox";
   static final HiveService _instance = HiveService._internal();
-  final pointsService = PointsService();
+  final PointsService _pointsService = getIt<PointsService>();
 
   HiveService._internal();
 
@@ -20,7 +24,7 @@ class HiveService {
   Future<Box> get _cacheBox async => Hive.box(_cacheboxName);
 
 //create
-  Future<void> addMarkersToCache(List<MarkerModel> markers) async {
+  Future<void> addMarkersToCache(List<ParkingSpotModel> markers) async {
     var box = await _markerBox;
     await box.put("cachedMarkers", markers);
   }
@@ -63,14 +67,14 @@ class HiveService {
   }
 
 //delete specific
-  Future<void> deleteCachedMarker(MarkerModel marker) async {
+  Future<void> deleteCachedMarker(ParkingSpotData marker) async {
     var box = await _markerBox;
-    List<MarkerModel> list =
-        List<MarkerModel>.from(await getAllCachedMarkers());
+    List<ParkingSpotData> list =
+        List<ParkingSpotData>.from(await getAllCachedMarkers());
     var markerToDelete = list
         .where((element) =>
-            element.latitude == marker.latitude &&
-            element.longitude == marker.longitude)
+            element.mapMarker.point.latitude == marker.mapMarker.point.latitude &&
+            element.mapMarker.point.longitude == marker.mapMarker.point.longitude)
         .firstOrNull;
     list.remove(markerToDelete);
     await box.put("cachedMarkers", list);
@@ -81,12 +85,12 @@ class HiveService {
   Future<void> deleteAllCachedMarkers() async {
     var box = await _markerBox;
     await box.delete("cachedMarkers");
-    await box.put("cachedMarkers", List<MarkerModel>.empty(growable: true));
+    await box.put("cachedMarkers", List<ParkingSpotData>.empty(growable: true));
   }
 
   Future<void> addPointsToCache(String points) async {
     var box = await _cacheBox;
-    var encryptedPoints = await pointsService.encryptPoints(points);
+    var encryptedPoints = await _pointsService.encryptPoints(points);
     await box.put("points", encryptedPoints);
   }
 
@@ -94,7 +98,7 @@ class HiveService {
     var box = await _cacheBox;
     final encryptedPoints = box.get("points");
     if (encryptedPoints != null) {
-      var points = pointsService.decryptPoints(encryptedPoints);
+      var points = _pointsService.decryptPoints(encryptedPoints);
       return points;
     }
     return "0";
