@@ -224,7 +224,18 @@ class ParkingService{
           );
         }).toList();
 
+        var mappedSpots = markers.map((spot) {
+          return ParkingSpotModel(
+              address: spot.address,
+              latitude: spot.mapMarker.point.latitude,
+              longitude: spot.mapMarker.point.longitude,
+              timestamp: spot.timestamp,
+              probability: spot.probability
+          );
+        }).toList();
+
         markersNotifier.value = markers;
+        HiveService("markersBox").addMarkersToCache(mappedSpots);
         print("3. [getMarkersInBounds] Notifier updated with ${markers.length} markers.");
 
       } else {
@@ -279,6 +290,31 @@ class ParkingService{
     HiveService("markersBox").addMarkersToCache(mappedSpots);
 
     print("Added marker from notification at $point. Total markers: ${mappedSpots.length}");
+  }
+
+  Future<Response?> deleteMarker(Marker marker, String topic) async {
+    try {
+      var response = await http.post(
+          Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
+          body: cnv.jsonEncode({
+            "latitude": marker.point.latitude.toString(),
+            "longitude": marker.point.longitude.toString(),
+            "topic": topic
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+
+      if (response.statusCode == 200){
+        getMarkersInBounds(_lastKnownBounds!, 15.0);
+      }
+
+      return response;
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
+    }
   }
 
   // NEW METHOD for removing a marker from a notification

@@ -11,26 +11,48 @@ class ParkingSpotTile extends StatelessWidget {
     super.key,
     required this.distanceMeters,
     required this.age,
-    required this.probability,
+    this.probability,
     required this.onTap,
   });
 
+  double get _calculatedProbability {
+    final minutes = age.inMinutes;
+
+    // Spot is expired after 30 minutes
+    if (minutes >= 30) return 0.0;
+
+    // Very fresh (0-5 mins)
+    if (minutes <= 5) return 1.0;
+
+    // Decay over the remaining 25 minutes
+    // at 10 mins -> 0.8
+    // at 17.5 mins -> 0.5
+    // at 25 mins -> 0.2
+    double remainingRatio = (30 - minutes) / 25.0;
+    return remainingRatio.clamp(0.0, 1.0);
+  }
 
   Color getProbabilityColor() {
-    if (probability! > 0.66) return Colors.green;
-    if (probability! > 0.33) return Colors.orange;
+    final prob = _calculatedProbability;
+    if (prob > 0.66) return Colors.green;
+    if (prob > 0.33) return Colors.orange;
     return Colors.red;
   }
 
 
   String getProbabilityLabel() {
-    if (probability! > 0.66) return 'Υψηλή πιθανότητα';
-    if (probability! > 0.33) return 'Μέτρια πιθανότητα';
+    final prob = _calculatedProbability;
+
+    if (age.inMinutes >= 30) return 'Έληξε';
+
+    if (prob > 0.66) return 'Υψηλή πιθανότητα';
+    if (prob > 0.33) return 'Μέτρια πιθανότητα';
     return 'Χαμηλή πιθανότητα';
   }
 
 
   String formatAge(Duration d) {
+    if (d.inMinutes >= 30) return 'έληξε';
     if (d.inMinutes < 1) return 'μόλις τώρα';
     if (d.inMinutes < 60) return 'πριν ${d.inMinutes} λεπτά';
     return 'πριν ${d.inHours} ώρες';

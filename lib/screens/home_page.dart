@@ -35,7 +35,7 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class HomePageState extends State<HomePage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   // #region variables
   final ParkingService _parkingService = getIt<ParkingService>();
   PushNotification? notification;
@@ -99,6 +99,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ValueNotifier<LatLng?> _userLocationNotifier = ValueNotifier<LatLng?>(null);
 
   // #endregion
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void dispose() {
@@ -199,51 +202,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  Future<Response?> deleteMarker(Marker marker, String topic) async {
-    try {
-      var response = await http.post(
-          Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
-          body: cnv.jsonEncode({
-            "latitude": marker.point.latitude.toString(),
-            "longitude": marker.point.longitude.toString(),
-            "topic": topic
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": globals.securityToken!
-          });
-      return response;
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return null;
-    }
-  }
-
-  // void addMarker(List<Marker> newMarkers) {
-  //   bool exists = _parkingService.markersNotifier.value.any((existingMarker) {
-  //     return newMarkers.any((marker) => marker.point == existingMarker.point);
-  //   });
-  //   if (!exists) {
-  //     _parkingService.markersNotifier.value = List.from(_parkingService.markersNotifier.value)
-  //       ..addAll(newMarkers);
-  //     var markerModels = _parkingService.markersNotifier.value.map((newMarker) {
-  //       return MarkerModel(
-  //           alignment: newMarker.alignment,
-  //           height: newMarker.height,
-  //           width: newMarker.width,
-  //           latitude: newMarker.point.latitude,
-  //           longitude: newMarker.point.longitude,
-  //           rotate: newMarker.rotate);
-  //     }).toList();
-  //     HiveService("markersBox").addMarkersToCache(markerModels);
-  //   }
-  //   for (Marker marker in newMarkers) {
-  //     if (!_addressCache.keys.any((element) => marker.point == element)) {
-  //       convertPointToAddress(marker.point);
-  //     }
-  //   }
-  // }
-
   // Method to initialize and start location tracking
   void startLocationTracking() async {
     // Request permission to access location
@@ -296,6 +254,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           _mapctl.move(currentLatLng, 18.0);
         }
         //updateBoundsAddMarkers();
+        pulsatingMarkerPosition = currentLatLng;
         previousLocation = currentLatLng;
       }
     });
@@ -315,7 +274,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _mapctl.move(
           LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
           18.0); // Center map on current location
-      //updateBoundsAddMarkers();
+      _parkingService.updateBounds(
+           _mapctl.camera.visibleBounds!, _mapctl.camera.zoom);
     } else {
       // Handle the case where currentPosition is still null
       toastification.show(
@@ -367,7 +327,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           showProgressBar: false);
       return;
     }
-    deleteMarker(marker, cellTopic).then(
+    _parkingService.deleteMarker(marker, cellTopic).then(
       (value) {
         if (value != null && value.statusCode == 200) {
           globals.showSuccessfullToast(context, "Spot was deleted.");
@@ -573,6 +533,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final shortestSide = MediaQuery.of(context).size.shortestSide;
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -754,7 +715,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     //   ],
                                     // ),
                                     if (isMapInitialized)
-                                      //_buildPulsatingMarker(),
                                       AnimatedBuilder(
                                         // 1. It listens to your existing animation controller.
                                         animation: _animationController,
@@ -891,18 +851,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     ),
                                   ],
                                 ))),
-                        // Container(
-                        //   margin: const EdgeInsets.only(left: 15.0),
-                        //   alignment: Alignment.topLeft,
-                        //   child: Text(
-                        //     widget.address!,
-                        //     style: GoogleFonts.robotoSlab(
-                        //         textStyle: TextStyle(color: Colors.blue[900]),
-                        //         fontWeight: FontWeight.w600,
-                        //         fontSize: addressTextSize),
-                        //     textAlign: TextAlign.left,
-                        //   ),
-                        // ),
                       ],
                     )),
                   ),
@@ -960,88 +908,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       );
                     },
                   ),
-                  /*Expanded(
-                      child: spots > 0
-                          ? ListView.builder(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: screenHeight * 0.01),
-                              itemCount: _markersNotifier.value.length,
-                              itemBuilder: (context, index) {
-                                try {
-                                  var latlong =
-                                      _markersNotifier.value[index].point;
-                                  if (LatLngBounds(
-                                          _mapctl
-                                              .camera.visibleBounds.southWest,
-                                          _mapctl
-                                              .camera.visibleBounds.northEast)
-                                      .contains(latlong)) {
-                                    var cachedAddress = _addressCache[latlong];
-                                    var decodedData =
-                                        cnv.jsonDecode(cachedAddress!);
-                                    var address = decodedData["addresses"][0]
-                                        ["address"]["streetNameAndNumber"];
 
-                                    return Card(
-                                      color: Colors.blue[50],
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: screenWidth * 0.04,
-                                          vertical: screenHeight *
-                                              0.004), // Margin around the card
-                                      elevation:
-                                          4, // Elevation for shadow effect
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            15.0), // Rounded corners
-                                      ),
-                                      child: InkWell(
-                                        onTap: () {
-                                          var selectedMarker =
-                                              _markersNotifier.value[index];
-                                          _mapctl.move(
-                                              selectedMarker.point, 18.0);
-                                        },
-                                        borderRadius: BorderRadius.circular(
-                                            15.0), // Ensure the tap area matches the card shape
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(
-                                              8.0), // Padding inside the card
-                                          child: Row(
-                                            children: [
-                                              Image.asset(
-                                                  'Assets/Images/parking-location.png',
-                                                  scale: 15),
-                                              SizedBox(
-                                                  width: screenWidth *
-                                                      0.05), // Space between icon and text
-                                              Expanded(
-                                                child: Text(
-                                                  '$address',
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        listTextSize, // Larger font size
-                                                    fontWeight: FontWeight
-                                                        .bold, // Bold text
-                                                    color: Colors
-                                                        .black, // Text color
-                                                  ),
-                                                  overflow: TextOverflow
-                                                      .ellipsis, // Handle long text
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  return Container(); // Return an empty container on error
-                                }
-                                return Container(); // Return an empty container if bounds are not matched
-                              },
-                            )
-                          : Image.asset('Assets/Images/pin.gif', scale: 5))*/
                   Expanded(
                       child: ValueListenableBuilder<LatLng?>(
                           valueListenable: _userLocationNotifier,
@@ -1057,24 +924,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       .shrink(); // Or a loading spinner
                                 }
                                 // 1. Pre-filter the markers that are visible on the map
-                                // final visibleMarkers = allMarkers.where((marker) {
-                                //   if (!isMapInitialized) return false;
-                                //   return _mapctl.camera.visibleBounds.contains(marker.point);
-                                // }).toList();
                                 final visibleMarkers = allSpots.where((
                                     spot) =>
                                     _mapctl.camera.visibleBounds.contains(
                                         spot.mapMarker.point)).toList();
-
-                                // Update the spot count based on the filtered list
-                                // Note: You might want to move this update to a more suitable place
-                                // to avoid calling setState during a build phase. A post-frame callback
-                                // or a different state management approach would be better.
-                                /*WidgetsBinding.instance.addPostFrameCallback((_) {
-                           setState(() {
-                             spots = visibleMarkers.length;
-                           });
-                        });*/
                                 WidgetsBinding.instance.addPostFrameCallback((
                                     _) {
                                   if (mounted) {
@@ -1095,13 +948,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   itemCount: visibleMarkers.length,
                                   itemBuilder: (context, index) {
                                     final parkingMarker = visibleMarkers[index];
-                                    // final cachedAddress = _parkingService.getAddressCache()[marker.point];
-                                    // print(cachedAddress);
-                                    // The try-catch block is still a good idea for JSON parsing
                                     try {
-                                      // final decodedData = cnv.jsonDecode(cachedAddress!);
-                                      // final address = decodedData["addresses"][0]["address"]["streetNameAndNumber"];
-
                                       final double distance;
                                       if (userLocation == null) {
                                         distance = 0.0;
@@ -1120,66 +967,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           _mapctl.move(parkingMarker.mapMarker.point, 18.0);
                                         },
                                       );
-                                  //     return Card(
-                                  //       color: Colors.blue[50],
-                                  //       margin: EdgeInsets.symmetric(
-                                  //           horizontal: screenWidth * 0.04,
-                                  //           vertical: screenHeight *
-                                  //               0.004),
-                                  //       // Margin around the card
-                                  //       elevation:
-                                  //       4,
-                                  //       // Elevation for shadow effect
-                                  //       shape: RoundedRectangleBorder(
-                                  //         borderRadius: BorderRadius.circular(
-                                  //             15.0), // Rounded corners
-                                  //       ),
-                                  //       child: InkWell(
-                                  //         onTap: () =>
-                                  //             _mapctl.move(marker.point, 18.0),
-                                  //         /* onTap: () {
-                                  //   var selectedMarker =
-                                  //   _markersNotifier.value[index];
-                                  //   _mapctl.move(
-                                  //       selectedMarker.point, 18.0);
-                                  // },*/
-                                  //         borderRadius: BorderRadius.circular(
-                                  //             15.0),
-                                  //         // Ensure the tap area matches the card shape
-                                  //         child: Padding(
-                                  //           padding: const EdgeInsets.all(
-                                  //               8.0), // Padding inside the card
-                                  //           child: Row(
-                                  //             children: [
-                                  //               Image.asset(
-                                  //                   'Assets/Images/parking-location.png',
-                                  //                   scale: 15),
-                                  //               SizedBox(
-                                  //                   width: screenWidth *
-                                  //                       0.05),
-                                  //               // Space between icon and text
-                                  //               Expanded(
-                                  //                 child: Text(
-                                  //                   'address',
-                                  //                   style: TextStyle(
-                                  //                     fontSize:
-                                  //                     listTextSize,
-                                  //                     // Larger font size
-                                  //                     fontWeight: FontWeight
-                                  //                         .bold,
-                                  //                     // Bold text
-                                  //                     color: Colors
-                                  //                         .black, // Text color
-                                  //                   ),
-                                  //                   overflow: TextOverflow
-                                  //                       .ellipsis, // Handle long text
-                                  //                 ),
-                                  //               ),
-                                  //             ],
-                                  //           ),
-                                  //         ),
-                                  //       ),
-                                  //     );
                                     } catch (e) {
                                       // Log the error for debugging purposes
                                       print(
@@ -1202,88 +989,120 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _showMarkAsTakenDialog(BuildContext context, Marker marker) {
-    return AlertDialog(
+    return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0), // Rounded corners
+        borderRadius: BorderRadius.circular(24.0),
       ),
-      backgroundColor: Colors.white, // Match the app's theme
-      title: Text(
-        "Declare Spot as Taken",
-        style: GoogleFonts.robotoSlab(
-          fontWeight: FontWeight.w600,
-          color: Colors.blue[900],
-        ),
-      ),
-      content: const Text(
-        "Are you sure this spot is no longer available?",
-        style: TextStyle(color: Colors.black87),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Dismiss dialog
-          },
-          child: Text(
-            "Cancel",
-            style: GoogleFonts.robotoSlab(
-              fontWeight: FontWeight.w500,
-              color: Colors.red,
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0.0, 10.0),
             ),
-          ),
+          ],
         ),
-        TextButton(
-          onPressed: () {
-            markSpotAsTaken(marker);
-            Navigator.of(context).pop(); // Dismiss dialog
-          },
-          child: Text(
-            "Confirm",
-            style: GoogleFonts.robotoSlab(
-              fontWeight: FontWeight.w500,
-              color: Colors.blue[900],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 1. Visual Icon Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.beenhere_rounded, // Represents verification/completion
+                size: 40,
+                color: Colors.blue[900],
+              ),
             ),
-          ),
-        ),
-      ],
-    );
-  }
+            const SizedBox(height: 20),
 
-  Widget _buildPulsatingMarker() {
-    //final screenPoint =
-    //    _mapctl.camera.latLngToScreenPoint(pulsatingMarkerPosition);
-    final screenPoint =
-    _mapctl.camera.latLngToScreenOffset(pulsatingMarkerPosition);
-    return Positioned(
-      top: screenPoint.dy -
-          (_pulsatingAnimation.value /
-              2), // Update based on the map's projection
-      left: screenPoint.dx - (_pulsatingAnimation.value / 2),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _pulsatingAnimation,
-            builder: (context, child) {
-              return Container(
-                width: _pulsatingAnimation.value + _zoom,
-                height: _pulsatingAnimation.value + _zoom,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue.withOpacity(0.3),
-                ),
-              );
-            },
-          ),
-          Container(
-            width: (_zoom),
-            height: (_zoom),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.blue,
-              border: Border.all(color: Colors.white, width: 3),
+            // 2. Title
+            Text(
+              "Spot Taken?",
+              style: GoogleFonts.robotoSlab(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[900],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+
+            // 3. Description text
+            const Text(
+              "Thanks for keeping the map updated! Confirming this will remove the marker for all users.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 4. Buttons Row
+            Row(
+              children: [
+                // Cancel Button
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: GoogleFonts.robotoSlab(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Confirm Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      markSpotAsTaken(marker);
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[900],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Confirm",
+                      style: GoogleFonts.robotoSlab(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

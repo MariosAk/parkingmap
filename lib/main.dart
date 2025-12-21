@@ -179,9 +179,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             HiveService("").addPointsToCache(points.toString());
           } else {}
         }*/
-        //if (update) {
-        //  _parkingService.shouldUpdate = true;
-        //} else {
+        if (update) {
+          _parkingService.getMarkersInBounds(_parkingService.getLastKnownBounds()!, 15.0);
+        } else {
           var type = message.data['type'].toString();
           var address = message.data['address'].toString();
           latitude = double.parse(message.data['lat']);
@@ -196,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             _parkingService.removeMarkerFromNotification(point);
           }
         }
-      //}
+      }
     });
     // } else {
     //   var error = 'User declined or has not accepted notification permission';
