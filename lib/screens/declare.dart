@@ -56,12 +56,12 @@ class DeclareSpotScreen extends StatelessWidget {
                           .currentLocation;
                   _parkingService.addLeaving(location, await _authService.getCurrentUserUID()).then(
                     (value) {
-                      if (value) {
+                      if (value.success) {
                         toastification.show(
                             context: context,
                             type: ToastificationType.success,
                             style: ToastificationStyle.flat,
-                            title: const Text("Spot has been vacated!"),
+                            title: Text(value.reason),
                             alignment: Alignment.bottomCenter,
                             autoCloseDuration: const Duration(seconds: 4),
                             borderRadius: BorderRadius.circular(100.0),
@@ -71,7 +71,7 @@ class DeclareSpotScreen extends StatelessWidget {
                         _pointsService.updatePoints();
                         //_parkingService.addMarkerFromNotification(new LatLng(location!.latitude!, location!.longitude!));
                       } else {
-                        globals.showServerErrorToast(context);
+                        globals.showToast(context, value.reason, ToastificationType.error);
                       }
                     },
                   );

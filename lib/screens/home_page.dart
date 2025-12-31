@@ -19,6 +19,7 @@ import 'package:parkingmap/services/marker_event_bus.dart';
 import 'dart:convert' as cnv;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:parkingmap/services/parking_service.dart';
+import 'package:parkingmap/services/user_service.dart';
 import 'package:parkingmap/tools/app_config.dart';
 import 'package:parkingmap/tools/radar_widget.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,9 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   // #region variables
   final ParkingService _parkingService = getIt<ParkingService>();
+  final AuthService _authService = getIt<AuthService>();
+  final UserService _userService = getIt<UserService>();
+
   PushNotification? notification;
   String? address;
   DateTime? notifReceiveTime;
@@ -111,8 +115,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     subscription?.cancel();
     _locationSubscription?.cancel();
     _spotsNotifier.dispose();
-    _userLocationNotifier.dispose(); // You missed this one
-    radarVisibility.dispose(); // You missed this one
+    _userLocationNotifier.dispose();
+    radarVisibility.dispose();
     super.dispose();
   }
 
@@ -120,43 +124,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
   void initState() {
     super.initState();
     startLocationTracking();
-    // Wait until the widget tree is fully built before listening to map events
-    //WidgetsBinding.instance.addPostFrameCallback((_) async {
-      //await widget.updateBounds(
-      //    _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
-      //addMarker(initialMarkers);
-      //subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) async {
-      //  if (mapEvent is MapEventMoveEnd) {
-      //    _shouldCenterOnLocation = false;
-      //    updateBoundsAddMarkers();
-      //  }
-      //});
-    //});
 
-    // Listen to marker events from the event bus
-    //MarkerEventBus().markerStream.listen((MarkerEvent markerEvent) {
-    //  if (markerEvent.type == MarkerEventType.add) {
-    //    Marker mrk = Marker(
-    //      width: 80.0,
-    //      height: 80.0,
-    //      point: markerEvent.position,
-    //      child: Image.asset('Assets/Images/parking-location.png', scale: 15),
-    //    );
-    //    List<Marker> markers = [mrk];
-    //    addMarker(markers);
-    //    //convertPointToAddress(markerEvent.position);
-    //  } else if (markerEvent.type == MarkerEventType.delete) {
-    //    deleteMarkerReceived(markerEvent.position);
-    //  }
-    //});
-
-    previousLocation = LatLng(
-        Provider.of<LocationProvider>(context, listen: false)
-            .currentLocation!
-            .latitude!,
-        Provider.of<LocationProvider>(context, listen: false)
-            .currentLocation!
-            .longitude!);
+    // previousLocation = LatLng(
+    //     Provider.of<LocationProvider>(context, listen: false)
+    //         .currentLocation!
+    //         .latitude!,
+    //     Provider.of<LocationProvider>(context, listen: false)
+    //         .currentLocation!
+    //         .longitude!);
 
     _animationController = AnimationController(
       vsync: this,
@@ -164,6 +139,23 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     )..repeat(reverse: true);
     _pulsatingAnimation =
         Tween<double>(begin: 0, end: 20).animate(_animationController);
+
+    if (Provider.of<LocationProvider>(context, listen: false).currentLocation != null) {
+      pulsatingMarkerPosition = LatLng(
+          Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+          Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!
+      );
+      // Also set the notifier immediately so the list calculates distances correctly
+      _userLocationNotifier.value = pulsatingMarkerPosition;
+
+      _authService.getCurrentUserUID().then((value) {
+        _userService.sendAlive(value!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+            Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
+        _parkingService.getSearchingCount(Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+            Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
+      });
+
+    }
     // timer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
     //   setState(() {
     //     value = (value + 1) % 100;
@@ -172,12 +164,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
     radarVisibility = ValueNotifier<bool>(globals.premiumSearchState);
   }
-
-  //Future updateBoundsAddMarkers() async {
-    /*await widget.updateBounds(
-       _mapctl.camera.visibleBounds, _mapctl.camera.zoom);*/
-   // addMarker(_parkingService.markersNotifier.value);
-  //}
 
   void deleteMarkerReceived(LatLng markerLatLng) async {
     bool exists = _parkingService.markersNotifier.value.any((existingSpot) =>
@@ -233,15 +219,41 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
       LatLng currentLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
       cellTopic = calculateCellTopic(
           currentLocation.latitude!, currentLocation.longitude!);
-      if (oldTopic != cellTopic &&
-          (previousLocation == null || _calculateDistance(currentLatLng) > 500.0)) {
-        if (oldTopic.isNotEmpty) {
-          await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
-        }
+      // if (oldTopic != cellTopic &&
+      //     (previousLocation == null || _calculateDistance(currentLatLng) > 500.0)) {
+      //   if (oldTopic.isNotEmpty) {
+      //     await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
+      //   }
+      //   await FirebaseMessaging.instance
+      //       .subscribeToTopic(cellTopic)
+      //       .catchError((error) {});
+      // }
+
+      if (previousLocation == null) {
         await FirebaseMessaging.instance
             .subscribeToTopic(cellTopic)
             .catchError((error) {});
+
+        previousLocation = LatLng(
+            Provider.of<LocationProvider>(context, listen: false)
+                .currentLocation!
+                .latitude!,
+            Provider.of<LocationProvider>(context, listen: false)
+                .currentLocation!
+                .longitude!);
+      } else {
+        final distance = _calculateDistance(currentLatLng);
+
+        if (oldTopic != cellTopic || distance > 500.0) {
+          if (oldTopic.isNotEmpty) {
+            await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
+          }
+          await FirebaseMessaging.instance
+              .subscribeToTopic(cellTopic)
+              .catchError((error) {});
+        }
       }
+
       _currentLocation = currentLocation;
 
       if (currentLatLng.latitude != previousLocation!.latitude &&
@@ -308,12 +320,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
       return;
     }
 
-    double distance = FlutterMapMath.distanceBetween(
-        _currentLocation!.latitude!,
-        _currentLocation!.longitude!,
+    double distance = Geolocator.distanceBetween(
         marker.point.latitude,
         marker.point.longitude,
-        "meters");
+        _currentLocation!.latitude!,
+        _currentLocation!.longitude!);
     if (distance > 125) {
       toastification.show(
           context: context,
@@ -327,14 +338,24 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           showProgressBar: false);
       return;
     }
-    _parkingService.deleteMarker(marker, cellTopic).then(
-      (value) {
-        if (value != null && value.statusCode == 200) {
-          globals.showSuccessfullToast(context, "Spot was deleted.");
-        } else {
-          globals.showServerErrorToast(context);
+    var uid = await _authService.getCurrentUserUID();
+    // _parkingService.deleteMarker(marker, cellTopic, uid!).then(
+    //   (value) {
+    //     if (value != null && value.statusCode == 200) {
+    //       globals.showSuccessfullToast(context, "Spot was deleted.");
+    //     } else {
+    //       globals.showServerErrorToast(context);
+    //     }
+    //   },
+    // );
+    _parkingService.incrementReport(marker.point.latitude, marker.point.longitude).then(
+        (value) {
+          if (value) {
+            globals.showToast(context, "Spot was reported.", ToastificationType.success);
+          } else {
+            globals.showToast(context, "There is a 60 minute cooldown between reports. Please try again later.", ToastificationType.error);
+          }
         }
-      },
     );
   }
 
@@ -353,8 +374,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
   Color getAgeColor(Duration age) {
     // Define your thresholds here
-    const int freshLimitMinutes = 10;   // 0-10 mins: Green
-    const int mediumLimitMinutes = 30;  // 10-30 mins: Yellow
+    const int freshLimitMinutes = 5;   // 0-10 mins: Green
+    const int mediumLimitMinutes = 10;  // 10-30 mins: Yellow
     // 30+ mins: Red
 
     if (age.inMinutes <= freshLimitMinutes) {
@@ -678,8 +699,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                           }
                                         });
                                         isMapInitialized = true;
-                                        pulsatingMarkerPosition =
-                                            _mapctl.camera.center;
+                                        // pulsatingMarkerPosition =
+                                        //     _mapctl.camera.center;
                                       },
                                       onPositionChanged:
                                           (position, hasGesture) {
@@ -963,6 +984,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                         distanceMeters: distance,
                                         age: age,
                                         probability: parkingMarker.probability,
+                                        reportCount: parkingMarker.reports,
                                         onTap: () {
                                           _mapctl.move(parkingMarker.mapMarker.point, 18.0);
                                         },
@@ -1040,7 +1062,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
             // 3. Description text
             const Text(
-              "Thanks for keeping the map updated! Confirming this will remove the marker for all users.",
+              "Thanks for keeping the map updated! Confirming this will contribute to spot availability for all users.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

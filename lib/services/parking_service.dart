@@ -19,7 +19,8 @@ typedef ParkingSpotData = ({
 Marker mapMarker,
 String address,
 DateTime? timestamp,
-double? probability
+double? probability,
+int reports
 });
 
 class ParkingService{
@@ -37,11 +38,15 @@ class ParkingService{
 
   LatLngBounds? getLastKnownBounds() => _lastKnownBounds;
 
-  Future<bool> addLeaving(LocationData? location, String? token) async {
+  Future<({bool success, String reason})> addLeaving(LocationData? location, String? token) async {
     try {
-      if(token == null || token.isEmpty){
-        return false;
+      if (location?.latitude == null || location?.longitude == null) {
+        return (success: false, reason: 'Current location is not available.');
       }
+      if (token == null) {
+        return (success: false, reason: 'User is not authenticated.');
+      }
+
       var userId = await _authService.getCurrentUserUID();
       var response = await http.post(
           Uri.parse('${AppConfig.instance.apiUrl}/add-leaving'),
@@ -61,12 +66,16 @@ class ParkingService{
           await getMarkersInBounds(_lastKnownBounds!, 15.0);
         }
         shouldUpdate = true;
-        return true; // Return true for success
+        return (success: true, reason: 'Spot declared successfully.');
       }
-      return false; // Return false for failure
+      else if (response.statusCode == 429) {
+        return (success: false, reason: 'Cooldown active. Please wait before declaring again.');
+      } else {
+        return (success: false, reason: 'Server error: ${response.statusCode}');
+      }
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return false;
+      return (success: false, reason: 'A network error occurred. Please check your connection.');
     }
   }
 
@@ -146,7 +155,8 @@ class ParkingService{
             mapMarker: cmrk.toMarker(),
             address: cmrk.address,
             timestamp: cmrk.timestamp,
-            probability: cmrk.probability
+            probability: cmrk.probability,
+            reports: cmrk.reports
             )
         );
       }
@@ -221,6 +231,7 @@ class ParkingService{
           address: data['address'].toString() ?? 'Address Not Available',
           timestamp: DateTime.parse(data['time'] ?? DateTime.now().toIso8601String()),
           probability: (data['probability'] as num?)?.toDouble() ?? 0.0,
+          reports: (data['reports'] as int?) ?? 0,
           );
         }).toList();
 
@@ -271,6 +282,7 @@ class ParkingService{
     timestamp: DateTime.now(),
     probability: 0.75,
     address: address,
+    reports: 0,
     );
 
     // 4. Add the new marker to the list.
@@ -292,14 +304,15 @@ class ParkingService{
     print("Added marker from notification at $point. Total markers: ${mappedSpots.length}");
   }
 
-  Future<Response?> deleteMarker(Marker marker, String topic) async {
+  Future<Response?> deleteMarker(Marker marker, String topic, String uid) async {
     try {
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/delete-marker"),
           body: cnv.jsonEncode({
             "latitude": marker.point.latitude.toString(),
             "longitude": marker.point.longitude.toString(),
-            "topic": topic
+            "topic": topic,
+            "uid": uid
           }),
           headers: {
             "Content-Type": "application/json",
@@ -317,6 +330,36 @@ class ParkingService{
     }
   }
 
+  Future<bool> incrementReport(double latitude, double longitude) async {
+    try {
+      var uid = await _authService.getCurrentUserUID();
+      var response = await http.post(
+          Uri.parse("${AppConfig.instance.apiUrl}/increment-report"),
+          body: cnv.jsonEncode({
+            "latitude": latitude.toString(),
+            "longitude": longitude.toString(),
+            "user_id": uid
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+
+      if (response.statusCode == 200){
+        if (_lastKnownBounds != null) {
+          await getMarkersInBounds(_lastKnownBounds!, 15.0);
+        }
+        shouldUpdate = true;
+        return true;
+      } else{
+        return false;
+      }
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return false;
+    }
+  }
+
   // NEW METHOD for removing a marker from a notification
   void removeMarkerFromNotification(LatLng point) {
     // 1. Get the current list of markers.
@@ -328,6 +371,21 @@ class ParkingService{
     // 3. Update the notifier with the new, modified list.
     markersNotifier.value = currentMarkers;
     print("Removed marker from notification at $point. Total markers: ${currentMarkers.length}");
+  }
+
+  Future<Response?> getSearchingCount(double latitude, double longitude) async {
+    try {
+      var response = await http.get(
+          Uri.parse("${AppConfig.instance.apiUrl}/search/count?latitude=${latitude.toString()}&longitude=${longitude.toString()}"),
+          headers: {
+            "Authorization": globals.securityToken!
+          });
+      print(response.body);
+      return response;
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
+    }
   }
 
   // Future<String?> convertPointToAddress(LatLng marker) async {

@@ -156,3 +156,16 @@ void showSuccessfullToast(BuildContext context, String message) {
       boxShadow: lowModeShadow,
       showProgressBar: false);
 }
+
+void showToast(BuildContext context, String message, ToastificationType type) {
+  toastification.show(
+      context: context,
+      type: ToastificationType.success,
+      style: ToastificationStyle.flat,
+      title: Text(message),
+      alignment: Alignment.bottomCenter,
+      autoCloseDuration: const Duration(seconds: 4),
+      borderRadius: BorderRadius.circular(100.0),
+      boxShadow: lowModeShadow,
+      showProgressBar: false);
+}

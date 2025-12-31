@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "parkingmap",
-      "version": "1.0.0+6",
+      "version": "1.0.0+7",
       "dependencies": [
         "avatar_glow",
         "awesome_notifications",
@@ -30,6 +30,7 @@
         "flutter_native_splash",
         "flutter_overlay",
         "flutter_portal",
+        "flutter_ringtone_player",
         "flutter_secure_storage",
         "flutter_speed_dial",
         "fluttertoast",
@@ -2137,6 +2138,15 @@
       "version": "1.0.1",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "flutter_ringtone_player",
+      "version": "4.0.0+4",
+      "dependencies": [
+        "flutter",
+        "path_provider",
+        "plugin_platform_interface"
       ]
     }
   ],

@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -143,9 +144,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final ParkingService _parkingService = getIt<ParkingService>();
   final InitService _initService = getIt<InitService>();
 
+  final FlutterRingtonePlayer flutterRingtonePlayer = FlutterRingtonePlayer();
   // #endregion
-
-
 
   Future registerNotification() async {
     // 1. Initialize the Firebase app
@@ -189,6 +189,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           final point = LatLng(latitude, longitude);
           if (type == "add") {
             _parkingService.addMarkerFromNotification(point, address);
+            flutterRingtonePlayer.playNotification();
             if (vibrationEnabled) {
               Vibration.vibrate();
             }

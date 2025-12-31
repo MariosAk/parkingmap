@@ -66,4 +66,22 @@ class UserService{
     }
   }
 
+  Future sendAlive(String deviceId, double latitude, double longitude) async {
+    try {
+      await http.post(
+          Uri.parse("${AppConfig.instance.apiUrl}/search/heartbeat"),
+          body: cnv.jsonEncode({
+            "deviceId": deviceId,
+            "latitude": latitude.toString(),
+            "longitude": longitude.toString(),
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+    }
+  }
+
 }

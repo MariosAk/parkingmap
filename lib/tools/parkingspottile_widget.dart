@@ -5,7 +5,7 @@ class ParkingSpotTile extends StatelessWidget {
   final Duration age;
   final double? probability; // 0.0 – 1.0
   final VoidCallback onTap;
-
+  final int reportCount;
 
   const ParkingSpotTile({
     super.key,
@@ -13,22 +13,20 @@ class ParkingSpotTile extends StatelessWidget {
     required this.age,
     this.probability,
     required this.onTap,
+    required this.reportCount
   });
 
   double get _calculatedProbability {
     final minutes = age.inMinutes;
 
-    // Spot is expired after 30 minutes
-    if (minutes >= 30) return 0.0;
+    // Spot is expired after 15 minutes
+    if (minutes >= 15) return 0.0;
 
     // Very fresh (0-5 mins)
     if (minutes <= 5) return 1.0;
 
-    // Decay over the remaining 25 minutes
-    // at 10 mins -> 0.8
-    // at 17.5 mins -> 0.5
-    // at 25 mins -> 0.2
-    double remainingRatio = (30 - minutes) / 25.0;
+    // Decay over the remaining 10 minutes
+    double remainingRatio = (15 - minutes) / 10.0;
     return remainingRatio.clamp(0.0, 1.0);
   }
 
@@ -43,7 +41,7 @@ class ParkingSpotTile extends StatelessWidget {
   String getProbabilityLabel() {
     final prob = _calculatedProbability;
 
-    if (age.inMinutes >= 30) return 'Έληξε';
+    if (age.inMinutes >= 15) return 'Θα διαγραφεί σύντομα';
 
     if (prob > 0.66) return 'Υψηλή πιθανότητα';
     if (prob > 0.33) return 'Μέτρια πιθανότητα';
@@ -52,9 +50,9 @@ class ParkingSpotTile extends StatelessWidget {
 
 
   String formatAge(Duration d) {
-    if (d.inMinutes >= 30) return 'έληξε';
-    if (d.inMinutes < 1) return 'μόλις τώρα';
-    if (d.inMinutes < 60) return 'πριν ${d.inMinutes} λεπτά';
+    if (d.inMinutes >= 15) return 'Έληξε';
+    if (d.inMinutes < 1) return 'Μόλις τώρα';
+    if (d.inMinutes < 60) return 'Πριν ${d.inMinutes} λεπτά';
     return 'πριν ${d.inHours} ώρες';
   }
 
@@ -72,6 +70,25 @@ class ParkingSpotTile extends StatelessWidget {
           Text(
             getProbabilityLabel(),
             style: TextStyle(color: getProbabilityColor()),
+          ),
+        ],
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.flag_circle, // An icon representing reports
+            color: reportCount >= 3 ? Colors.red : Colors.black54,
+            size: 20,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            reportCount.toString(),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+              fontSize: 14,
+            ),
           ),
         ],
       ),

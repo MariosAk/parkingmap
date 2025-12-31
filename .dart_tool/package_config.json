@@ -482,6 +482,12 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "flutter_ringtone_player",
+      "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_ringtone_player-4.0.0+4",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "flutter_secure_storage",
       "rootUri": "file:///C:/Users/Marios/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_secure_storage-9.2.4",
       "packageUri": "lib/",
