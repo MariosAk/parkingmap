@@ -197,12 +197,10 @@ class NotificationPageState extends State<NotificationPage> {
           // Future with some errors
           else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasError) {
-            //print(snapshot.data![0].entryId.toString());
             return Text("The error ${snapshot.error} occured");
           }
           // Future not done yet
           else {
-            //print(snapshot.connectionState);
             return Scaffold(
               body: Center(
                 child: SizedBox(

@@ -31,6 +31,9 @@ class ParkingService{
   final cacheBox = "cacheBox";
   late final String? email = _authService.email;
 
+  final ValueNotifier<int> searchingCountNotifier = ValueNotifier<int>(0);
+
+
   bool shouldUpdate = true;
   LatLngBounds? _lastKnownBounds;
 
@@ -141,7 +144,9 @@ class ParkingService{
             latitude: spotData.mapMarker.point.latitude,
             longitude: spotData.mapMarker.point.longitude,
             timestamp: spotData.timestamp,
-            probability: spotData.probability);
+            probability: spotData.probability,
+            reports: spotData.reports ?? 0
+        );
       }).toList();
       await HiveService(markersBox).deleteAllCachedMarkers();
       await HiveService(markersBox).addMarkersToCache(mappedSpots);
@@ -195,7 +200,6 @@ class ParkingService{
   Future getMarkersInBounds(
       LatLngBounds bounds, double currentZoom) async {
     try {
-      print("1. [getMarkersInBounds] Fetching markers for bounds: $bounds");
       final url =
           '${AppConfig.instance.apiUrl}/markers?swLat=${bounds.southWest.latitude}&swLng=${bounds.southWest.longitude}&neLat=${bounds.northEast.latitude}&neLng=${bounds.northEast.longitude}';
 
@@ -217,7 +221,6 @@ class ParkingService{
           // Fallback in case the API sometimes returns a direct list
           markersData = decodedResponse;
         }
-        print("2. [getMarkersInBounds] API call successful. Received ${markersData.length} raw markers.");
 
         // Manually create Marker objects from the response
         List<ParkingSpotData> markers = markersData.map((data) {
@@ -241,21 +244,18 @@ class ParkingService{
               latitude: spot.mapMarker.point.latitude,
               longitude: spot.mapMarker.point.longitude,
               timestamp: spot.timestamp,
-              probability: spot.probability
+              probability: spot.probability,
+              reports: spot.reports
           );
         }).toList();
 
         markersNotifier.value = markers;
         HiveService("markersBox").addMarkersToCache(mappedSpots);
-        print("3. [getMarkersInBounds] Notifier updated with ${markers.length} markers.");
 
       } else {
-        print("2. [getMarkersInBounds] API call FAILED with status: ${response.statusCode}");
-
         markersNotifier.value = [];
       }
     } catch (error, stackTrace) {
-      print("2. [getMarkersInBounds] Exception caught: $error");
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
       markersNotifier.value = [];
     }
@@ -267,7 +267,6 @@ class ParkingService{
     // 2. Check if a marker at this point already exists to avoid duplicates.
     final markerExists = currentSpots.any((spot) => spot.mapMarker.point == point);
     if (markerExists) {
-      print("Marker at $point already exists. Not adding from notification.");
       return;
     }
 
@@ -296,12 +295,11 @@ class ParkingService{
           latitude: spot.mapMarker.point.latitude,
           longitude: spot.mapMarker.point.longitude,
           timestamp: spot.timestamp,
-          probability: spot.probability
+          probability: spot.probability,
+          reports: spot.reports
           );
     }).toList();
     HiveService("markersBox").addMarkersToCache(mappedSpots);
-
-    print("Added marker from notification at $point. Total markers: ${mappedSpots.length}");
   }
 
   Future<Response?> deleteMarker(Marker marker, String topic, String uid) async {
@@ -370,21 +368,21 @@ class ParkingService{
 
     // 3. Update the notifier with the new, modified list.
     markersNotifier.value = currentMarkers;
-    print("Removed marker from notification at $point. Total markers: ${currentMarkers.length}");
   }
 
-  Future<Response?> getSearchingCount(double latitude, double longitude) async {
+  Future<void> getSearchingCount(double latitude, double longitude) async {
     try {
       var response = await http.get(
           Uri.parse("${AppConfig.instance.apiUrl}/search/count?latitude=${latitude.toString()}&longitude=${longitude.toString()}"),
           headers: {
             "Authorization": globals.securityToken!
           });
-      print(response.body);
-      return response;
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        searchingCountNotifier.value = (data['count'] as int?) ?? 0;
+      }
     } catch (error, stackTrace) {
       FirebaseCrashlytics.instance.recordError(error, stackTrace);
-      return null;
     }
   }
 

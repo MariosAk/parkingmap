@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class ParkingSpotTile extends StatelessWidget {
@@ -6,6 +8,7 @@ class ParkingSpotTile extends StatelessWidget {
   final double? probability; // 0.0 – 1.0
   final VoidCallback onTap;
   final int reportCount;
+  final int activeSearchers;
 
   const ParkingSpotTile({
     super.key,
@@ -13,21 +16,44 @@ class ParkingSpotTile extends StatelessWidget {
     required this.age,
     this.probability,
     required this.onTap,
-    required this.reportCount
+    required this.reportCount,
+    required this.activeSearchers,
   });
 
+  // double get _calculatedProbability {
+  //   final minutes = age.inMinutes;
+  //
+  //   // Spot is expired after 15 minutes
+  //   if (minutes >= 15) return 0.0;
+  //
+  //   // Very fresh (0-5 mins)
+  //   if (minutes <= 5) return 1.0;
+  //
+  //   // Decay over the remaining 10 minutes
+  //   double remainingRatio = (15 - minutes) / 10.0;
+  //   return remainingRatio.clamp(0.0, 1.0);
+  // }
+
   double get _calculatedProbability {
+    // Backend-provided probability has priority
+    if (probability != null && probability! > 0) {
+      return probability!.clamp(0.0, 1.0);
+    }
+
     final minutes = age.inMinutes;
 
-    // Spot is expired after 15 minutes
+    // Hard expiration
     if (minutes >= 15) return 0.0;
 
-    // Very fresh (0-5 mins)
-    if (minutes <= 5) return 1.0;
+    const double lambda = 0.15; // time decay
+    const double alpha = 0.35;  // competition weight
 
-    // Decay over the remaining 10 minutes
-    double remainingRatio = (15 - minutes) / 10.0;
-    return remainingRatio.clamp(0.0, 1.0);
+    final p = math.exp(
+      -lambda * minutes * (1 + alpha * activeSearchers),
+    );
+
+    // Never show absolute 0 or 100
+    return p.clamp(0.02, 0.98);
   }
 
   Color getProbabilityColor() {
@@ -41,7 +67,7 @@ class ParkingSpotTile extends StatelessWidget {
   String getProbabilityLabel() {
     final prob = _calculatedProbability;
 
-    if (age.inMinutes >= 15) return 'Θα διαγραφεί σύντομα';
+    if (age.inMinutes >= 15) return 'Πιθανόν κατειλημμένη';
 
     if (prob > 0.66) return 'Υψηλή πιθανότητα';
     if (prob > 0.33) return 'Μέτρια πιθανότητα';

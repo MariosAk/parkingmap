@@ -26,7 +26,6 @@ class SqliteService {
     final id = await db.insert('Notifications', notification.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
     //indexSync.add(id.toString());
-    //print(indexSync[0]);
     return id.toString();
   }
 

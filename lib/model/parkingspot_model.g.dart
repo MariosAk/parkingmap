@@ -22,13 +22,14 @@ class ParkingSpotModelAdapter extends TypeAdapter<ParkingSpotModel> {
       longitude: fields[2] as double,
       timestamp: fields[3] as DateTime?,
       probability: fields[4] as double?,
+      reports: fields[5] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ParkingSpotModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.address)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class ParkingSpotModelAdapter extends TypeAdapter<ParkingSpotModel> {
       ..writeByte(3)
       ..write(obj.timestamp)
       ..writeByte(4)
-      ..write(obj.probability);
+      ..write(obj.probability)
+      ..writeByte(5)
+      ..write(obj.reports);
   }
 
   @override

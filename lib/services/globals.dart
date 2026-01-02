@@ -12,11 +12,19 @@ import 'dart:convert' as cnv;
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:toastification/toastification.dart';
 
+import '../dependency_injection.dart';
+
+AuthService _authService = getIt<AuthService>();
 bool premiumSearchState = false;
 bool searching = false;
 String? securityToken = "";
 String points = "0";
 String? fcmToken = "";
+String? uid = "";
+
+Future initializeUid() async {
+  uid = await _authService.getCurrentUserUID();
+}
 
 Future getDevToken() async {
   fcmToken = await FirebaseMessaging.instance.getToken();

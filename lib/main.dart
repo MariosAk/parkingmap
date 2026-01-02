@@ -19,6 +19,7 @@ import 'package:parkingmap/screens/unsupported_location.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/init_service.dart';
 import 'package:parkingmap/services/parking_service.dart';
+import 'package:parkingmap/services/user_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:vibration/vibration.dart';
@@ -138,11 +139,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool permissionsNotGranted = false;
   String permissionToastTitle = "", permissionToastBody = "";
 
+  Position? _currentPosition;
+
   late PageController _pageViewController;
   final ValueNotifier<int> _notifier = ValueNotifier(0);
   ValueNotifier<double> notifierImageScale = ValueNotifier(15);
   final ParkingService _parkingService = getIt<ParkingService>();
   final InitService _initService = getIt<InitService>();
+  final UserService _userService = getIt<UserService>();
 
   final FlutterRingtonePlayer flutterRingtonePlayer = FlutterRingtonePlayer();
   // #endregion
@@ -340,6 +344,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               MaterialPageRoute(builder: (context) => const EnableLocation()),
               (Route route) => false);
         }
+        _userService.sendAlive(globals.uid!, _currentPosition!.latitude, _currentPosition!.longitude);
         break;
       case AppLifecycleState.inactive:
         // widget is inactive
@@ -432,6 +437,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     Position position =
         await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+    _currentPosition = position;
     if (!(position.latitude >= 40.5530246503162 &&
         position.latitude <= 40.6600 &&
         position.longitude >= 22.87426837242212 &&
@@ -465,6 +471,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     await globals.initializeSecurityToken();
     await globals.initializePoints();
     await globals.initializePremiumSearchState();
+    await globals.initializeUid();
     updateUserID();
     _initService.registerFcmToken();
     //notificationsCount();

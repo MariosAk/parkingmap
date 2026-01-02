@@ -22,12 +22,16 @@ class ParkingSpotModel {
   @HiveField(4)
   final double? probability;
 
+  @HiveField(5)
+  final int? reports;
+
   ParkingSpotModel({
     required this.address,
     required this.latitude,
     required this.longitude,
     required this.timestamp,
     required this.probability,
+    required this.reports,
   });
 
   Marker toMarker() {

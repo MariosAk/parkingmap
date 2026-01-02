@@ -29,6 +29,7 @@ import 'package:toastification/toastification.dart';
 
 import '../dependency_injection.dart';
 import '../tools/parkingspottile_widget.dart';
+import '../tools/cooldown_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,7 +44,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
   final UserService _userService = getIt<UserService>();
 
   PushNotification? notification;
-  String? address;
+  String? address, uid;
   DateTime? notifReceiveTime;
   double height = 100;
 
@@ -161,6 +162,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     //     value = (value + 1) % 100;
     //   });
     // });
+    Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_currentLocation != null) {
+        // Update the global searcher count for the user's area
+        _parkingService.getSearchingCount(
+            _currentLocation!.latitude!,
+            _currentLocation!.longitude!
+        );
+      }
+    });
 
     radarVisibility = ValueNotifier<bool>(globals.premiumSearchState);
   }
@@ -251,6 +261,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           await FirebaseMessaging.instance
               .subscribeToTopic(cellTopic)
               .catchError((error) {});
+          _userService.sendAlive(globals.uid!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+              Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
         }
       }
 
@@ -270,10 +282,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
         previousLocation = currentLatLng;
       }
     });
+
+    var uid = await _authService.getCurrentUserUID();
+    Timer.periodic(
+      const Duration(seconds: 60),
+          (_) => _userService.sendAlive(globals.uid!, _currentLocation!.latitude!, _currentLocation!.longitude!)
+    );
+
   }
 
   String calculateCellTopic(double latitude, double longitude) {
-    const gridCellSize = 0.05;
+    const gridCellSize = 0.005;
     int latCell = ((latitude) / gridCellSize).floor();
     int lngCell = ((longitude) / gridCellSize).floor();
     cellTopic = 'thessaloniki_${latCell}_$lngCell';
@@ -685,7 +704,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                       minZoom: 16,
                                       maxZoom: 18,
                                       onMapReady: () {
-                                        print("Map is now ready. Performing initial fetch.");
                                         _parkingService.updateBounds(
                                             _mapctl.camera.visibleBounds!, _mapctl.camera.zoom);
                                         subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) {
@@ -693,7 +711,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                             _shouldCenterOnLocation = false;
                                             // When the user stops moving the map, just tell the service to update.
                                             // That's its only job.
-                                            print("Map move ended. Requesting update from service.");
                                             _parkingService.updateBounds(
                                                 mapEvent.camera.visibleBounds!, mapEvent.camera.zoom);
                                           }
@@ -799,7 +816,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                     ValueListenableBuilder<List<ParkingSpotData>>(
                                       valueListenable: _parkingService.markersNotifier,
                                       builder: (context, parkingSpots, child) {
-                                        print("UI is rebuilding with ${parkingSpots.length} markers.");
                                         //final mapMarkers = parkingSpots.map((spot) => spot.mapMarker).toList();
                                         final mapMarkers = parkingSpots.map((spot) {
 
@@ -930,78 +946,152 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                     },
                   ),
 
-                  Expanded(
-                      child: ValueListenableBuilder<LatLng?>(
-                          valueListenable: _userLocationNotifier,
-                          builder: (context, userLocation, child) {
-                            return ValueListenableBuilder<List<ParkingSpotData>>(
-                              valueListenable: _parkingService.markersNotifier,
-                              builder: (context, allSpots, child) {
-                                if (!isMapInitialized) {
-                                  // If the map isn't ready, we can't calculate visible markers.
-                                  // It's safe to return an empty container or a loading indicator.
-                                  // This prevents the crash on the first frame.
-                                  return const SizedBox
-                                      .shrink(); // Or a loading spinner
-                                }
-                                // 1. Pre-filter the markers that are visible on the map
-                                final visibleMarkers = allSpots.where((
-                                    spot) =>
-                                    _mapctl.camera.visibleBounds.contains(
-                                        spot.mapMarker.point)).toList();
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                    _) {
-                                  if (mounted) {
-                                    _spotsNotifier.value =
-                                        visibleMarkers.length;
-                                  }
-                                });
+                  // Expanded(
+                  //     child: ValueListenableBuilder<LatLng?>(
+                  //         valueListenable: _userLocationNotifier,
+                  //         builder: (context, userLocation, child) {
+                  //           return ValueListenableBuilder<List<ParkingSpotData>>(
+                  //             valueListenable: _parkingService.markersNotifier,
+                  //             builder: (context, allSpots, child) {
+                  //               if (!isMapInitialized) {
+                  //                 // If the map isn't ready, we can't calculate visible markers.
+                  //                 // It's safe to return an empty container or a loading indicator.
+                  //                 // This prevents the crash on the first frame.
+                  //                 return const SizedBox
+                  //                     .shrink(); // Or a loading spinner
+                  //               }
+                  //               // 1. Pre-filter the markers that are visible on the map
+                  //               final visibleMarkers = allSpots.where((
+                  //                   spot) =>
+                  //                   _mapctl.camera.visibleBounds.contains(
+                  //                       spot.mapMarker.point)).toList();
+                  //               WidgetsBinding.instance.addPostFrameCallback((
+                  //                   _) {
+                  //                 if (mounted) {
+                  //                   _spotsNotifier.value =
+                  //                       visibleMarkers.length;
+                  //                 }
+                  //               });
+                  //
+                  //               if (visibleMarkers.isEmpty) {
+                  //                 return Image.asset(
+                  //                     'Assets/Images/pin.gif', scale: 5);
+                  //               }
+                  //
+                  //               // 2. Build the ListView only with the visible markers
+                  //               return ListView.builder(
+                  //                 padding: EdgeInsets.symmetric(
+                  //                     vertical: screenHeight * 0.01),
+                  //                 itemCount: visibleMarkers.length,
+                  //                 itemBuilder: (context, index) {
+                  //                   final parkingMarker = visibleMarkers[index];
+                  //                   try {
+                  //                     final double distance;
+                  //                     if (userLocation == null) {
+                  //                       distance = 0.0;
+                  //                     } else {
+                  //                       distance = _calculateDistance(userLocation);
+                  //                     }
+                  //
+                  //                     final age = DateTime.now().difference(parkingMarker.timestamp!);
+                  //
+                  //                     // 4. Return the ParkingSpotTile with the real-time distance.
+                  //                     ValueListenableBuilder<int>(
+                  //                       valueListenable: _parkingService.searchingCountNotifier,
+                  //                     builder: (context, searchingCount, child) {
+                  //                       return ParkingSpotTile(
+                  //                         distanceMeters: distance,
+                  //                         age: age,
+                  //                         probability: parkingMarker
+                  //                             .probability,
+                  //                         reportCount: parkingMarker.reports,
+                  //                         activeSearchers: searchingCount,
+                  //                         onTap: () {
+                  //                           _mapctl.move(
+                  //                               parkingMarker.mapMarker.point,
+                  //                               18.0);
+                  //                         },
+                  //                       );
+                  //                     });
+                  //                   } catch (e) {
+                  //                     // Log the error for debugging purposes
+                  //                     print(
+                  //                         "Error processing address for marker: $e");
+                  //                     return const SizedBox
+                  //                         .shrink(); // Use SizedBox.shrink() instead of Container()
+                  //                   }
+                  //                 },
+                  //               );
+                  //             },
+                  //           );
+                  //         }),
+                  // )
+            Expanded(
+              child: ValueListenableBuilder<LatLng?>(
+                valueListenable: _userLocationNotifier,
+                builder: (context, userLocation, _) {
+                  return ValueListenableBuilder<int>(
+                    valueListenable: _parkingService.searchingCountNotifier,
+                    builder: (context, searchingCount, _) {
+                      return ValueListenableBuilder<List<ParkingSpotData>>(
+                        valueListenable: _parkingService.markersNotifier,
+                        builder: (context, allSpots, _) {
+                          if (!isMapInitialized) {
+                            return const SizedBox.shrink();
+                          }
 
-                                if (visibleMarkers.isEmpty) {
-                                  return Image.asset(
-                                      'Assets/Images/pin.gif', scale: 5);
-                                }
+                          final visibleMarkers = allSpots.where(
+                                (spot) => _mapctl.camera.visibleBounds
+                                .contains(spot.mapMarker.point),
+                          ).toList();
 
-                                // 2. Build the ListView only with the visible markers
-                                return ListView.builder(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: screenHeight * 0.01),
-                                  itemCount: visibleMarkers.length,
-                                  itemBuilder: (context, index) {
-                                    final parkingMarker = visibleMarkers[index];
-                                    try {
-                                      final double distance;
-                                      if (userLocation == null) {
-                                        distance = 0.0;
-                                      } else {
-                                        distance = _calculateDistance(userLocation);
-                                      }
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              _spotsNotifier.value = visibleMarkers.length;
+                            }
+                          });
 
-                                      final age = DateTime.now().difference(parkingMarker.timestamp!);
+                          if (visibleMarkers.isEmpty) {
+                            return Image.asset('Assets/Images/pin.gif', scale: 5);
+                          }
 
-                                      // 4. Return the ParkingSpotTile with the real-time distance.
-                                      return ParkingSpotTile(
-                                        distanceMeters: distance,
-                                        age: age,
-                                        probability: parkingMarker.probability,
-                                        reportCount: parkingMarker.reports,
-                                        onTap: () {
-                                          _mapctl.move(parkingMarker.mapMarker.point, 18.0);
-                                        },
-                                      );
-                                    } catch (e) {
-                                      // Log the error for debugging purposes
-                                      print(
-                                          "Error processing address for marker: $e");
-                                      return const SizedBox
-                                          .shrink(); // Use SizedBox.shrink() instead of Container()
-                                    }
-                                  },
-                                );
-                              },
-                            );
-                          }),
-                  )
+                          return ListView.builder(
+                            padding: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01,
+                            ),
+                            itemCount: visibleMarkers.length,
+                            itemBuilder: (context, index) {
+                              final parkingMarker = visibleMarkers[index];
+
+                              final distance = userLocation == null
+                                  ? 0.0
+                                  : _calculateDistance(userLocation);
+
+                              final age = DateTime.now()
+                                  .difference(parkingMarker.timestamp!);
+
+                              return ParkingSpotTile(
+                                distanceMeters: distance,
+                                age: age,
+                                probability: parkingMarker.probability,
+                                reportCount: parkingMarker.reports,
+                                activeSearchers: searchingCount,
+                                onTap: () {
+                                  _mapctl.move(
+                                    parkingMarker.mapMarker.point,
+                                    18.0,
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            )
 
                 ],
               ),
@@ -1098,27 +1188,41 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                 ),
                 const SizedBox(width: 12),
                 // Confirm Button
+                // Expanded(
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       markSpotAsTaken(marker);
+                //       Navigator.of(context).pop();
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor: Colors.blue[900],
+                //       foregroundColor: Colors.white,
+                //       padding: const EdgeInsets.symmetric(vertical: 12),
+                //       elevation: 0,
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(12),
+                //       ),
+                //     ),
+                //     child: Text(
+                //       "Confirm",
+                //       style: GoogleFonts.robotoSlab(
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      markSpotAsTaken(marker);
-                      Navigator.of(context).pop();
+                  child: CooldownButton(
+                    title: "Confirm",
+                    cooldownDuration: const Duration(seconds: 60), // Match your backend logic
+                    cooldownKey: 'last_mark_as_taken_time', // A unique key for this action
+                    onPressed: () async {
+                      // The logic to run when the button is NOT on cooldown
+                      await markSpotAsTaken(marker);
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                      }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[900],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Confirm",
-                      style: GoogleFonts.robotoSlab(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ),
               ],
