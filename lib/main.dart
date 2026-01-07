@@ -9,6 +9,7 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:parkingmap/enums/cooldown_type_enum.dart';
 import 'package:parkingmap/model/latlng_bounds_model.dart';
 import 'package:parkingmap/model/location.dart';
 import 'package:parkingmap/model/marker_model.dart';
@@ -208,45 +209,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     //   FirebaseCrashlytics.instance.recordError(error, StackTrace.current);
     // }
   }
-
-  // Future notificationsCount() async {
-  //   if (screens.isEmpty) {
-  //     screens.add(HomePage());
-  //     screens.add(DeclareSpotScreen(token: token.toString()));
-  //     screens.add(const SettingsScreen());
-  //   }
-  // }
-
-  // postInsertTime() async {
-  //   try {
-  //     var response = await http.post(
-  //         //Uri.parse("http://192.168.1.26:8080/pasthelwparking/searching.php"), //vm
-  //         Uri.parse("https://pasthelwparkingv1.000webhostapp.com/php/insert_time.php"),
-  //         body: {"time": '$notifReceiveTime', "uid": '$token'});
-  //     print(response.body);
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
-  // getUserID() async {
-  //   try {
-  //     email = AuthService().email;
-  //     var response = await http.post(
-  //         Uri.parse("${AppConfig.instance.apiUrl}/get-userid"),
-  //         body: cnv.jsonEncode({"email": email.toString()}),
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "Authorization": globals.securityToken!
-  //         });
-  //     if (response.body.isNotEmpty) {
-  //       var decoded = cnv.jsonDecode(response.body);
-  //       token = decoded["user_id"];
-  //     }
-  //   } catch (e) {
-  //     return e.toString();
-  //   }
-  // }
 
   Future updateUserID() async {
     try {
@@ -468,10 +430,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Future appInitializations() async {
     //await requirePermissions();
     await _getPosition;
+    await globals.initializeSharedPreferences();
     await globals.initializeSecurityToken();
     await globals.initializePoints();
     await globals.initializePremiumSearchState();
     await globals.initializeUid();
+    await globals.getLastActionTime(CooldownType.report);
+    await globals.getLastActionTime(CooldownType.declare);
     updateUserID();
     _initService.registerFcmToken();
     //notificationsCount();

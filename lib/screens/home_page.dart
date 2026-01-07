@@ -1,35 +1,29 @@
 import 'dart:async';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart';
 import 'package:location/location.dart';
+import 'package:parkingmap/enums/cooldown_type_enum.dart';
 import 'package:parkingmap/model/location.dart';
 import 'package:parkingmap/model/marker_model.dart';
 import 'package:parkingmap/model/pushnotification_model.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart';
 import 'package:parkingmap/services/hive_service.dart';
-import 'package:parkingmap/services/marker_event_bus.dart';
-import 'dart:convert' as cnv;
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:parkingmap/services/parking_service.dart';
 import 'package:parkingmap/services/user_service.dart';
-import 'package:parkingmap/tools/app_config.dart';
 import 'package:parkingmap/tools/radar_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_map_math/flutter_geo_math.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
 
 import '../dependency_injection.dart';
+import '../tools/confirm_spot_taken.dart';
 import '../tools/parkingspottile_widget.dart';
-import '../tools/cooldown_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -126,14 +120,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     super.initState();
     startLocationTracking();
 
-    // previousLocation = LatLng(
-    //     Provider.of<LocationProvider>(context, listen: false)
-    //         .currentLocation!
-    //         .latitude!,
-    //     Provider.of<LocationProvider>(context, listen: false)
-    //         .currentLocation!
-    //         .longitude!);
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -157,11 +143,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
       });
 
     }
-    // timer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
-    //   setState(() {
-    //     value = (value + 1) % 100;
-    //   });
-    // });
+
     Timer.periodic(const Duration(seconds: 30), (_) {
       if (_currentLocation != null) {
         // Update the global searcher count for the user's area
@@ -229,15 +211,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
       LatLng currentLatLng = LatLng(currentLocation.latitude!, currentLocation.longitude!);
       cellTopic = calculateCellTopic(
           currentLocation.latitude!, currentLocation.longitude!);
-      // if (oldTopic != cellTopic &&
-      //     (previousLocation == null || _calculateDistance(currentLatLng) > 500.0)) {
-      //   if (oldTopic.isNotEmpty) {
-      //     await FirebaseMessaging.instance.unsubscribeFromTopic(oldTopic);
-      //   }
-      //   await FirebaseMessaging.instance
-      //       .subscribeToTopic(cellTopic)
-      //       .catchError((error) {});
-      // }
 
       if (previousLocation == null) {
         await FirebaseMessaging.instance
@@ -273,7 +246,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
         //pulsatingMarkerPosition = currentLatLng;
         _userLocationNotifier.value = currentLatLng;
         // Move the map to the user's current position
-        if (_shouldCenterOnLocation &&
+        if (
             (previousLocation == null || _calculateDistance(currentLatLng) > 5.0)) {
           _mapctl.move(currentLatLng, 18.0);
         }
@@ -357,16 +330,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           showProgressBar: false);
       return;
     }
-    var uid = await _authService.getCurrentUserUID();
-    // _parkingService.deleteMarker(marker, cellTopic, uid!).then(
-    //   (value) {
-    //     if (value != null && value.statusCode == 200) {
-    //       globals.showSuccessfullToast(context, "Spot was deleted.");
-    //     } else {
-    //       globals.showServerErrorToast(context);
-    //     }
-    //   },
-    // );
+
     _parkingService.incrementReport(marker.point.latitude, marker.point.longitude).then(
         (value) {
           if (value) {
@@ -581,6 +545,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     double multiplierList = shortestSide >= 600 ? 0.02 : 0.035;
     double addressTextSize = screenWidth * multiplier;
     double sizedboxSize = screenHeight * 0.015;
+    double myLocationButtonSize = screenWidth * multiplier;
     double listTextSize = screenWidth * multiplierList;
     return Container(
         color: Colors.white,
@@ -633,30 +598,30 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                   ),
 
                   // Right-side actions
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _purchasePriorityPrompt(context);
-                        },
-                        child:
-                            Image.asset('Assets/Images/reward.png', scale: 15),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5, right: 10),
-                        child: Text(
-                          globals.points,
-                          style: GoogleFonts.robotoSlab(
-                            textStyle: const TextStyle(
-                              color: Colors.lightBlue,
-                              fontSize: 25,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisSize: MainAxisSize.min,
+                  //   children: [
+                  //     GestureDetector(
+                  //       onTap: () {
+                  //         _purchasePriorityPrompt(context);
+                  //       },
+                  //       child:
+                  //           Image.asset('Assets/Images/reward.png', scale: 15),
+                  //     ),
+                  //     Padding(
+                  //       padding: const EdgeInsets.only(left: 5, right: 10),
+                  //       child: Text(
+                  //         globals.points,
+                  //         style: GoogleFonts.robotoSlab(
+                  //           textStyle: const TextStyle(
+                  //             color: Colors.lightBlue,
+                  //             fontSize: 25,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
@@ -716,8 +681,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                           }
                                         });
                                         isMapInitialized = true;
-                                        // pulsatingMarkerPosition =
-                                        //     _mapctl.camera.center;
                                       },
                                       onPositionChanged:
                                           (position, hasGesture) {
@@ -736,22 +699,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                                         userAgentPackageName:
                                             "com.maappinnovations.parkingmap"),
-                                    // CircleLayer(
-                                    //   circles: [
-                                    //     CircleMarker(
-                                    //       point: LatLng(40.629485,
-                                    //           22.948015), // Center of the circle
-                                    //       color: Colors.blue.withOpacity(
-                                    //           0.3), // Fill color with opacity
-                                    //       borderStrokeWidth: 2.0,
-                                    //       borderColor:
-                                    //           Colors.blue, // Border color
-                                    //       useRadiusInMeter:
-                                    //           true, // Use radius in meters
-                                    //       radius: 500, // Radius in meters
-                                    //     ),
-                                    //   ],
-                                    // ),
                                     if (isMapInitialized)
                                       AnimatedBuilder(
                                         // 1. It listens to your existing animation controller.
@@ -805,11 +752,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                     Positioned(
                                       bottom: 20,
                                       right: 20,
+                                      height: screenHeight * multiplier,
+                                      width: screenWidth * multiplier * 2.2,
                                       child: FloatingActionButton(
                                         onPressed: _centerOnCurrentLocation,
                                         backgroundColor: Colors.white70,
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.my_location,
+                                          size: myLocationButtonSize,
                                         ),
                                       ),
                                     ),
@@ -826,36 +776,31 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                           // 2. Return a new Marker with the composite UI (Icon + Dot)
                                           return Marker(
                                             point: spot.mapMarker.point,
-                                            width: 80.0, // Keep consistent with your original size
-                                            height: 80.0,
-                                            // Use a Stack to overlay the dot on top of the image
+                                            width: 90.0, // Slightly larger to fit the glow
+                                            height: 90.0,
                                             child: Stack(
                                               alignment: Alignment.center,
                                               children: [
-                                                // Layer A: The original parking icon
-                                                //Image.asset('Assets/Images/parking-location.png', scale: 18),
-
-                                                // Layer B: The TTL Indicator Dot
-                                                Positioned(
-                                                  top: 15, // Adjust these values to position the dot exactly where you want
-                                                  right: 20,
-                                                  child: Container(
-                                                    width: 14,
-                                                    height: 14,
-                                                    decoration: BoxDecoration(
-                                                      color: statusColor,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(color: Colors.white, width: 2),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.black.withOpacity(0.3),
-                                                          blurRadius: 2,
-                                                          offset: const Offset(0, 1),
-                                                        )
-                                                      ],
-                                                    ),
+                                                // 1. The Glow/Halo Layer
+                                                Container(
+                                                  width: 60,
+                                                  height: 60,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: statusColor.withOpacity(0.2), // Transparent center
+                                                    border: Border.all(color: statusColor.withOpacity(0.5), width: 2),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: statusColor.withOpacity(0.4),
+                                                        blurRadius: 15,
+                                                        spreadRadius: 2,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
+
+                                                // 2. The Icon Layer
+                                                Image.asset('Assets/Images/parking-location.png', scale: 18),
                                               ],
                                             ),
                                           );
@@ -865,20 +810,24 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                             markers: mapMarkers,
                                             popupController: _popupController,
                                             onPopupEvent:
-                                                (event, selectedMarkers) {
+                                                (event, selectedMarkers) async{
                                               if (selectedMarkers.isNotEmpty) {
                                                 // Assuming you want to show the dialog for the first selected marker
                                                 Marker selectedMarker =
                                                     selectedMarkers.first;
 
-                                                // Show the AlertDialog when the popup is tapped
+                                                const cooldownLimit = Duration(minutes: 10);
+                                                Duration remaining = await globals.getRemainingCooldown(cooldownLimit, CooldownType.report);
+
                                                 showDialog(
                                                   context: context,
-                                                  builder: (BuildContext
-                                                          context) =>
-                                                      _showMarkAsTakenDialog(
-                                                          context,
-                                                          selectedMarker),
+                                                  barrierDismissible: false,
+                                                  builder: (_) => MarkAsTakenCooldownDialog(
+                                                    cooldownRemaining: remaining,
+                                                    onConfirm: () {
+                                                      markSpotAsTaken(selectedMarker);
+                                                    },
+                                                  ),
                                                 );
                                               }
                                             },
@@ -946,86 +895,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                     },
                   ),
 
-                  // Expanded(
-                  //     child: ValueListenableBuilder<LatLng?>(
-                  //         valueListenable: _userLocationNotifier,
-                  //         builder: (context, userLocation, child) {
-                  //           return ValueListenableBuilder<List<ParkingSpotData>>(
-                  //             valueListenable: _parkingService.markersNotifier,
-                  //             builder: (context, allSpots, child) {
-                  //               if (!isMapInitialized) {
-                  //                 // If the map isn't ready, we can't calculate visible markers.
-                  //                 // It's safe to return an empty container or a loading indicator.
-                  //                 // This prevents the crash on the first frame.
-                  //                 return const SizedBox
-                  //                     .shrink(); // Or a loading spinner
-                  //               }
-                  //               // 1. Pre-filter the markers that are visible on the map
-                  //               final visibleMarkers = allSpots.where((
-                  //                   spot) =>
-                  //                   _mapctl.camera.visibleBounds.contains(
-                  //                       spot.mapMarker.point)).toList();
-                  //               WidgetsBinding.instance.addPostFrameCallback((
-                  //                   _) {
-                  //                 if (mounted) {
-                  //                   _spotsNotifier.value =
-                  //                       visibleMarkers.length;
-                  //                 }
-                  //               });
-                  //
-                  //               if (visibleMarkers.isEmpty) {
-                  //                 return Image.asset(
-                  //                     'Assets/Images/pin.gif', scale: 5);
-                  //               }
-                  //
-                  //               // 2. Build the ListView only with the visible markers
-                  //               return ListView.builder(
-                  //                 padding: EdgeInsets.symmetric(
-                  //                     vertical: screenHeight * 0.01),
-                  //                 itemCount: visibleMarkers.length,
-                  //                 itemBuilder: (context, index) {
-                  //                   final parkingMarker = visibleMarkers[index];
-                  //                   try {
-                  //                     final double distance;
-                  //                     if (userLocation == null) {
-                  //                       distance = 0.0;
-                  //                     } else {
-                  //                       distance = _calculateDistance(userLocation);
-                  //                     }
-                  //
-                  //                     final age = DateTime.now().difference(parkingMarker.timestamp!);
-                  //
-                  //                     // 4. Return the ParkingSpotTile with the real-time distance.
-                  //                     ValueListenableBuilder<int>(
-                  //                       valueListenable: _parkingService.searchingCountNotifier,
-                  //                     builder: (context, searchingCount, child) {
-                  //                       return ParkingSpotTile(
-                  //                         distanceMeters: distance,
-                  //                         age: age,
-                  //                         probability: parkingMarker
-                  //                             .probability,
-                  //                         reportCount: parkingMarker.reports,
-                  //                         activeSearchers: searchingCount,
-                  //                         onTap: () {
-                  //                           _mapctl.move(
-                  //                               parkingMarker.mapMarker.point,
-                  //                               18.0);
-                  //                         },
-                  //                       );
-                  //                     });
-                  //                   } catch (e) {
-                  //                     // Log the error for debugging purposes
-                  //                     print(
-                  //                         "Error processing address for marker: $e");
-                  //                     return const SizedBox
-                  //                         .shrink(); // Use SizedBox.shrink() instead of Container()
-                  //                   }
-                  //                 },
-                  //               );
-                  //             },
-                  //           );
-                  //         }),
-                  // )
             Expanded(
               child: ValueListenableBuilder<LatLng?>(
                 valueListenable: _userLocationNotifier,
@@ -1098,139 +967,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
             ),
           ),
         ));
-  }
-
-  Widget _showMarkAsTakenDialog(BuildContext context, Marker marker) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24.0),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.0,
-              offset: Offset(0.0, 10.0),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 1. Visual Icon Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.beenhere_rounded, // Represents verification/completion
-                size: 40,
-                color: Colors.blue[900],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // 2. Title
-            Text(
-              "Spot Taken?",
-              style: GoogleFonts.robotoSlab(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue[900],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 3. Description text
-            const Text(
-              "Thanks for keeping the map updated! Confirming this will contribute to spot availability for all users.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 4. Buttons Row
-            Row(
-              children: [
-                // Cancel Button
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Cancel",
-                      style: GoogleFonts.robotoSlab(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Confirm Button
-                // Expanded(
-                //   child: ElevatedButton(
-                //     onPressed: () {
-                //       markSpotAsTaken(marker);
-                //       Navigator.of(context).pop();
-                //     },
-                //     style: ElevatedButton.styleFrom(
-                //       backgroundColor: Colors.blue[900],
-                //       foregroundColor: Colors.white,
-                //       padding: const EdgeInsets.symmetric(vertical: 12),
-                //       elevation: 0,
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(12),
-                //       ),
-                //     ),
-                //     child: Text(
-                //       "Confirm",
-                //       style: GoogleFonts.robotoSlab(
-                //         fontWeight: FontWeight.bold,
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                Expanded(
-                  child: CooldownButton(
-                    title: "Confirm",
-                    cooldownDuration: const Duration(seconds: 60), // Match your backend logic
-                    cooldownKey: 'last_mark_as_taken_time', // A unique key for this action
-                    onPressed: () async {
-                      // The logic to run when the button is NOT on cooldown
-                      await markSpotAsTaken(marker);
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showCurrentOrCustomLocationDialog(BuildContext context) {

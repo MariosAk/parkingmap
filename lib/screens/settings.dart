@@ -75,34 +75,34 @@ class SettingsScreenState extends State<SettingsScreen> {
                     const Divider(color: Colors.black),
 
                     // Notification Toggle
-                    SwitchListTile(
-                      title: Text(
-                        "Enable Notifications",
-                        style: GoogleFonts.robotoSlab(
-                          textStyle: const TextStyle(color: Colors.black),
-                        ),
-                      ),
-                      value: false,
-                      onChanged: null,
-                      secondary: const Icon(Icons.notifications,
-                          color: Colors.blueAccent),
-                    ),
-                    const Divider(color: Colors.black),
+                    // SwitchListTile(
+                    //   title: Text(
+                    //     "Enable Notifications",
+                    //     style: GoogleFonts.robotoSlab(
+                    //       textStyle: const TextStyle(color: Colors.black),
+                    //     ),
+                    //   ),
+                    //   value: false,
+                    //   onChanged: null,
+                    //   secondary: const Icon(Icons.notifications,
+                    //       color: Colors.blueAccent),
+                    // ),
+                    // const Divider(color: Colors.black),
 
                     // Change Password
-                    ListTile(
-                      leading: const Icon(Icons.lock, color: Colors.blueAccent),
-                      title: Text(
-                        "Change Password",
-                        style: GoogleFonts.robotoSlab(
-                          textStyle: const TextStyle(color: Colors.black),
-                        ),
-                      ),
-                      onTap: () {
-                        globals.showSoonToComeToast(context);
-                      },
-                    ),
-                    const Divider(color: Colors.black),
+                    // ListTile(
+                    //   leading: const Icon(Icons.lock, color: Colors.blueAccent),
+                    //   title: Text(
+                    //     "Change Password",
+                    //     style: GoogleFonts.robotoSlab(
+                    //       textStyle: const TextStyle(color: Colors.black),
+                    //     ),
+                    //   ),
+                    //   onTap: () {
+                    //     globals.showSoonToComeToast(context);
+                    //   },
+                    // ),
+                    // const Divider(color: Colors.black),
 
                     ListTile(
                       leading: const Icon(Icons.no_accounts, color: Colors.red),

@@ -7,18 +7,54 @@ import 'package:provider/provider.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
 import '../dependency_injection.dart';
+import '../enums/cooldown_type_enum.dart';
 import '../model/location.dart';
 import '../services/auth_service.dart';
+import '../tools/cooldown_widget.dart';
 
-class DeclareSpotScreen extends StatelessWidget {
+class DeclareSpotScreen extends StatefulWidget  {
+  const DeclareSpotScreen({super.key});
+
+  @override
+  State<DeclareSpotScreen> createState() => _DeclareSpotScreenState();
+}
+
+class _DeclareSpotScreenState extends State<DeclareSpotScreen> {
   final ParkingService _parkingService = getIt<ParkingService>();
   final PointsService _pointsService = getIt<PointsService>();
   final AuthService _authService = getIt<AuthService>();
 
-  DeclareSpotScreen({super.key});
+  final cooldownLimit = const Duration(minutes: 2);
+  Duration? _cooldownRemaining;
+  bool _loadingCooldown = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCooldown();
+  }
+
+  Future<void> _loadCooldown() async {
+    final remaining = await globals.getRemainingCooldown(
+      cooldownLimit,
+      CooldownType.declare,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _cooldownRemaining = remaining;
+      _loadingCooldown = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingCooldown) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -46,52 +82,53 @@ class DeclareSpotScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30), // Add space between title and button
 
-            // Button: "I have vacated a parking spot"
             Center(
-              child: ElevatedButton.icon(
+              child: CooldownButton(
+                title: "I have vacated a parking spot",
+                icon: Icons.local_parking_rounded,
+                cooldownDuration: cooldownLimit,
+                initialRemaining: _cooldownRemaining ?? Duration.zero,
+                //cooldownDuration: const Duration(minutes: 5), // Set your desired cooldown
+                //cooldownKey: 'lastDeclareTime', // A unique key for this action
                 onPressed: () async {
-                  // Add your logic to declare the parking spot here
-                  final location =
-                      Provider.of<LocationProvider>(context, listen: false)
-                          .currentLocation;
-                  _parkingService.addLeaving(location, await _authService.getCurrentUserUID()).then(
-                    (value) {
-                      if (value.success) {
-                        toastification.show(
-                            context: context,
-                            type: ToastificationType.success,
-                            style: ToastificationStyle.flat,
-                            title: Text(value.reason),
-                            alignment: Alignment.bottomCenter,
-                            autoCloseDuration: const Duration(seconds: 4),
-                            borderRadius: BorderRadius.circular(100.0),
-                            boxShadow: lowModeShadow,
-                            showProgressBar: false);
+                  // This code only runs when the button is NOT on cooldown.
+                  final location = Provider.of<LocationProvider>(context, listen: false).currentLocation;
+                  final uid = await _authService.getCurrentUserUID();
 
-                        _pointsService.updatePoints();
-                        //_parkingService.addMarkerFromNotification(new LatLng(location!.latitude!, location!.longitude!));
-                      } else {
-                        globals.showToast(context, value.reason, ToastificationType.error);
-                      }
-                    },
-                  );
+                  if (location == null || uid == null) {
+                    globals.showToast(context, "Could not get user or location data.", ToastificationType.error);
+                    return false;
+                  }
+
+                  final result = await _parkingService.addLeaving(location, uid);
+
+                  if (!context.mounted) return false;
+
+                  if (result.success) {
+                    //startCooldown();
+                    //_loadCooldown();
+
+                    toastification.show(
+                        context: context,
+                        type: ToastificationType.success,
+                        style: ToastificationStyle.flat,
+                        title: Text(result.reason),
+                        alignment: Alignment.bottomCenter,
+                        autoCloseDuration: const Duration(seconds: 4),
+                        borderRadius: BorderRadius.circular(100.0),
+                        boxShadow: lowModeShadow,
+                        showProgressBar: false);
+
+                    _pointsService.updatePoints();
+                    return true;
+                  } else {
+                    globals.showToast(context, result.reason, ToastificationType.error);
+                    return false;
+                  }
                 },
-                style: ElevatedButton.styleFrom(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.zero, // Rectangle shape (no rounding)
-                    ),
-                    backgroundColor: Colors.blue, // Button color
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 15),
-                    textStyle: const TextStyle(fontSize: 18),
-                    foregroundColor: Colors.white),
-                label: Text("I have vacated a parking spot",
-                    style: GoogleFonts.robotoSlab()),
-                icon: const Icon(Icons.local_parking_rounded),
-                iconAlignment: IconAlignment.start,
               ),
             ),
+
             const SizedBox(
                 height: 10), // Space between button and the next section
 

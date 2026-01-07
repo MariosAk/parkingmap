@@ -3,6 +3,7 @@ library;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:parkingmap/enums/cooldown_type_enum.dart';
 import 'package:parkingmap/screens/login.dart';
 import 'package:parkingmap/services/hive_service.dart';
 import 'package:parkingmap/tools/app_config.dart';
@@ -21,6 +22,11 @@ String? securityToken = "";
 String points = "0";
 String? fcmToken = "";
 String? uid = "";
+SharedPreferences? sharedPreferences;
+
+Future initializeSharedPreferences() async {
+  sharedPreferences = await SharedPreferences.getInstance();
+}
 
 Future initializeUid() async {
   uid = await _authService.getCurrentUserUID();
@@ -108,6 +114,99 @@ Future<void> getPoints() async {
   } catch (error, stackTrace) {
     FirebaseCrashlytics.instance.recordError(error, stackTrace);
   }
+}
+
+Future getLastActionTime(CooldownType cooldownType) async {
+  var lastActionTime = cooldownType == CooldownType.report ? sharedPreferences?.getString('lastReportTime') : sharedPreferences?.getString('lastDeclareTime');
+
+  if(lastActionTime == null || lastActionTime.isEmpty) {
+    lastActionTime = cooldownType == CooldownType.report ? await fetchLastReportTime(uid!) : await fetchLastDeclareTime(uid!);
+    cooldownType == CooldownType.report ? sharedPreferences?.setString('lastReportTime', lastActionTime) : sharedPreferences?.setString('lastDeclareTime', lastActionTime);
+  }
+
+  return lastActionTime;
+}
+
+Future<DateTime?> getLastActionDateTime(CooldownType cooldownType) async {
+  var timeStr = await getLastActionTime(cooldownType); // Returns String like "2023-10-27T10:00:00.000Z" or ""
+
+  if (timeStr != null && timeStr is String && timeStr.isNotEmpty) {
+    return DateTime.tryParse(timeStr);
+  }
+  return null;
+}
+
+// 1. Get Duration SINCE the last report (Time Elapsed)
+// Future<Duration> getTimeSinceLastReport() async {
+//   DateTime? lastReport = await getLastReportDateTime();
+//   if (lastReport == null) {
+//     return Duration.zero; // Or a very large duration if "never" means infinite time
+//   }
+//   return DateTime.now().difference(lastReport);
+// }
+
+// 2. Get Duration REMAINING for a cooldown (e.g., 5 minutes)
+Future<Duration> getRemainingCooldown(Duration cooldownDuration, CooldownType cooldownType) async {
+  DateTime? lastAction = await getLastActionDateTime(cooldownType);
+  if (lastAction == null) {
+    return Duration.zero; // No previous report, so 0 cooldown remaining
+  }
+
+  final difference = DateTime.now().difference(lastAction);
+
+  if (difference < cooldownDuration) {
+    return cooldownDuration - difference;
+  } else {
+    return Duration.zero; // Cooldown has passed
+  }
+}
+
+Future<String> fetchLastReportTime(String userId) async {
+  try{
+    var response = await http.get(Uri.parse("${AppConfig.instance.apiUrl}/user-last-report-time?user_id=$userId"),
+        headers: {
+          "Authorization": securityToken!
+        });
+    if(response.statusCode == 200){
+      final decodedBody = cnv.jsonDecode(response.body);
+      if (decodedBody is Map<String, dynamic> && decodedBody.containsKey('last_report_time')) {
+        return decodedBody['last_report_time'] as String;
+      }
+
+      // Fallback if the backend sends just the string "..."
+      if (decodedBody is String) {
+        return decodedBody;
+      }
+    }
+  }
+  catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  }
+  return "";
+}
+
+Future<String> fetchLastDeclareTime(String userId) async {
+  try{
+    var response = await http.get(Uri.parse("${AppConfig.instance.apiUrl}/user-last-declare-time?user_id=$userId"),
+        headers: {
+          "Authorization": securityToken!
+        });
+    if(response.statusCode == 200){
+      final decodedBody = cnv.jsonDecode(response.body);
+      if (decodedBody is Map<String, dynamic> && decodedBody.containsKey('last_declare_time')) {
+        return decodedBody['last_declare_time'] as String;
+      }
+
+      // Fallback if the backend sends just the string "..."
+      if (decodedBody is String) {
+        return decodedBody;
+      }
+    }
+  }
+  catch (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  }
+  return "";
 }
 
 // Function to sign out the user

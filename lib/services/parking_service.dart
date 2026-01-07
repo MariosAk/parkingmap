@@ -68,6 +68,7 @@ class ParkingService{
         if (_lastKnownBounds != null) {
           await getMarkersInBounds(_lastKnownBounds!, 15.0);
         }
+        await globals.sharedPreferences?.setString('lastDeclareTime', DateTime.now().toString());
         shouldUpdate = true;
         return (success: true, reason: 'Spot declared successfully.');
       }
@@ -346,6 +347,11 @@ class ParkingService{
       if (response.statusCode == 200){
         if (_lastKnownBounds != null) {
           await getMarkersInBounds(_lastKnownBounds!, 15.0);
+        }
+        final data = jsonDecode(response.body);
+        if(data != null && data['dateNow'] != null) {
+          globals.sharedPreferences?.setString(
+              'lastReportTime', data['dateNow'].toString());
         }
         shouldUpdate = true;
         return true;

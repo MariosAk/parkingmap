@@ -1,20 +1,24 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CooldownButton extends StatefulWidget {
   final String title;
+  final IconData? icon;
   final Duration cooldownDuration;
-  final String cooldownKey; // Key to store the timestamp in SharedPreferences
-  final Future<void> Function() onPressed;
+  final Duration initialRemaining;
+  final Future<bool> Function() onPressed;
 
+  /// onPressed must return:
+  /// true  → start cooldown
+  /// false → do nothing (error case)
   const CooldownButton({
     super.key,
     required this.title,
     required this.cooldownDuration,
-    required this.cooldownKey,
+    required this.initialRemaining,
     required this.onPressed,
+    this.icon,
   });
 
   @override
@@ -23,72 +27,87 @@ class CooldownButton extends StatefulWidget {
 
 class _CooldownButtonState extends State<CooldownButton> {
   Timer? _timer;
-  Duration _remainingTime = Duration.zero;
+  late Duration _remaining;
+  bool _locked = false; // prevents double tap
 
   @override
   void initState() {
     super.initState();
-    _checkCooldown();
-    // Set up a periodic timer to update the UI every second
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _checkCooldown());
-  }
+    _remaining = widget.initialRemaining;
 
-  @override
-  void dispose() {
-    _timer?.cancel(); // Always cancel the timer to prevent memory leaks
-    super.dispose();
-  }
-
-  Future<void> _checkCooldown() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastActionTimeStr = prefs.getString(widget.cooldownKey);
-
-    if (lastActionTimeStr != null) {
-      final lastActionTime = DateTime.parse(lastActionTimeStr);
-      final difference = DateTime.now().difference(lastActionTime);
-
-      if (difference < widget.cooldownDuration) {
-        if (mounted) {
-          setState(() {
-            _remainingTime = widget.cooldownDuration - difference;
-          });
-        }
-      } else {
-        if (mounted && _remainingTime != Duration.zero) {
-          setState(() {
-            _remainingTime = Duration.zero;
-          });
-        }
-      }
+    if (_remaining.inSeconds > 0) {
+      _startTimer();
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final bool isOnCooldown = _remainingTime.inSeconds > 0;
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
-    return ElevatedButton(
-      onPressed: isOnCooldown ? null : widget.onPressed, // Disable button if on cooldown
+  void _startCooldown() {
+    _timer?.cancel();
+
+    setState(() {
+      _remaining = widget.cooldownDuration;
+      _locked = false;
+    });
+
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _remaining -= const Duration(seconds: 1);
+        if (_remaining.inSeconds <= 0) {
+          _remaining = Duration.zero;
+          _timer?.cancel();
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isOnCooldown = _remaining.inSeconds > 0;
+    final minutes = _remaining.inMinutes;
+    final seconds = (_remaining.inSeconds % 60).toString().padLeft(2, '0');
+
+    return ElevatedButton.icon(
+      onPressed: (isOnCooldown || _locked)
+          ? null
+          : () async {
+        setState(() => _locked = true); // immediate disable
+
+        final success = await widget.onPressed();
+
+        if (!mounted) return;
+
+        if (success) {
+          _startCooldown();
+        } else {
+          setState(() => _locked = false); // re-enable on failure
+        }
+      },
       style: ElevatedButton.styleFrom(
-        backgroundColor: isOnCooldown ? Colors.grey[700] : Colors.blue[900], // Visual feedback
+        backgroundColor: isOnCooldown || _locked
+            ? Colors.grey[500]
+            : Colors.blue,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        // This makes the button's disabled state look better
-        disabledBackgroundColor: Colors.grey[400],
-        disabledForegroundColor: Colors.grey[700],
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        textStyle: const TextStyle(fontSize: 18),
       ),
-      child: Text(
-        // Show the title or the remaining time
+      icon: Icon(widget.icon),
+      label: Text(
         isOnCooldown
-            ? 'Wait ${_remainingTime.inSeconds}s'
+            ? 'Please wait $minutes:$seconds'
             : widget.title,
-        style: GoogleFonts.robotoSlab(
-          fontWeight: FontWeight.bold,
-        ),
+        style: GoogleFonts.robotoSlab(),
       ),
     );
   }

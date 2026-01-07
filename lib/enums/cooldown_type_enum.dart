@@ -1,0 +1,4 @@
+enum CooldownType {
+  declare,
+  report,
+}
