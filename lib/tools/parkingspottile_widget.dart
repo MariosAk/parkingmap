@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../services/globals.dart' as globals;
+
 class ParkingSpotTile extends StatelessWidget {
   final double distanceMeters;
   final Duration age;
@@ -34,47 +36,6 @@ class ParkingSpotTile extends StatelessWidget {
   //   return remainingRatio.clamp(0.0, 1.0);
   // }
 
-  double get _calculatedProbability {
-    // Backend-provided probability has priority
-    if (probability != null && probability! > 0) {
-      return probability!.clamp(0.0, 1.0);
-    }
-
-    final minutes = age.inMinutes;
-
-    // Hard expiration
-    if (minutes >= 15) return 0.0;
-
-    const double lambda = 0.15; // time decay
-    const double alpha = 0.35;  // competition weight
-
-    final p = math.exp(
-      -lambda * minutes * (1 + alpha * activeSearchers),
-    );
-
-    // Never show absolute 0 or 100
-    return p.clamp(0.02, 0.98);
-  }
-
-  Color getProbabilityColor() {
-    final prob = _calculatedProbability;
-    if (prob > 0.66) return Colors.green;
-    if (prob > 0.33) return Colors.orange;
-    return Colors.red;
-  }
-
-
-  String getProbabilityLabel() {
-    final prob = _calculatedProbability;
-
-    if (age.inMinutes >= 15) return 'Πιθανόν κατειλημμένη';
-
-    if (prob > 0.66) return 'Υψηλή πιθανότητα';
-    if (prob > 0.33) return 'Μέτρια πιθανότητα';
-    return 'Χαμηλή πιθανότητα';
-  }
-
-
   String formatAge(Duration d) {
     if (d.inMinutes >= 15) return 'Έληξε';
     if (d.inMinutes < 1) return 'Μόλις τώρα';
@@ -94,8 +55,8 @@ class ParkingSpotTile extends StatelessWidget {
         children: [
           Text(formatAge(age)),
           Text(
-            getProbabilityLabel(),
-            style: TextStyle(color: getProbabilityColor()),
+            globals.getProbabilityLabel(probability, age, activeSearchers),
+            style: TextStyle(color: globals.getProbabilityColor(probability, age, activeSearchers)),
           ),
         ],
       ),

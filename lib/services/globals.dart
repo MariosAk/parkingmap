@@ -1,5 +1,7 @@
 library;
 
+import 'dart:math' as math;
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -275,4 +277,44 @@ void showToast(BuildContext context, String message, ToastificationType type) {
       borderRadius: BorderRadius.circular(100.0),
       boxShadow: lowModeShadow,
       showProgressBar: false);
+}
+
+double getCalculatedProbability(double? probability, Duration age, int activeSearchers) {
+  // Backend-provided probability has priority
+  if (probability != null && probability > 0) {
+    return probability.clamp(0.0, 1.0);
+  }
+
+  final minutes = age.inMinutes;
+
+  // Hard expiration
+  if (minutes >= 15) return 0.0;
+
+  const double lambda = 0.15; // time decay
+  const double alpha = 0.35;  // competition weight
+
+  final p = math.exp(
+    -lambda * minutes * (1 + alpha * activeSearchers),
+  );
+
+  // Never show absolute 0 or 100
+  return p.clamp(0.02, 0.98);
+}
+
+Color getProbabilityColor(double? probability, Duration age, int activeSearchers) {
+  final prob = getCalculatedProbability(probability, age, activeSearchers);
+  if (prob > 0.66) return Colors.green;
+  if (prob > 0.33) return Colors.orange;
+  return Colors.red;
+}
+
+
+String getProbabilityLabel(double? probability, Duration age, int activeSearchers) {
+  final prob = getCalculatedProbability(probability, age, activeSearchers);
+
+  if (age.inMinutes >= 15) return 'Πιθανόν κατειλημμένη';
+
+  if (prob > 0.66) return 'Υψηλή πιθανότητα';
+  if (prob > 0.33) return 'Μέτρια πιθανότητα';
+  return 'Χαμηλή πιθανότητα';
 }

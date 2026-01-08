@@ -376,21 +376,21 @@ class ParkingService{
     markersNotifier.value = currentMarkers;
   }
 
-  Future<void> getSearchingCount(double latitude, double longitude) async {
-    try {
-      var response = await http.get(
-          Uri.parse("${AppConfig.instance.apiUrl}/search/count?latitude=${latitude.toString()}&longitude=${longitude.toString()}"),
-          headers: {
-            "Authorization": globals.securityToken!
-          });
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        searchingCountNotifier.value = (data['count'] as int?) ?? 0;
-      }
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    }
-  }
+  // Future<void> getSearchingCount(double latitude, double longitude) async {
+  //   try {
+  //     var response = await http.get(
+  //         Uri.parse("${AppConfig.instance.apiUrl}/search/count?latitude=${latitude.toString()}&longitude=${longitude.toString()}"),
+  //         headers: {
+  //           "Authorization": globals.securityToken!
+  //         });
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       searchingCountNotifier.value = (data['count'] as int?) ?? 0;
+  //     }
+  //   } catch (error, stackTrace) {
+  //     FirebaseCrashlytics.instance.recordError(error, stackTrace);
+  //   }
+  // }
 
   // Future<String?> convertPointToAddress(LatLng marker) async {
   //   try {

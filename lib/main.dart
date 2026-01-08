@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -44,6 +45,12 @@ import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -306,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               MaterialPageRoute(builder: (context) => const EnableLocation()),
               (Route route) => false);
         }
-        _userService.sendAlive(globals.uid!, _currentPosition!.latitude, _currentPosition!.longitude);
+        //_userService.sendAlive(globals.uid!, _currentPosition!.latitude, _currentPosition!.longitude);
         break;
       case AppLifecycleState.inactive:
         // widget is inactive

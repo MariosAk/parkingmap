@@ -97,6 +97,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
   final ValueNotifier<LatLng?> _userLocationNotifier = ValueNotifier<LatLng?>(null);
 
+  final ValueNotifier<double> _userHeadingNotifier = ValueNotifier<double>(0.0);
+
   // #endregion
 
   @override
@@ -118,6 +120,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
   @override
   void initState() {
     super.initState();
+
+    globals.initializeUid();
+
     startLocationTracking();
 
     _animationController = AnimationController(
@@ -136,25 +141,25 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
       _userLocationNotifier.value = pulsatingMarkerPosition;
 
       _authService.getCurrentUserUID().then((value) {
-        _userService.sendAlive(value!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
-            Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
-        _parkingService.getSearchingCount(Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
-            Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
+        // _userService.sendAlive(value!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+        //     Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
+        // _parkingService.getSearchingCount(Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+        //     Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
       });
 
     }
 
-    Timer.periodic(const Duration(seconds: 30), (_) {
-      if (_currentLocation != null) {
-        // Update the global searcher count for the user's area
-        _parkingService.getSearchingCount(
-            _currentLocation!.latitude!,
-            _currentLocation!.longitude!
-        );
-      }
-    });
+    // Timer.periodic(const Duration(seconds: 30), (_) {
+    //   if (_currentLocation != null) {
+    //     // Update the global searcher count for the user's area
+    //     _parkingService.getSearchingCount(
+    //         _currentLocation!.latitude!,
+    //         _currentLocation!.longitude!
+    //     );
+    //   }
+    // });
 
-    radarVisibility = ValueNotifier<bool>(globals.premiumSearchState);
+    //radarVisibility = ValueNotifier<bool>(globals.premiumSearchState);
   }
 
   void deleteMarkerReceived(LatLng markerLatLng) async {
@@ -234,8 +239,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           await FirebaseMessaging.instance
               .subscribeToTopic(cellTopic)
               .catchError((error) {});
-          _userService.sendAlive(globals.uid!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
-              Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
+          // _userService.sendAlive(globals.uid!, Provider.of<LocationProvider>(context, listen: false).currentLocation!.latitude!,
+          //     Provider.of<LocationProvider>(context, listen: false).currentLocation!.longitude!);
         }
       }
 
@@ -254,13 +259,17 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
         pulsatingMarkerPosition = currentLatLng;
         previousLocation = currentLatLng;
       }
+
+      if (currentLocation.heading != null) {
+        _userHeadingNotifier.value = currentLocation.heading!;
+      }
     });
 
-    var uid = await _authService.getCurrentUserUID();
-    Timer.periodic(
-      const Duration(seconds: 60),
-          (_) => _userService.sendAlive(globals.uid!, _currentLocation!.latitude!, _currentLocation!.longitude!)
-    );
+    // var uid = await _authService.getCurrentUserUID();
+    // Timer.periodic(
+    //   const Duration(seconds: 60),
+    //       (_) => _userService.sendAlive(globals.uid!, _currentLocation!.latitude!, _currentLocation!.longitude!)
+    // );
 
   }
 
@@ -570,32 +579,32 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                     ),
                   ),
 
-                  ValueListenableBuilder<bool>(
-                    valueListenable: radarVisibility,
-                    builder: (context, value, child) {
-                      return Visibility(
-                        visible: radarVisibility.value,
-                        replacement: const Expanded(
-                          child: Center(
-                            child: SizedBox(
-                              width: 50, // Same size as the radar widget
-                              height: 50, // Same size as the radar widget
-                            ),
-                          ),
-                        ),
-                        child:
-                            // Spacer to push radar widget to center
-                            const Expanded(
-                          child: Center(
-                            child: RotatingRadarWidget(
-                              size: 50,
-                              color: Colors.lightBlueAccent,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  // ValueListenableBuilder<bool>(
+                  //   valueListenable: radarVisibility,
+                  //   builder: (context, value, child) {
+                  //     return Visibility(
+                  //       visible: radarVisibility.value,
+                  //       replacement: const Expanded(
+                  //         child: Center(
+                  //           child: SizedBox(
+                  //             width: 50, // Same size as the radar widget
+                  //             height: 50, // Same size as the radar widget
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       child:
+                  //           // Spacer to push radar widget to center
+                  //           const Expanded(
+                  //         child: Center(
+                  //           child: RotatingRadarWidget(
+                  //             size: 50,
+                  //             color: Colors.lightBlueAccent,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
 
                   // Right-side actions
                   // Row(
@@ -700,58 +709,82 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                         userAgentPackageName:
                                             "com.maappinnovations.parkingmap"),
                                     if (isMapInitialized)
-                                      AnimatedBuilder(
-                                        // 1. It listens to your existing animation controller.
-                                        animation: _animationController,
+                                      //
+                                      ValueListenableBuilder<double>(
+                                        valueListenable: _userHeadingNotifier,
+                                        builder: (context, userHeading, _) {
+                                          // Listen for location updates to position the marker
+                                          return ValueListenableBuilder<LatLng?>(
+                                            valueListenable: _userLocationNotifier,
+                                            builder: (context, userLocation, _) {
+                                              // If no location yet, don't draw anything
+                                              if (userLocation == null) {
+                                                return const SizedBox.shrink();
+                                              }
 
-                                        // 2. This builder function re-runs on every animation "tick".
-                                        builder: (context, child) {
-                                          // Safety check: Don't try to draw if we don't have a location yet.
-                                          if (pulsatingMarkerPosition == null) {
-                                            return const SizedBox.shrink();
-                                          }
+                                              // Animate the pulsating effect
+                                              return AnimatedBuilder(
+                                                animation: _animationController,
+                                                builder: (context, child) {
+                                                  return MarkerLayer(
+                                                    markers: [
+                                                      // COMBINED MARKER: Glow + Arrow
+                                                      Marker(
+                                                        // Make the marker large enough to hold the max glow size
+                                                        width: (screenWidth * 0.05 * (_zoom / 15.0)) + 20 + 50,
+                                                        height: (screenWidth * 0.05 * (_zoom / 15.0)) + 20 + 50,
+                                                        point: userLocation,
+                                                        child: Stack(
+                                                          alignment: Alignment.center,
+                                                          children: [
+                                                            // 1. The Pulsating Glow Layer
+                                                            Container(
+                                                              width: (screenWidth * 0.05 * (_zoom / 15.0)) + _pulsatingAnimation.value,
+                                                              height: (screenWidth * 0.05 * (_zoom / 15.0)) + _pulsatingAnimation.value,
+                                                              decoration: BoxDecoration(
+                                                                shape: BoxShape.circle,
+                                                                color: Colors.blue.withOpacity(0.3),
+                                                              ),
+                                                            ),
 
-                                          // 3. It returns a MarkerLayer, which knows how to position itself on the map.
-                                          return MarkerLayer(
-                                            markers: [
-                                              // This is the outer, pulsating, transparent circle.
-                                              Marker(
-                                                // We use the animation's value directly for the size.
-                                                // We add `_zoom` to it, just like in your original code.
-                                                width: _pulsatingAnimation.value + _zoom,
-                                                height: _pulsatingAnimation.value + _zoom,
-                                                // We give it a geographic LatLng point. The map handles the rest.
-                                                point: pulsatingMarkerPosition!,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    // Your original color logic.
-                                                    color: Colors.blue.withOpacity(0.3),
-                                                  ),
-                                                ),
-                                              ),
-
-                                              // This is the inner, solid, main location dot.
-                                              Marker(
-                                                width: _zoom, // Your original size logic.
-                                                height: _zoom, // Your original size logic.
-                                                point: pulsatingMarkerPosition!,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: Colors.blue,
-                                                    // Your original border logic.
-                                                    border: Border.all(color: Colors.white, width: 3),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                                            // 2. The Directional Arrow Layer
+                                                            Transform.rotate(
+                                                              angle: (userHeading * (3.14159 / 180)),
+                                                              child: Container(
+                                                                width: (screenWidth * 0.05 * (_zoom / 15.0)),
+                                                                height: (screenWidth * 0.05 * (_zoom / 15.0)),
+                                                                decoration: BoxDecoration(
+                                                                  color: Colors.blue,
+                                                                  shape: BoxShape.circle,
+                                                                  border: Border.all(color: Colors.white, width: 2),
+                                                                  boxShadow: const [
+                                                                    BoxShadow(
+                                                                      color: Colors.black26,
+                                                                      blurRadius: 3,
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                child: Icon(
+                                                                  Icons.navigation_rounded,
+                                                                  color: Colors.white,
+                                                                  size: (screenWidth * 0.05 * (_zoom / 15.0)) * 0.6,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
                                           );
                                         },
                                       ),
                                     Positioned(
-                                      bottom: 20,
-                                      right: 20,
+                                      bottom: screenHeight * 0.01,
+                                      right: screenHeight * 0.01,
                                       height: screenHeight * multiplier,
                                       width: screenWidth * multiplier * 2.2,
                                       child: FloatingActionButton(
@@ -771,7 +804,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
                                           // 1. Calculate the color dynamically
                                           final age = DateTime.now().difference(spot.timestamp!);
-                                          final statusColor = getAgeColor(age);
+                                          final statusColor = globals.getProbabilityColor(null, age, 0);
 
                                           // 2. Return a new Marker with the composite UI (Icon + Dot)
                                           return Marker(
@@ -799,9 +832,23 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                                   ),
                                                 ),
 
-                                                // 2. The Icon Layer
-                                                Image.asset('Assets/Images/parking-location.png', scale: 18),
-                                              ],
+                                              Container(
+                                                  width: 14,
+                                                  height: 14,
+                                                  decoration: BoxDecoration(
+                                                    color: statusColor,
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(color: Colors.white, width: 2),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withOpacity(0.3),
+                                                        blurRadius: 2,
+                                                        offset: const Offset(0, 1),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                            ]
                                             ),
                                           );
                                         }).toList();
@@ -934,7 +981,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
                               final distance = userLocation == null
                                   ? 0.0
-                                  : _calculateDistance(userLocation);
+                                  : _calculateDistance(parkingMarker.mapMarker.point);
 
                               final age = DateTime.now()
                                   .difference(parkingMarker.timestamp!);
