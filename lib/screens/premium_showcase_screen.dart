@@ -3,8 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
 
+import '../dependency_injection.dart';
+import '../services/user_service.dart';
+
 class PremiumShowcaseScreen extends StatelessWidget {
-  const PremiumShowcaseScreen({super.key});
+  PremiumShowcaseScreen({super.key});
+  final UserService _userService = getIt<UserService>();
 
   @override
   Widget build(BuildContext context) {
@@ -121,13 +125,27 @@ class PremiumShowcaseScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
-              onPressed: () {
+              onPressed: () async {
                 // LOG THE INTEREST HERE (Firebase Analytics etc)
                 Navigator.pop(context);
-                globals.showSuccessfullToast(
-                    context,
-                    "Interest noted! You'll be notified when Premium launches."
-                );
+
+                bool success = true;
+
+                if (globals.sharedPreferences?.getBool('isInterestedInPremium') == null) {
+                  success = await _userService.postInterestInPremium();
+                }
+
+                if(!context.mounted) return;
+
+                if(success) {
+                  globals.showSuccessfullToast(
+                      context,
+                      "Interest noted! You'll be notified when Premium launches."
+                  );
+                }
+                else{
+                  globals.showServerErrorToast(context);
+                }
               },
               child: const Text(
                 "I'm Interested - Get Discount",

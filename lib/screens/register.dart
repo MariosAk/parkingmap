@@ -77,7 +77,6 @@ class RegisterPageState extends State<RegisterPage> {
         bool success = await _userService.registerUser(
           user.uid,
           textControllerEmail.text.trim(),
-          textControllerPassword.text.trim(),
           token,
         );
 

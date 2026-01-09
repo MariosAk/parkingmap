@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:parkingmap/screens/premium_showcase_screen.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart' as globals;
 import 'package:toastification/toastification.dart';
@@ -104,6 +105,26 @@ class SettingsScreenState extends State<SettingsScreen> {
                     // ),
                     // const Divider(color: Colors.black),
 
+
+                    ListTile(
+                      leading: const Icon(Icons.stars_rounded, color: Colors.amber),
+                      title: Text(
+                        "Go Premium",
+                        style: GoogleFonts.robotoSlab(
+                          textStyle: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => PremiumShowcaseScreen(),
+                        );
+                      },
+                    ),
+                    const Divider(color: Colors.black),
+
                     ListTile(
                       leading: const Icon(Icons.no_accounts, color: Colors.red),
                       title: Text(
@@ -117,6 +138,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       },
                     ),
                     const Divider(color: Colors.black),
+
 
                     // Sign Out Button
                     const SizedBox(height: 40),

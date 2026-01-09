@@ -603,7 +603,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
-                          builder: (context) => const PremiumShowcaseScreen(),
+                          builder: (context) => PremiumShowcaseScreen(),
                         );
                       },
                       borderRadius: BorderRadius.circular(20),
@@ -621,16 +621,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                                 Icons.stars_rounded, // A softer icon than 'star'
                                 color: Colors.amber,
-                                size: 16
+                                size: screenWidth * 0.05
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: screenWidth * 0.01),
                             Text(
                               "PREMIUM",
                               style: GoogleFonts.poppins( // Match app typography
-                                fontSize: 12,
+                                fontSize: screenWidth * 0.033,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.amber[800], // Darker amber for readability on light background
                                 letterSpacing: 0.5,
@@ -650,16 +650,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                         onTap: () {
                           _purchasePriorityPrompt(context);
                         },
-                        child: Image.asset('Assets/Images/reward.png', scale: 15),
+                        child: Image.asset('Assets/Images/reward.png', scale: screenWidth * 0.04),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 5, right: 10),
                         child: Text(
                           globals.points,
                           style: GoogleFonts.robotoSlab(
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               color: Colors.lightBlue,
-                              fontSize: 25,
+                              fontSize: screenWidth * 0.06,
                             ),
                           ),
                         ),
@@ -1014,13 +1014,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.map_outlined, size: 64, color: Colors.blue[200]),
-                                    const SizedBox(height: 16),
+                                    Icon(Icons.map_outlined, size: screenWidth * 0.15, color: Colors.blue[200]),
+                                    SizedBox(height: screenWidth * 0.05),
                                     Text(
                                       "Quiet area!",
-                                      style: GoogleFonts.robotoSlab(fontSize: 18, fontWeight: FontWeight.bold),
+                                      style: GoogleFonts.robotoSlab(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),
                                     ),
-                                    const SizedBox(height: 8),
+                                    SizedBox(height: screenWidth * 0.02),
                                     const Text(
                                       "No spots reported nearby. If you're leaving a spot, help others by declaring it!",
                                       textAlign: TextAlign.center,

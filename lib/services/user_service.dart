@@ -4,10 +4,15 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 
+import '../dependency_injection.dart';
 import '../tools/app_config.dart';
+import 'auth_service.dart';
 import 'globals.dart' as globals;
 
 class UserService{
+
+  final AuthService _authService = getIt<AuthService>();
+  late final String? email = _authService.email;
 
   Future<Response?> deleteUser(String? userID) async {
     try {
@@ -42,14 +47,13 @@ class UserService{
     }
   }
 
-  Future registerUser(uid, email, password, fcmToken) async {
+  Future registerUser(uid, email, fcmToken) async {
     try {
       var response = await http.post(
           Uri.parse("${AppConfig.instance.apiUrl}/register-user"),
           body: cnv.jsonEncode({
             "uid": uid,
             "email": email,
-            "password": password,
             "fcm_token": fcmToken
           }),
           headers: {
@@ -83,5 +87,28 @@ class UserService{
   //     FirebaseCrashlytics.instance.recordError(error, stackTrace);
   //   }
   // }
+
+  Future postInterestInPremium() async {
+    try {
+      var response = await http.post(
+          Uri.parse('${AppConfig.instance.apiUrl}/register-premium-interest'),
+          body: cnv.jsonEncode({
+            "email": email
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": globals.securityToken!
+          });
+      if (response.statusCode == 200) {
+        globals.sharedPreferences?.setBool('isInterestedInPremium', true);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error, stackTrace) {
+      FirebaseCrashlytics.instance.recordError(error, stackTrace);
+      return null;
+    }
+  }
 
 }
