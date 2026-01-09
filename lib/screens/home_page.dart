@@ -10,6 +10,7 @@ import 'package:parkingmap/model/pushnotification_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:parkingmap/screens/premium_showcase_screen.dart';
 import 'package:parkingmap/services/auth_service.dart';
 import 'package:parkingmap/services/globals.dart';
 import 'package:parkingmap/services/hive_service.dart';
@@ -35,14 +36,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
   // #region variables
   final ParkingService _parkingService = getIt<ParkingService>();
   final AuthService _authService = getIt<AuthService>();
-  final UserService _userService = getIt<UserService>();
+  //final UserService _userService = getIt<UserService>();
 
   PushNotification? notification;
   String? address, uid;
   DateTime? notifReceiveTime;
-  double height = 100;
-
-  double width = 100;
 
   int index = 0;
 
@@ -52,7 +50,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
   bool leaving = false;
 
-  bool isSelected = false;
   double? containerHeight, containerWidth, x, y;
 
   final _controller = TextEditingController();
@@ -83,9 +80,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
   final PopupController _popupController = PopupController();
   final ValueNotifier<int> _spotsNotifier = ValueNotifier<int>(0);
 
-  Card card = const Card();
-  bool convertedToAddress = false;
-
   late StreamSubscription<LocationData>? _locationSubscription;
   LocationData? _currentLocation;
   LatLng? previousLocation;
@@ -93,7 +87,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
   double _zoom = 20;
   String cellTopic = "";
-  late ValueNotifier<bool> radarVisibility;
+  //late ValueNotifier<bool> radarVisibility;
 
   final ValueNotifier<LatLng?> _userLocationNotifier = ValueNotifier<LatLng?>(null);
 
@@ -113,15 +107,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     _locationSubscription?.cancel();
     _spotsNotifier.dispose();
     _userLocationNotifier.dispose();
-    radarVisibility.dispose();
+    //radarVisibility.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-
-    globals.initializeUid();
 
     startLocationTracking();
 
@@ -174,19 +166,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           .first;
       _parkingService.markersNotifier.value = List.from(_parkingService.markersNotifier.value)
         ..remove(spot);
-      MarkerModel markerModel = MarkerModel(
-          latitude: spot.mapMarker.point.latitude,
-          longitude: spot.mapMarker.point.longitude,
-          width: spot.mapMarker.width,
-          height: spot.mapMarker.height,
-          alignment: spot.mapMarker.alignment,
-          rotate: spot.mapMarker.rotate);
       await HiveService("markersBox").deleteCachedMarker(spot);
     }
   }
 
   // Method to initialize and start location tracking
   void startLocationTracking() async {
+    if (!mounted) return;
     // Request permission to access location
     bool serviceEnabled;
     PermissionStatus permissionGranted;
@@ -222,13 +208,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
             .subscribeToTopic(cellTopic)
             .catchError((error) {});
 
-        previousLocation = LatLng(
-            Provider.of<LocationProvider>(context, listen: false)
-                .currentLocation!
-                .latitude!,
-            Provider.of<LocationProvider>(context, listen: false)
-                .currentLocation!
-                .longitude!);
+        // previousLocation = LatLng(
+        //     Provider.of<LocationProvider>(context, listen: false)
+        //         .currentLocation!
+        //         .latitude!,
+        //     Provider.of<LocationProvider>(context, listen: false)
+        //         .currentLocation!
+        //         .longitude!);
+        previousLocation = currentLatLng;
       } else {
         final distance = _calculateDistance(currentLatLng);
 
@@ -246,7 +233,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
       _currentLocation = currentLocation;
 
-      if (currentLatLng.latitude != previousLocation!.latitude &&
+      if (previousLocation == null || currentLatLng.latitude != previousLocation!.latitude &&
           currentLatLng.longitude != previousLocation!.longitude) {
         //pulsatingMarkerPosition = currentLatLng;
         _userLocationNotifier.value = currentLatLng;
@@ -288,7 +275,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
           LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
           18.0); // Center map on current location
       _parkingService.updateBounds(
-           _mapctl.camera.visibleBounds!, _mapctl.camera.zoom);
+           _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
     } else {
       // Handle the case where currentPosition is still null
       toastification.show(
@@ -342,6 +329,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
     _parkingService.incrementReport(marker.point.latitude, marker.point.longitude).then(
         (value) {
+          if (!mounted) return;
+
           if (value) {
             globals.showToast(context, "Spot was reported.", ToastificationType.success);
           } else {
@@ -551,11 +540,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double multiplier = shortestSide >= 600 ? 0.02 : 0.05;
-    double multiplierList = shortestSide >= 600 ? 0.02 : 0.035;
     double addressTextSize = screenWidth * multiplier;
     double sizedboxSize = screenHeight * 0.015;
     double myLocationButtonSize = screenWidth * multiplier;
-    double listTextSize = screenWidth * multiplierList;
     return Container(
         color: Colors.white,
         child: SafeArea(
@@ -566,18 +553,19 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
               elevation: 0,
               backgroundColor: Colors.transparent,
               flexibleSpace: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Left-side title
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      "ParkingMap",
-                      style: GoogleFonts.robotoSlab(
-                        textStyle:
-                            const TextStyle(color: Colors.black, fontSize: 18),
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 8.0),
+                  //   child: Text(
+                  //     "ParkingMap",
+                  //     style: GoogleFonts.robotoSlab(
+                  //       textStyle:
+                  //           const TextStyle(color: Colors.black, fontSize: 18),
+                  //     ),
+                  //   ),
+                  // ),
 
                   // ValueListenableBuilder<bool>(
                   //   valueListenable: radarVisibility,
@@ -606,31 +594,78 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                   //   },
                   // ),
 
-                  // Right-side actions
-                  // Row(
-                  //   mainAxisSize: MainAxisSize.min,
-                  //   children: [
-                  //     GestureDetector(
-                  //       onTap: () {
-                  //         _purchasePriorityPrompt(context);
-                  //       },
-                  //       child:
-                  //           Image.asset('Assets/Images/reward.png', scale: 15),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.only(left: 5, right: 10),
-                  //       child: Text(
-                  //         globals.points,
-                  //         style: GoogleFonts.robotoSlab(
-                  //           textStyle: const TextStyle(
-                  //             color: Colors.lightBlue,
-                  //             fontSize: 25,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+                  // --- LEFT SIDE: PREMIUM ---
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => const PremiumShowcaseScreen(),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          // Use a very soft amber tint instead of solid amber
+                          color: Colors.amber.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.amber.withOpacity(0.4),
+                              width: 1
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                                Icons.stars_rounded, // A softer icon than 'star'
+                                color: Colors.amber,
+                                size: 16
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "PREMIUM",
+                              style: GoogleFonts.poppins( // Match app typography
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.amber[800], // Darker amber for readability on light background
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // --- RIGHT SIDE: REWARDS ---
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _purchasePriorityPrompt(context);
+                        },
+                        child: Image.asset('Assets/Images/reward.png', scale: 15),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5, right: 10),
+                        child: Text(
+                          globals.points,
+                          style: GoogleFonts.robotoSlab(
+                            textStyle: const TextStyle(
+                              color: Colors.lightBlue,
+                              fontSize: 25,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -679,21 +714,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                       maxZoom: 18,
                                       onMapReady: () {
                                         _parkingService.updateBounds(
-                                            _mapctl.camera.visibleBounds!, _mapctl.camera.zoom);
+                                            _mapctl.camera.visibleBounds, _mapctl.camera.zoom);
                                         subscription = _mapctl.mapEventStream.listen((MapEvent mapEvent) {
                                           if (mapEvent is MapEventMoveEnd) {
                                             _shouldCenterOnLocation = false;
                                             // When the user stops moving the map, just tell the service to update.
                                             // That's its only job.
                                             _parkingService.updateBounds(
-                                                mapEvent.camera.visibleBounds!, mapEvent.camera.zoom);
+                                                mapEvent.camera.visibleBounds, mapEvent.camera.zoom);
                                           }
                                         });
                                         isMapInitialized = true;
                                       },
                                       onPositionChanged:
                                           (position, hasGesture) {
-                                        _zoom = (5 +
+                                        _zoom = (8 +
                                                 ((40 - 20) *
                                                     ((position.zoom - 16) /
                                                         (18 - 16))))
@@ -708,7 +743,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                                         userAgentPackageName:
                                             "com.maappinnovations.parkingmap"),
-                                    if (isMapInitialized)
+                                    //if (isMapInitialized)
                                       //
                                       ValueListenableBuilder<double>(
                                         valueListenable: _userHeadingNotifier,
@@ -803,21 +838,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                         final mapMarkers = parkingSpots.map((spot) {
 
                                           // 1. Calculate the color dynamically
-                                          final age = DateTime.now().difference(spot.timestamp!);
+                                          final age = DateTime.now().difference(spot.timestamp ?? DateTime.now());
                                           final statusColor = globals.getProbabilityColor(null, age, 0);
 
                                           // 2. Return a new Marker with the composite UI (Icon + Dot)
                                           return Marker(
                                             point: spot.mapMarker.point,
-                                            width: 90.0, // Slightly larger to fit the glow
-                                            height: 90.0,
+                                            width: (screenWidth * 0.10 * (_zoom / 15.0)), // Slightly larger to fit the glow
+                                            height: (screenWidth * 0.10 * (_zoom / 15.0)),
                                             child: Stack(
                                               alignment: Alignment.center,
                                               children: [
                                                 // 1. The Glow/Halo Layer
                                                 Container(
-                                                  width: 60,
-                                                  height: 60,
+                                                  width: (screenWidth * 0.10 * (_zoom / 15.0)) ,
+                                                  height: (screenWidth * 0.10 * (_zoom / 15.0)) ,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                     color: statusColor.withOpacity(0.2), // Transparent center
@@ -833,8 +868,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                                                 ),
 
                                               Container(
-                                                  width: 14,
-                                                  height: 14,
+                                                  width: (screenWidth * 0.02 * (_zoom / 15.0)),
+                                                  height: (screenWidth * 0.02 * (_zoom / 15.0)),
                                                   decoration: BoxDecoration(
                                                     color: statusColor,
                                                     shape: BoxShape.circle,
@@ -865,6 +900,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
 
                                                 const cooldownLimit = Duration(minutes: 10);
                                                 Duration remaining = await globals.getRemainingCooldown(cooldownLimit, CooldownType.report);
+
+                                                if (!mounted) return;
 
                                                 showDialog(
                                                   context: context,
@@ -967,8 +1004,32 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
                             }
                           });
 
+                          // if (visibleMarkers.isEmpty) {
+                          //   return Image.asset('Assets/Images/pin.gif', scale: 5);
+                          // }
                           if (visibleMarkers.isEmpty) {
-                            return Image.asset('Assets/Images/pin.gif', scale: 5);
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.map_outlined, size: 64, color: Colors.blue[200]),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      "Quiet area!",
+                                      style: GoogleFonts.robotoSlab(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      "No spots reported nearby. If you're leaving a spot, help others by declaring it!",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
                           }
 
                           return ListView.builder(
@@ -1041,7 +1102,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin, Autom
               onPressed: () {
                 _parkingService.addSearching(_currentLocation);
                 HiveService("").setPremiumSearchStateToCache(true);
-                radarVisibility.value = true;
+                //radarVisibility.value = true;
                 Navigator.of(context).pop();
               },
               child: const Text(

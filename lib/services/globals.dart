@@ -39,27 +39,18 @@ Future getDevToken() async {
 }
 
 Future initializeSecurityToken() async {
-  AuthService().getCurrentUserIdToken().then(
-    (value) {
-      securityToken = value;
-    },
-  );
+  final value = await _authService.getCurrentUserIdToken();
+  securityToken = value;
 }
 
 Future initializePoints() async {
-  HiveService("").getPointsFromCache().then(
-    (value) {
-      points = value;
-    },
-  );
+  final value = await HiveService("").getPointsFromCache();
+  points = value;
 }
 
 Future initializePremiumSearchState() async {
-  HiveService("").getPremiumSearchStateFromCache().then(
-    (value) {
-      premiumSearchState = value;
-    },
-  );
+  final value = await HiveService("").getPremiumSearchStateFromCache();
+  premiumSearchState = value;
 }
 
 Future<void> cancelSearch() async {
@@ -216,7 +207,7 @@ Future<void> signOutAndNavigate(BuildContext context,
     {bool? accountDeleted}) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear(); // Clear all saved data
-  AuthService().signOut();
+  _authService.signOut();
   if (!context.mounted) return;
   // Navigate to the login page and remove all previous routes
   await Navigator.of(context).pushAndRemoveUntil(

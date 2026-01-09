@@ -54,7 +54,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   setupLocator();
+
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   Hive.registerAdapter(MarkerModelAdapter());
@@ -62,6 +64,7 @@ void main() async {
   Hive.registerAdapter(ParkingSpotModelAdapter());
   await Hive.openBox<List>("markersBox");
   await Hive.openBox("cacheBox");
+
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
@@ -70,6 +73,10 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+
+  await globals.initializeSharedPreferences();
+  await globals.initializeUid();
+
   runApp(ChangeNotifierProvider(
     create: (context) => LocationProvider(),
     child: const MyApp(),
@@ -157,6 +164,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final UserService _userService = getIt<UserService>();
 
   final FlutterRingtonePlayer flutterRingtonePlayer = FlutterRingtonePlayer();
+
+  late Future<void> _initFuture;
   // #endregion
 
   Future registerNotification() async {
@@ -245,7 +254,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+
+    _pageViewController = PageController(initialPage: selectedIndex);
+
+    _isUserLogged = AuthService().isUserLogged();
+
+    if (_isUserLogged == true) {
+      _initFuture = appInitializations();
+    } else {
+      // Assign an empty completed future to avoid LateInitializationError
+      _initFuture = Future.value();
+    }
+
     requirePermissions();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (permissionsNotGranted) {
         toastification.show(
@@ -285,13 +307,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     Provider.of<LocationProvider>(context, listen: false).onLocationUpdated =
         (newLocation) {};
     Provider.of<LocationProvider>(context, listen: false).initializeLocation();
-    _isUserLogged = AuthService().isUserLogged();
+
     WidgetsBinding.instance.addObserver(this);
-    _getPosition = _determinePosition();
+
     registerNotification();
-    overlayState = Overlay.of(context);
+
     _toggleServiceStatusStream();
-    _pageViewController = PageController(initialPage: selectedIndex);
+
   }
 
   @override
@@ -413,19 +435,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         position.longitude <= 22.9900)) {
       return Future.error('Location out of bounds');
     }
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-
-      Placemark place = placemarks[0];
-
-      setState(() {
-        address =
-            "${place.locality}, ${place.subLocality},${place.street}, ${place.postalCode}";
-      });
-    } catch (error, stackTrace) {
-      FirebaseCrashlytics.instance.recordError(error, stackTrace);
-    }
   }
 
   Future sharedPref() async {
@@ -436,17 +445,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future appInitializations() async {
     //await requirePermissions();
-    await _getPosition;
-    await globals.initializeSharedPreferences();
-    await globals.initializeSecurityToken();
-    await globals.initializePoints();
-    await globals.initializePremiumSearchState();
-    await globals.initializeUid();
-    await globals.getLastActionTime(CooldownType.report);
-    await globals.getLastActionTime(CooldownType.declare);
-    updateUserID();
-    _initService.registerFcmToken();
-    //notificationsCount();
+    await _determinePosition();
+
+    await Future.wait([
+      globals.initializeSecurityToken(),
+      globals.initializePoints(),
+      globals.initializePremiumSearchState(),
+    ]);
+
+    await Future.wait([
+      globals.getLastActionTime(CooldownType.report),
+      globals.getLastActionTime(CooldownType.declare),
+      updateUserID(),
+      _initService.registerFcmToken(),
+    ]);
   }
 
   @override
@@ -456,7 +468,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return const LoginPage();
     } else {
       return FutureBuilder(
-          future: Future.wait([appInitializations()]),
+          future: _initFuture,
           builder: (context, snapshot) {
             // Future done with no errors
             if (snapshot.connectionState == ConnectionState.done &&

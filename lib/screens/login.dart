@@ -10,6 +10,7 @@ import 'package:parkingmap/services/auth_service.dart';
 import 'package:toastification/toastification.dart';
 
 import '../dependency_injection.dart';
+import '../services/globals.dart' as globals;
 
 // Define a constant for the blue color for consistency
 const kPrimaryColor = Color(0xFF3A82F8);
@@ -83,6 +84,8 @@ class LoginPageState extends State<LoginPage> {
 
       final prefs = await SharedPreferences.getInstance();
       bool isFirstLogin = prefs.getBool("firstLogIn") ?? true;
+
+      await globals.initializeUid();
 
       if (!mounted) return;
 
